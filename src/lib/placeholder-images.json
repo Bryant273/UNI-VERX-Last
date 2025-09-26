@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "user-avatar-1",
+      "description": "Student avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1517841905240-472988babdf9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzdHVkZW50JTIwcG9ydHJhaXR8ZW58MHx8fHwxNzU4ODQwNzk1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "student portrait"
+    },
+    {
+      "id": "user-avatar-2",
+      "description": "Professor avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1680260086952-72bf60ecd6e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwcm9mZXNzb3IlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTg4OTQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professor portrait"
+    },
+    {
+      "id": "user-avatar-3",
+      "description": "Admin avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1581065178047-8ee15951ede6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTg5MjY3MjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional portrait"
+    },
+    {
+      "id": "course-thumb-1",
+      "description": "Mathematics course thumbnail",
+      "imageUrl": "https://images.unsplash.com/photo-1758685848791-87860bb29292?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtYXRoZW1hdGljcyUyMGNoYWxrYm9hcmR8ZW58MHx8fHwxNzU4ODU3MDg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mathematics chalkboard"
+    },
+    {
+      "id": "course-thumb-2",
+      "description": "Physics course thumbnail",
+      "imageUrl": "https://images.unsplash.com/photo-1729018260118-ef6483c06fea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGh5c2ljcyUyMGV4cGVyaW1lbnR8ZW58MHx8fHwxNzU4ODkzNDY1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "physics experiment"
+    },
+    {
+      "id": "course-thumb-3",
+      "description": "History course thumbnail",
+      "imageUrl": "https://images.unsplash.com/photo-1641803972307-fdd58a324f49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxoaXN0b3JpY2FsJTIwYXJ0aWZhY3RzfGVufDB8fHx8MTc1ODg5NjgzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "historical artifacts"
+    },
+    {
+      "id": "course-thumb-4",
+      "description": "Literature course thumbnail",
+      "imageUrl": "https://images.unsplash.com/photo-1560362415-c88a4c066155?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjbGFzc2ljJTIwYm9va3N8ZW58MHx8fHwxNzU4ODUzMzI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "classic books"
+    }
+  ]
 }
