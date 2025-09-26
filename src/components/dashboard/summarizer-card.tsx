@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { BrainCircuit } from 'lucide-react';
 
 import { getSummary } from '@/app/actions';
@@ -15,7 +16,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -31,7 +31,7 @@ export default function SummarizerCard() {
     summary: '',
     error: '',
   };
-  const [state, formAction] = useFormState(getSummary, initialState);
+  const [state, formAction] = useActionState(getSummary, initialState);
 
   return (
     <Card>
