@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ModalProvider } from '@/components/modal-provider';
 
 export const metadata: Metadata = {
   title: 'VerxLink',
@@ -27,6 +28,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <ModalProvider />
           {children}
           <Toaster />
         </ThemeProvider>

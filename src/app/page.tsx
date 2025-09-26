@@ -5,7 +5,6 @@ import Pricing from '@/components/landing/pricing';
 import Testimonials from '@/components/landing/testimonials';
 import Contact from '@/components/landing/contact';
 import Footer from '@/components/landing/footer';
-import LoginModal from '@/components/landing/login-modal';
 
 export default function LandingPage() {
   return (
@@ -19,7 +18,6 @@ export default function LandingPage() {
         <Contact />
       </main>
       <Footer />
-      <LoginModal />
     </div>
   );
 }
