@@ -15,6 +15,8 @@ import {
   Briefcase,
   FileCog,
   BookUser,
+  FolderKanban,
+  File,
   type LucideIcon,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
@@ -54,14 +56,34 @@ export interface NavLink {
   icon: LucideIcon;
 }
 
-export const navLinks: Record<UserRole, NavLink[]> = {
+export interface NavGroup {
+  title: string;
+  links: NavLink[];
+}
+
+export type NavItem = NavLink | NavGroup;
+
+export const navLinks: Record<UserRole, NavItem[]> = {
   student: [
     { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '#', label: 'My Courses', icon: BookOpen },
     { href: '#', label: 'Timetable', icon: Calendar },
     { href: '#', label: 'Grades', icon: GraduationCap },
-    { href: '#', label: 'Messages', icon: MessageSquare },
-    { href: '#', label: 'Documents', icon: FileText },
+    {
+      title: 'Collaboratif',
+      links: [
+        { href: '#', label: 'TD de groupe', icon: Users },
+        { href: '#', label: 'Messages', icon: MessageSquare },
+      ],
+    },
+    {
+      title: 'Administratif',
+      links: [
+        { href: '#', label: 'Offres d\'emploi', icon: Briefcase },
+        { href: '#', label: 'Accès Entreprise', icon: Building },
+        { href: '#', label: 'Documents', icon: FileText },
+      ],
+    },
   ],
   professor: [
     { href: '/professor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
