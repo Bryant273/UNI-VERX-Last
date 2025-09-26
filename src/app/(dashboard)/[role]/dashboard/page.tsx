@@ -7,10 +7,14 @@ import {
   BrainCircuit,
   MessageSquare,
   Calendar,
+  Building,
+  Briefcase,
+  FileCog,
+  BookUser,
 } from 'lucide-react';
 
 import type { UserRole } from '@/lib/data';
-import { userData } from '@/lib/data';
+import { userData, VALID_ROLES } from '@/lib/data';
 import WelcomeBanner from '@/components/dashboard/welcome-banner';
 import TimetableCard from '@/components/dashboard/timetable-card';
 import CoursesCard from '@/components/dashboard/courses-card';
@@ -19,10 +23,25 @@ import MessagingCard from '@/components/dashboard/messaging-card';
 import StatsCard from '@/components/dashboard/stats-card';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
+const ComingSoonCard = ({ title, icon: Icon }: { title: string, icon: React.ElementType }) => (
+  <Card className="lg:col-span-3">
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <Icon className="h-6 w-6 text-muted-foreground" />
+        {title}
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-muted-foreground">Le tableau de bord pour le rôle de {title.toLowerCase()} est en cours de construction.</p>
+    </CardContent>
+  </Card>
+);
+
+
 export default function DashboardPage({ params }: { params: { role: UserRole } }) {
   const { role } = params;
 
-  if (!['student', 'professor', 'admin'].includes(role)) {
+  if (!VALID_ROLES.includes(role)) {
     notFound();
   }
 
@@ -119,6 +138,12 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
             <SummarizerCard />
           </>
         )}
+
+        {/* Placeholder Dashboards */}
+        {role === 'academic-advisor' && <ComingSoonCard title="Responsable Pédagogique" icon={BookUser} />}
+        {role === 'secretariat' && <ComingSoonCard title="Sécrétariat" icon={FileCog} />}
+        {role === 'rectorate' && <ComingSoonCard title="Rectorat" icon={Building} />}
+        {role === 'erp-provider' && <ComingSoonCard title="Fournisseur ERP" icon={Briefcase} />}
       </div>
     </div>
   );

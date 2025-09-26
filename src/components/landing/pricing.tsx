@@ -5,7 +5,7 @@ const pricingPlans = [
   {
     name: 'Starter',
     description: 'Pour les petites écoles',
-    price: '49€',
+    price: '32 000 FCFA',
     period: 'par mois / jusqu\'à 500 étudiants',
     features: ['Gestion des étudiants', 'Planification de base', 'Support email', 'Stockage 10GB'],
     isPopular: false,
@@ -15,7 +15,7 @@ const pricingPlans = [
   {
     name: 'Professional',
     description: 'Pour les universités moyennes',
-    price: '149€',
+    price: '97 500 FCFA',
     period: 'par mois / jusqu\'à 5000 étudiants',
     features: ['Toutes les fonctions Starter', 'Analytics IA avancées', 'Gestion financière complète', 'Support prioritaire 24/7', 'Stockage 100GB'],
     isPopular: true,
@@ -46,7 +46,7 @@ export default function Pricing() {
         </div>
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {pricingPlans.map(plan => (
-            <div key={plan.name} className={`bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all ${plan.isPopular ? 'border-2 border-primary relative' : ''}`}>
+            <div key={plan.name} className={`bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all flex flex-col ${plan.isPopular ? 'border-2 border-primary relative' : ''}`}>
               {plan.isPopular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">
                   Populaire
@@ -58,7 +58,7 @@ export default function Pricing() {
                 <div className="text-4xl font-bold text-primary mb-2">{plan.price}</div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{plan.period}</p>
               </div>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8 flex-grow">
                 {plan.features.map(feature => (
                   <li key={feature} className="flex items-center">
                     <Check className="h-5 w-5 text-green-500 mr-3" />
@@ -66,9 +66,13 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Button className="w-full" variant={plan.buttonVariant === 'default' ? 'default' : 'secondary'}>{plan.buttonText}</Button>
+              <Button className="w-full mt-auto" variant={plan.buttonVariant === 'default' ? 'default' : 'secondary'}>{plan.buttonText}</Button>
             </div>
           ))}
+        </div>
+        <div className="text-center mt-12 text-sm text-gray-500 dark:text-gray-400">
+          <p>Les prix sont affichés en francs CFA (FCFA).</p>
+          <p>Conversion approximative : 32 000 FCFA ≈ 49 EUR / 52 USD. | 97 500 FCFA ≈ 149 EUR / 158 USD.</p>
         </div>
       </div>
     </section>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, KeyRound } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -7,13 +8,17 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLoginModal } from '@/hooks/use-login-modal';
 import { useToast } from '@/hooks/use-toast';
+import type { UserRole } from '@/lib/data';
+import { userRolesForLogin } from '@/lib/data';
 
 export default function LoginModal() {
   const { isOpen, onClose } = useLoginModal();
   const { toast } = useToast();
   const router = useRouter();
+  const [selectedRole, setSelectedRole] = useState<UserRole>('student');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,7 +28,7 @@ export default function LoginModal() {
     });
     setTimeout(() => {
       onClose();
-      router.push('/student/dashboard');
+      router.push(`/${selectedRole}/dashboard`);
     }, 1500);
   };
 
@@ -40,6 +45,19 @@ export default function LoginModal() {
           </DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="role-select">Je me connecte en tant que</Label>
+            <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)}>
+              <SelectTrigger id="role-select">
+                <SelectValue placeholder="Sélectionnez un rôle" />
+              </SelectTrigger>
+              <SelectContent>
+                {userRolesForLogin.map(role => (
+                   <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="email-login">Email</Label>
             <Input id="email-login" type="email" placeholder="votre@email.com" />

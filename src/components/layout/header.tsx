@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { PanelLeft, Home, ChevronRight, Search } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { PanelLeft, Search } from 'lucide-react';
 
 import type { UserRole } from '@/lib/data';
-import { userData } from '@/lib/data';
-import { cn } from '@/lib/utils';
+import { userData, VALID_ROLES } from '@/lib/data';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,10 +31,15 @@ function getInitials(name: string) {
 export default function Header() {
   const { isMobile, toggleSidebar } = useSidebar();
   const pathname = usePathname();
+  const router = useRouter();
+  
   const role = pathname.split('/')[1] as UserRole;
-  const user = userData[role];
+  
+  const handleLogout = () => {
+    router.push('/');
+  };
 
-  const pathSegments = pathname.split('/').filter(Boolean);
+  const user = VALID_ROLES.includes(role) ? userData[role] : null;
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-card px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -73,12 +77,12 @@ export default function Header() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem>Paramètres</DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Logout</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout}>Déconnexion</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

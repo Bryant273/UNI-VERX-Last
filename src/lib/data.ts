@@ -11,11 +11,42 @@ import {
   Shield,
   PieChart,
   LogOut,
+  Building,
+  Briefcase,
+  FileCog,
+  BookUser,
   type LucideIcon,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 
-export type UserRole = 'student' | 'professor' | 'admin';
+export type UserRole = 
+  | 'student' 
+  | 'professor' 
+  | 'academic-advisor' 
+  | 'secretariat' 
+  | 'rectorate'
+  | 'admin'
+  | 'erp-provider';
+
+export const VALID_ROLES: UserRole[] = [
+  'student', 
+  'professor', 
+  'academic-advisor', 
+  'secretariat', 
+  'rectorate',
+  'admin',
+  'erp-provider'
+];
+
+export const userRolesForLogin: { value: UserRole; label: string }[] = [
+    { value: 'student', label: 'Étudiant' },
+    { value: 'professor', label: 'Professeur' },
+    { value: 'academic-advisor', label: 'Responsable Pédagogique' },
+    { value: 'secretariat', label: 'Sécrétariat' },
+    { value: 'rectorate', label: 'Rectorat' },
+    { value: 'admin', label: 'Admin-Université' },
+    { value: 'erp-provider', label: 'Fournisseur ERP' },
+];
 
 export interface NavLink {
   href: string;
@@ -47,6 +78,26 @@ export const navLinks: Record<UserRole, NavLink[]> = {
     { href: '#', label: 'System Analytics', icon: PieChart },
     { href: '#', label: 'Security', icon: Shield },
   ],
+  'academic-advisor': [
+    { href: '/academic-advisor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '#', label: 'Programmes', icon: BookOpen },
+    { href: '#', label: 'Suivi Étudiants', icon: Users },
+  ],
+  secretariat: [
+    { href: '/secretariat/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '#', label: 'Inscriptions', icon: ClipboardCheck },
+    { href: '#', label: 'Gestion Documents', icon: FileCog },
+  ],
+  rectorate: [
+      { href: '/rectorate/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '#', label: 'Statistiques Globales', icon: PieChart },
+      { href: '#', label: 'Administration', icon: Building },
+  ],
+  'erp-provider': [
+      { href: '/erp-provider/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '#', label: 'Intégrations', icon: Briefcase },
+      { href: '#', label: 'Maintenance', icon: Settings },
+  ]
 };
 
 export const bottomNavLinks: NavLink[] = [
@@ -54,7 +105,7 @@ export const bottomNavLinks: NavLink[] = [
   { href: '#', label: 'Logout', icon: LogOut },
 ];
 
-export const userData = {
+export const userData: Record<UserRole, { name: string; avatar: string }> = {
   student: {
     name: 'Alex Dupont',
     avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
@@ -66,6 +117,22 @@ export const userData = {
   admin: {
     name: 'Samuel Carter',
     avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
+  },
+  'academic-advisor': {
+    name: 'Hélène Olivier',
+    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-2')?.imageUrl || '',
+  },
+  secretariat: {
+    name: 'Lucas Bernard',
+    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
+  },
+  rectorate: {
+    name: 'Isabelle Moreau',
+    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
+  },
+  'erp-provider': {
+    name: 'Fournisseur ERP',
+    avatar: '',
   },
 };
 
@@ -94,6 +161,10 @@ export const timetableEvents = {
     { id: 4, time: '10:00 - 11:00', course: 'Faculty Meeting', location: 'Conference Room 1' },
     { id: 5, time: '14:00 - 15:00', course: 'Budget Review', location: 'Admin Building' },
   ],
+  'academic-advisor': [],
+  secretariat: [],
+  rectorate: [],
+  'erp-provider': [],
 }
 
 export const messages = [
