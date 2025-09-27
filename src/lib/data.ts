@@ -68,6 +68,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '#', label: 'Mes cours', icon: BookOpen },
     { href: '#', label: 'Emploi du temps', icon: Calendar },
+    { href: '#', label: 'Évaluations', icon: ClipboardCheck },
     { href: '#', label: 'Résultats', icon: GraduationCap },
     {
       title: 'Collaboratif',
