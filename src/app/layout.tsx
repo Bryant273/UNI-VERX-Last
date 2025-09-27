@@ -5,8 +5,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ModalProvider } from '@/components/modal-provider';
 
 export const metadata: Metadata = {
-  title: 'VerxLink',
-  description: 'The Intelligent University System',
+  title: 'UNI-VERX',
+  description: 'Le Système Universitaire Intelligent',
 };
 
 export default function RootLayout({

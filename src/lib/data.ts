@@ -44,7 +44,7 @@ export const userRolesForLogin: { value: UserRole; label: string }[] = [
     { value: 'student', label: 'Étudiant' },
     { value: 'professor', label: 'Professeur' },
     { value: 'academic-advisor', label: 'Responsable Pédagogique' },
-    { value: 'secretariat', label: 'Sécrétariat' },
+    { value: 'secretariat', label: 'Secrétariat' },
     { value: 'rectorate', label: 'Rectorat' },
     { value: 'admin', label: 'Admin-Université' },
     { value: 'erp-provider', label: 'Fournisseur ERP' },
@@ -65,10 +65,10 @@ export type NavItem = NavLink | NavGroup;
 
 export const navLinks: Record<UserRole, NavItem[]> = {
   student: [
-    { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '#', label: 'My Courses', icon: BookOpen },
-    { href: '#', label: 'Timetable', icon: Calendar },
-    { href: '#', label: 'Grades', icon: GraduationCap },
+    { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '#', label: 'Mes cours', icon: BookOpen },
+    { href: '#', label: 'Emploi du temps', icon: Calendar },
+    { href: '#', label: 'Résultats', icon: GraduationCap },
     {
       title: 'Collaboratif',
       links: [
@@ -86,45 +86,45 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     },
   ],
   professor: [
-    { href: '/professor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '#', label: 'My Courses', icon: BookOpen },
-    { href: '#', label: 'Students', icon: Users },
-    { href: '#', label: 'Grading', icon: ClipboardCheck },
-    { href: '#', label: 'Timetable', icon: Calendar },
+    { href: '/professor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '#', label: 'Mes cours', icon: BookOpen },
+    { href: '#', label: 'Étudiants', icon: Users },
+    { href: '#', label: 'Évaluations', icon: ClipboardCheck },
+    { href: '#', label: 'Emploi du temps', icon: Calendar },
     { href: '#', label: 'Messages', icon: MessageSquare },
   ],
   admin: [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '#', label: 'User Management', icon: Users },
-    { href: '#', label: 'Course Management', icon: BookOpen },
-    { href: '#', label: 'System Analytics', icon: PieChart },
-    { href: '#', label: 'Security', icon: Shield },
+    { href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '#', label: 'Gestion des utilisateurs', icon: Users },
+    { href: '#', label: 'Gestion des cours', icon: BookOpen },
+    { href: '#', label: 'Statistiques', icon: PieChart },
+    { href: '#', label: 'Sécurité', icon: Shield },
   ],
   'academic-advisor': [
-    { href: '/academic-advisor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/academic-advisor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '#', label: 'Programmes', icon: BookOpen },
     { href: '#', label: 'Suivi Étudiants', icon: Users },
   ],
   secretariat: [
-    { href: '/secretariat/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/secretariat/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '#', label: 'Inscriptions', icon: ClipboardCheck },
     { href: '#', label: 'Gestion Documents', icon: FileCog },
   ],
   rectorate: [
-      { href: '/rectorate/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/rectorate/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
       { href: '#', label: 'Statistiques Globales', icon: PieChart },
       { href: '#', label: 'Administration', icon: Building },
   ],
   'erp-provider': [
-      { href: '/erp-provider/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/erp-provider/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
       { href: '#', label: 'Intégrations', icon: Briefcase },
       { href: '#', label: 'Maintenance', icon: Settings },
   ]
 };
 
 export const bottomNavLinks: NavLink[] = [
-  { href: '#', label: 'Settings', icon: Settings },
-  { href: '#', label: 'Logout', icon: LogOut },
+  { href: '#', label: 'Paramètres', icon: Settings },
+  { href: '#', label: 'Déconnexion', icon: LogOut },
 ];
 
 export const userData: Record<UserRole, { name: string; avatar: string }> = {

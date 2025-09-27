@@ -31,7 +31,7 @@ export default function AppSidebar() {
       <SidebarHeader>
         <Link href="/" className="flex items-center gap-2 font-semibold text-lg">
           <BookAIcon className="h-6 w-6 text-primary" />
-          <span>VerxLink</span>
+          <span>UNI-VERX</span>
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-2">
