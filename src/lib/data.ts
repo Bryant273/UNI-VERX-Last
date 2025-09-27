@@ -101,22 +101,22 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '#', label: 'Sécurité', icon: Shield },
   ],
   'academic-advisor': [
-    { href: '/academic-advisor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/academic-advisor/dashboard', label: 'Responsable Pédagogique', icon: LayoutDashboard },
     { href: '#', label: 'Programmes', icon: BookOpen },
     { href: '#', label: 'Suivi Étudiants', icon: Users },
   ],
   secretariat: [
-    { href: '/secretariat/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/secretariat/dashboard', label: 'Secrétariat', icon: LayoutDashboard },
     { href: '#', label: 'Inscriptions', icon: ClipboardCheck },
     { href: '#', label: 'Gestion Documents', icon: FileCog },
   ],
   rectorate: [
-      { href: '/rectorate/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+      { href: '/rectorate/dashboard', label: 'Rectorat', icon: LayoutDashboard },
       { href: '#', label: 'Statistiques Globales', icon: PieChart },
       { href: '#', label: 'Administration', icon: Building },
   ],
   'erp-provider': [
-      { href: '/erp-provider/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+      { href: '/erp-provider/dashboard', label: 'Fournisseur ERP', icon: LayoutDashboard },
       { href: '#', label: 'Intégrations', icon: Briefcase },
       { href: '#', label: 'Maintenance', icon: Settings },
   ]
