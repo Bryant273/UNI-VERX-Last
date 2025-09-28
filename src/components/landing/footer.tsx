@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { GraduationCap, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Facebook, Twitter, Linkedin } from 'lucide-react';
+import Logo from '@/components/logo';
 
 export default function Footer() {
   return (
@@ -7,11 +8,8 @@ export default function Footer() {
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
-                <GraduationCap className="text-white h-6 w-6" />
-              </div>
-              <span className="text-2xl font-bold">UNI-VERX</span>
+            <div className="mb-6">
+              <Logo />
             </div>
             <p className="text-gray-400 mb-4">
               La solution de gestion universitaire intelligente qui révolutionne l'enseignement supérieur.

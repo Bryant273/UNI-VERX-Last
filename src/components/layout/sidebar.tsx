@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookAIcon, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 import type { UserRole } from '@/lib/data';
 import { navLinks, bottomNavLinks } from '@/lib/data';
@@ -16,6 +16,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import Logo from '@/components/logo';
 
 function isNavGroup(item: any): item is { title: string; links: any[] } {
   return item && typeof item.title === 'string' && Array.isArray(item.links);
@@ -29,9 +30,8 @@ export default function AppSidebar() {
   return (
     <UISidebar>
       <SidebarHeader>
-        <Link href="/" className="flex items-center gap-2 font-semibold text-lg">
-          <BookAIcon className="h-6 w-6 text-primary" />
-          <span>UNI-VERX</span>
+        <Link href="/">
+          <Logo />
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-2">
