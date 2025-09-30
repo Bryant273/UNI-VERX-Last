@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import type { TimetableEvent, UserRole } from '@/lib/data';
+import type { TimetableEvent, UserRole, TimetableEventType } from '@/lib/data';
 import { allEvents } from '@/lib/static-data';
 import { cn } from '@/lib/utils';
 import { useParams } from 'next/navigation';
@@ -23,12 +23,21 @@ import html2canvas from 'html2canvas';
 
 const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const TIME_SLOTS = [
-  '09:00 - 11:00',
-  '13:00 - 15:00',
-  '15:00 - 16:00',
-  '16:00 - 18:00',
-  '08:00 - 10:00'
+  '08:30 - 10:00',
+  '10:30 - 12:00',
+  '13:30 - 15:00',
+  '15:30 - 17:00',
 ];
+
+const eventTypeColors: Record<TimetableEventType, string> = {
+  cours: 'bg-blue-100 dark:bg-blue-900/30',
+  td: 'bg-orange-100 dark:bg-orange-900/30',
+  tp: 'bg-green-100 dark:bg-green-900/30',
+  examen: 'bg-red-100 dark:bg-red-900/30',
+  devoir: 'bg-yellow-100 dark:bg-yellow-900/30',
+  activité: 'bg-purple-100 dark:bg-purple-900/30',
+};
+
 
 const getEventForSlot = (
   events: (TimetableEvent & { day: string })[],
@@ -159,7 +168,7 @@ export default function TimetablePage() {
             </tr>
           </thead>
           <tbody>
-            {timeSlotsToRender.map((time, timeIndex) => (
+            {TIME_SLOTS.map((time, timeIndex) => (
               <React.Fragment key={time}>
                 <tr className='h-28'>
                   <td className="p-2 border font-medium text-sm text-center bg-muted/30">
@@ -172,7 +181,7 @@ export default function TimetablePage() {
                         key={`${day}-${time}`}
                         className={cn(
                           'p-2 border align-top cursor-pointer hover:bg-muted/20 transition-colors',
-                           event ? 'bg-muted/10' : ''
+                           event ? eventTypeColors[event.type] : ''
                         )}
                         onClick={() => handleEventClick(event)}
                       >
