@@ -72,11 +72,13 @@ export default function AiReportModal({ isOpen, onClose, report }: AiReportModal
           <DialogHeader className="flex flex-row items-start justify-between pr-6">
             <div>
               <DialogTitle className="text-2xl mb-2">Rapport de Performance IA</DialogTitle>
-              <DialogDescription className='space-y-1 text-xs'>
-                <p><span className='font-semibold text-foreground'>Étudiant :</span> {report.studentName}</p>
-                <p><span className='font-semibold text-foreground'>Matricule :</span> {report.studentId}</p>
-                <p><span className='font-semibold text-foreground'>Classe :</span> {report.studentClass}</p>
-                <p><span className='font-semibold text-foreground'>Semestre :</span> {report.semester}</p>
+              <DialogDescription asChild>
+                <div className='space-y-1 text-xs'>
+                  <div><span className='font-semibold text-foreground'>Étudiant :</span> {report.studentName}</div>
+                  <div><span className='font-semibold text-foreground'>Matricule :</span> {report.studentId}</div>
+                  <div><span className='font-semibold text-foreground'>Classe :</span> {report.studentClass}</div>
+                  <div><span className='font-semibold text-foreground'>Semestre :</span> {report.semester}</div>
+                </div>
               </DialogDescription>
             </div>
             <Logo />
