@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   Check,
   AlertTriangle,
-  Info
+  Info,
+  Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
