@@ -44,7 +44,17 @@ const getEventForSlot = (
   day: string,
   time: string
 ) => {
-  return events.find(event => event.day === day && event.time === time);
+  // A simple heuristic to match events to slots. A real app would need a more robust logic.
+  // This finds the first event of the day that falls into the slot.
+  return events.find(event => {
+      if (event.day !== day) return false;
+      
+      const [eventStartStr] = event.time.split(' - ');
+      const [slotStartStr] = time.split(' - ');
+
+      // Simple string comparison works here because the format is HH:mm
+      return eventStartStr === slotStartStr;
+  });
 };
 
 export default function TimetablePage() {
@@ -263,3 +273,5 @@ export default function TimetablePage() {
     </div>
   );
 }
+
+    
