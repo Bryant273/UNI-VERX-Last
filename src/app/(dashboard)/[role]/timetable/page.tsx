@@ -8,7 +8,7 @@ import {
   Download,
   Calendar as CalendarIcon,
   Loader2,
-  FilePdf,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -128,7 +128,7 @@ export default function TimetablePage() {
               <ChevronRight />
             </Button>
              <Button onClick={handleGeneratePdf} >
-              <FilePdf className="mr-2" />
+              <FileText className="mr-2" />
               Exporter en PDF
             </Button>
           </div>
