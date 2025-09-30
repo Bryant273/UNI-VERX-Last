@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import Logo from '@/components/logo';
+import { SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 function isNavGroup(item: any): item is { title: string; links: any[] } {
   return item && typeof item.title === 'string' && Array.isArray(item.links);
@@ -39,9 +40,16 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const currentRole = (pathname.split('/')[1] || 'student') as UserRole;
   const currentNavItems = navLinks[currentRole] || [];
+  const { isMobile } = useSidebar();
+
 
   return (
     <UISidebar>
+       {isMobile && (
+          <SheetHeader className="p-4">
+            <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
+          </SheetHeader>
+        )}
       <SidebarHeader>
         <SidebarHeaderContent />
       </SidebarHeader>
