@@ -24,7 +24,7 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
 
   if (!event) {
     return (
-      <Card className="w-40 h-40 flex flex-col items-center justify-center bg-muted">
+      <Card className="w-48 h-48 flex flex-col items-center justify-center bg-muted">
         <CardContent className="flex flex-col items-center justify-center p-2 text-center">
           <p className="text-sm font-semibold mb-1">Rien de prévu</p>
           <p className="text-xs text-muted-foreground">Bonne journée !</p>
@@ -39,7 +39,7 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
   return (
     <Card 
       className={cn(
-        "w-40 h-40 flex flex-col justify-between p-4 text-white cursor-pointer hover:scale-105 transition-transform",
+        "w-48 h-48 flex flex-col justify-between p-4 text-white cursor-pointer hover:scale-105 transition-transform",
         config.color
       )}
     >
