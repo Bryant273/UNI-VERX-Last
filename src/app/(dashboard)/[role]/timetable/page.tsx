@@ -20,6 +20,8 @@ import EventDetailsModal from '@/components/dashboard/event-details-modal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { format, startOfWeek, endOfWeek, addDays, subDays } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 
 const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
@@ -70,6 +72,12 @@ export default function TimetablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+
+  const weekString = `Semaine du ${format(weekStart, 'dd MMMM yyyy', { locale: fr })} au ${format(weekEnd, 'dd MMMM yyyy', { locale: fr })}`;
 
   const handleEventClick = (event: TimetableEvent | undefined) => {
     if (!event) return;
@@ -89,8 +97,6 @@ export default function TimetablePage() {
     setTimeout(() => {
       const doc = new jsPDF('landscape');
       
-      const weekString = 'Semaine du 24 au 30 Juin 2024';
-
       doc.setFontSize(18);
       doc.text('Emploi du temps', 14, 20);
       
@@ -100,14 +106,12 @@ export default function TimetablePage() {
 
       const headerX = doc.internal.pageSize.width - 14;
       doc.text(`Classe: ${studentData.class}`, headerX, 20, { align: 'right' });
-      doc.text(`Niveau: ${studentData.class.split(' - ')[0]}`, headerX, 28, { align: 'right' });
 
 
-      const head = [['Horaire', ...DAYS_OF_WEEK]];
+      const head = [['Horaire', ...DAYS_OF_WEEK.map((day, index) => `${day.toUpperCase()}\n${format(addDays(weekStart, index), 'dd/MM')}`)]];
       const body: any[] = [];
 
       TIME_SLOTS.forEach((time, index) => {
-        // Add event row
         const row: string[] = [time];
         DAYS_OF_WEEK.forEach(day => {
           const event = getEventForSlot(userEvents, day, time);
@@ -119,7 +123,6 @@ export default function TimetablePage() {
         });
         body.push(row);
 
-        // Add break rows
         if (index === 0) {
             body.push([{ content: 'RÉCRÉATION', colSpan: 7, styles: { halign: 'center', fillColor: [30, 58, 138], textColor: [255, 255, 255] } }]);
         }
@@ -138,15 +141,15 @@ export default function TimetablePage() {
         head: head,
         body: body,
         theme: 'grid',
-        headStyles: { fillColor: [22, 163, 74] },
+        headStyles: { fillColor: [22, 163, 74], valign: 'middle' },
         styles: {
           cellPadding: 3,
           valign: 'middle',
           minCellHeight: 15,
         },
-        didParseCell: function (data) {
+        didParseCell: function (data: any) {
           if (data.section === 'body' && !data.cell.raw.colSpan) { // Check it's not a recreation/pause row
-             const event = getEventForSlot(userEvents, DAYS_OF_WEEK[data.column.index - 1], body[data.row.index][0]);
+             const event = getEventForSlot(userEvents, DAYS_OF_WEEK[data.column.index - 1], body.find(r => r[0] === data.cell.raw[0])?.[0]);
              if (event) {
                 const colorMap = {
                     cours: [240, 248, 255],
@@ -174,19 +177,19 @@ export default function TimetablePage() {
       <Card>
         <CardContent className="p-4 flex flex-col lg:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
-             <h2 className="text-xl font-semibold">
-              Semaine du 24 au 30 Juin 2024
+             <h2 className="text-xl font-semibold capitalize">
+              {weekString}
             </h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setCurrentDate(new Date())}>
               <CalendarIcon className="mr-2" />
               Aujourd'hui
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setCurrentDate(subDays(currentDate, 7))}>
               <ChevronLeft />
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setCurrentDate(addDays(currentDate, 7))}>
               <ChevronRight />
             </Button>
              <Button onClick={handleGeneratePdf} >
@@ -201,12 +204,12 @@ export default function TimetablePage() {
         <table id="timetableContent" className="w-full min-w-[80rem] border-collapse">
           <thead>
             <tr className="bg-muted/50">
-              <th className="p-2 border font-semibold text-sm w-28">JOURS</th>
+              <th className="p-2 border font-semibold text-sm w-36">JOURS</th>
               {DAYS_OF_WEEK.map((day, index) => (
                 <th key={day} className="p-2 border font-semibold text-sm">
                   {day.toUpperCase()}
                   <span className="block font-normal text-xs text-muted-foreground">
-                    {24 + index}/06
+                    {format(addDays(weekStart, index), 'dd/MM')}
                   </span>
                 </th>
               ))}
@@ -233,16 +236,17 @@ export default function TimetablePage() {
                       >
                         {event && colorConfig ? (
                           <div className={cn(
-                            "h-full w-full p-2.5 border-l-4 transition-colors", 
+                            "h-full w-full p-2.5 border-l-4 flex flex-col transition-colors", 
                             colorConfig.border, 
                             colorConfig.bg,
                             'hover:bg-opacity-20',
                             `hover:${colorConfig.bg.replace('/10', '/20')}`
                             )}>
-                            <p className={cn("font-bold", colorConfig.text)}>
+                            <p className={cn("font-bold text-sm", colorConfig.text)}>
                               {event.course}
                             </p>
                             <p className="text-xs font-semibold text-muted-foreground mt-0.5">{event.type.toUpperCase()}</p>
+                            <div className="flex-grow" />
                             <p className="text-xs text-muted-foreground mt-2">
                               {event.instructor}
                             </p>
