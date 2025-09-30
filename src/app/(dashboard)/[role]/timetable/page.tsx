@@ -139,7 +139,7 @@ export default function TimetablePage() {
         <table id="timetableContent" className="w-full min-w-[80rem] border-collapse">
           <thead>
             <tr className="bg-muted/50">
-              <th className="p-2 border font-semibold text-sm w-32">JOURS</th>
+              <th className="p-2 border font-semibold text-sm w-28">JOURS</th>
               {DAYS_OF_WEEK.map((day, index) => (
                 <th key={day} className="p-2 border font-semibold text-sm">
                   {day.toUpperCase()}
@@ -153,7 +153,7 @@ export default function TimetablePage() {
           <tbody>
             {TIME_SLOTS.map((time, timeIndex) => (
               <React.Fragment key={time}>
-                <tr>
+                <tr className='h-28'>
                   <td className="p-2 border font-medium text-sm text-center bg-muted/30">
                     {time}
                   </td>
