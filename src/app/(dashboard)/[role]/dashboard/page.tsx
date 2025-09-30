@@ -49,10 +49,12 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {role === 'student' && (
           <>
             <div className="lg:col-span-2 space-y-6">
-              <AiReportCard />
-            </div>
-            <div className="flex justify-center md:justify-end">
-                <CurrentEventCard role="student" />
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <AiReportCard />
+                    <div className="flex justify-center lg:justify-end">
+                        <CurrentEventCard role="student" />
+                    </div>
+                </div>
             </div>
           </>
         )}
