@@ -65,7 +65,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   student: [
     { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '#', label: 'Mes cours', icon: BookOpen },
-    { href: '#', label: 'Emploi du temps', icon: Calendar },
+    { href: '/student/timetable', label: 'Emploi du temps', icon: Calendar },
     { href: '#', label: 'Évaluations', icon: ClipboardCheck },
     { href: '#', label: 'Résultats', icon: GraduationCap },
     {
@@ -89,7 +89,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '#', label: 'Mes cours', icon: BookOpen },
     { href: '#', label: 'Étudiants', icon: Users },
     { href: '#', label: 'Évaluations', icon: ClipboardCheck },
-    { href: '#', label: 'Emploi du temps', icon: Calendar },
+    { href: '/professor/timetable', label: 'Emploi du temps', icon: Calendar },
     { href: '#', label: 'Messages', icon: MessageSquare },
   ],
   admin: [
@@ -192,7 +192,8 @@ export const courses = {
   ],
 };
 
-export type TimetableEventType = 'cours' | 'devoir' | 'examen' | 'activité';
+export type TimetableEventType = 'cours' | 'devoir' | 'examen' | 'activité' | 'td' | 'tp';
+export type PresenceStatus = 'validated' | 'pending' | 'absent' | 'na';
 
 export interface TimetableEvent {
   id: number;
@@ -200,14 +201,65 @@ export interface TimetableEvent {
   course: string;
   location: string;
   type: TimetableEventType;
+  instructor?: string;
+  fileLink?: string;
+  profComment?: string;
+  presenceStatus?: PresenceStatus;
+  isPast?: boolean;
 }
 
 const allEvents: Record<UserRole, TimetableEvent[]> = {
   student: [
-    { id: 1, time: '09:00 - 11:00', course: 'Advanced Calculus', location: 'Hall A', type: 'cours' },
-    { id: 2, time: '13:00 - 15:00', course: 'Quantum Physics', location: 'Lab 3B', type: 'cours' },
-    { id: 6, time: '15:00 - 16:00', course: 'Devoir de calcul', location: 'À rendre en ligne', type: 'devoir' },
-    { id: 7, time: '16:00 - 18:00', course: 'Club de débat', location: 'Salle commune', type: 'activité' },
+    { 
+      id: 1, 
+      time: '09:00 - 11:00', 
+      course: 'Advanced Calculus', 
+      location: 'Hall A', 
+      type: 'cours',
+      instructor: 'Dr. Alan Turing',
+      fileLink: '/files/calculus-notes.pdf',
+      profComment: 'Excellent travail sur les derniers exercices. Continuez comme ça !',
+      presenceStatus: 'validated',
+      isPast: false,
+    },
+    { 
+      id: 2, 
+      time: '13:00 - 15:00', 
+      course: 'Quantum Physics', 
+      location: 'Lab 3B', 
+      type: 'tp',
+      instructor: 'Dr. Marie Curie',
+      presenceStatus: 'pending',
+      isPast: false,
+    },
+    { 
+      id: 6, 
+      time: '15:00 - 16:00', 
+      course: 'Devoir de calcul', 
+      location: 'À rendre en ligne', 
+      type: 'devoir',
+      fileLink: '/files/devoir-calcul.pdf',
+      profComment: 'Date limite ce soir à 23h59.',
+      presenceStatus: 'na',
+    },
+    { 
+      id: 7, 
+      time: '16:00 - 18:00', 
+      course: 'Club de débat', 
+      location: 'Salle commune', 
+      type: 'activité',
+      presenceStatus: 'na',
+    },
+     { 
+      id: 9, 
+      time: '08:00 - 10:00', 
+      course: 'Histoire Ancienne', 
+      location: 'Amphi C', 
+      type: 'cours',
+      instructor: 'Dr. Indiana Jones',
+      presenceStatus: 'absent',
+      isPast: true,
+    },
   ],
   professor: [
     { id: 1, time: '09:00 - 11:00', course: 'Advanced Calculus', location: 'Hall A', type: 'cours' },
@@ -236,8 +288,9 @@ export const getActiveEvent = (role: UserRole): TimetableEvent | null => {
     return null;
   }
 
-  // Find the first event that is currently happening or is in the future today
+  // Find the first event that is currently happening
   const activeEvent = userEvents.find(event => {
+    if (event.isPast) return false;
     const [startTime, endTime] = event.time.split(' - ').map(t => {
       const [hours, minutes] = t.split(':').map(Number);
       return hours * 60 + minutes;
@@ -245,28 +298,11 @@ export const getActiveEvent = (role: UserRole): TimetableEvent | null => {
     return currentTime >= startTime && currentTime < endTime;
   });
 
-  // If there's an active event, return it
   if (activeEvent) {
     return activeEvent;
   }
-
-  // Otherwise, find the next upcoming event today
-  const upcomingEvent = userEvents
-    .filter(event => {
-      const [startTime] = event.time.split(' - ').map(t => {
-        const [hours, minutes] = t.split(':').map(Number);
-        return hours * 60 + minutes;
-      });
-      return startTime > currentTime;
-    })
-    .sort((a, b) => {
-      const aStartTime = a.time.split(' - ')[0].split(':').map(Number);
-      const bStartTime = b.time.split(' - ')[0].split(':').map(Number);
-      return (aStartTime[0] * 60 + aStartTime[1]) - (bStartTime[0] * 60 + bStartTime[1]);
-    })[0];
-
-  // Return the upcoming event or the first event of the day if nothing else is found
-  return upcomingEvent || userEvents[0];
+  
+  return null; // Return null if no event is currently active
 };
 
 
