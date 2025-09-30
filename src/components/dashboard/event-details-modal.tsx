@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import type { TimetableEvent, TimetableEventType, PresenceStatus } from '@/lib/data';
@@ -85,13 +86,17 @@ export default function EventDetailsModal({ isOpen, onClose, event }: EventDetai
       <DialogContent className="sm:max-w-md p-0">
         <DialogHeader>
           {event ? (
-            <div className={`w-full p-4 text-white text-center rounded-t-lg ${eventTypeConfig[event.type].color}`}>
-              <h2 className="text-xl font-bold">{eventTypeConfig[event.type].label.toUpperCase()} EN COURS</h2>
-            </div>
+            <DialogTitle asChild>
+              <div className={`w-full p-4 text-white text-center rounded-t-lg ${eventTypeConfig[event.type].color}`}>
+                <h2 className="text-xl font-bold">{eventTypeConfig[event.type].label.toUpperCase()} EN COURS</h2>
+              </div>
+            </DialogTitle>
           ) : (
-             <div className="w-full p-4 text-white text-center rounded-t-lg bg-gray-400">
-                <h2 className="text-xl font-bold">ÉVÈNEMENT</h2>
-             </div>
+             <DialogTitle asChild>
+               <div className="w-full p-4 text-white text-center rounded-t-lg bg-gray-400">
+                  <h2 className="text-xl font-bold">ÉVÈNEMENT</h2>
+               </div>
+             </DialogTitle>
           )}
         </DialogHeader>
 
