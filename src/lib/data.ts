@@ -171,24 +171,83 @@ export const courses = {
   ],
 };
 
-export const timetableEvents = {
+export type TimetableEventType = 'cours' | 'devoir' | 'examen' | 'activité';
+
+export interface TimetableEvent {
+  id: number;
+  time: string;
+  course: string;
+  location: string;
+  type: TimetableEventType;
+}
+
+const allEvents: Record<UserRole, TimetableEvent[]> = {
   student: [
-    { id: 1, time: '09:00 - 11:00', course: 'Advanced Calculus', location: 'Hall A' },
-    { id: 2, time: '13:00 - 15:00', course: 'Quantum Physics', location: 'Lab 3B' },
+    { id: 1, time: '09:00 - 11:00', course: 'Advanced Calculus', location: 'Hall A', type: 'cours' },
+    { id: 2, time: '13:00 - 15:00', course: 'Quantum Physics', location: 'Lab 3B', type: 'cours' },
+    { id: 6, time: '15:00 - 16:00', course: 'Devoir de calcul', location: 'À rendre en ligne', type: 'devoir' },
+    { id: 7, time: '16:00 - 18:00', course: 'Club de débat', location: 'Salle commune', type: 'activité' },
   ],
   professor: [
-    { id: 1, time: '09:00 - 11:00', course: 'Advanced Calculus', location: 'Hall A' },
-    { id: 3, time: '11:00 - 12:00', course: 'Office Hours', location: 'Office 101' },
+    { id: 1, time: '09:00 - 11:00', course: 'Advanced Calculus', location: 'Hall A', type: 'cours' },
+    { id: 3, time: '11:00 - 12:00', course: 'Office Hours', location: 'Office 101', type: 'activité' },
+    { id: 8, time: '14:00 - 16:00', course: 'Examen de mi-semestre', location: 'Amphi B', type: 'examen' },
   ],
   admin: [
-    { id: 4, time: '10:00 - 11:00', course: 'Faculty Meeting', location: 'Conference Room 1' },
-    { id: 5, time: '14:00 - 15:00', course: 'Budget Review', location: 'Admin Building' },
+    { id: 4, time: '10:00 - 11:00', course: 'Faculty Meeting', location: 'Conference Room 1', type: 'activité' },
+    { id: 5, time: '14:00 - 15:00', course: 'Budget Review', location: 'Admin Building', type: 'activité' },
   ],
   'academic-advisor': [],
   secretariat: [],
   rectorate: [],
   'erp-provider': [],
-}
+};
+
+
+// Function to get the current or next event for a user
+export const getActiveEvent = (role: UserRole): TimetableEvent | null => {
+  const now = new Date();
+  const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes from midnight
+
+  const userEvents = allEvents[role];
+
+  if (!userEvents || userEvents.length === 0) {
+    return null;
+  }
+
+  // Find the first event that is currently happening or is in the future today
+  const activeEvent = userEvents.find(event => {
+    const [startTime, endTime] = event.time.split(' - ').map(t => {
+      const [hours, minutes] = t.split(':').map(Number);
+      return hours * 60 + minutes;
+    });
+    return currentTime >= startTime && currentTime < endTime;
+  });
+
+  // If there's an active event, return it
+  if (activeEvent) {
+    return activeEvent;
+  }
+
+  // Otherwise, find the next upcoming event today
+  const upcomingEvent = userEvents
+    .filter(event => {
+      const [startTime] = event.time.split(' - ').map(t => {
+        const [hours, minutes] = t.split(':').map(Number);
+        return hours * 60 + minutes;
+      });
+      return startTime > currentTime;
+    })
+    .sort((a, b) => {
+      const aStartTime = a.time.split(' - ')[0].split(':').map(Number);
+      const bStartTime = b.time.split(' - ')[0].split(':').map(Number);
+      return (aStartTime[0] * 60 + aStartTime[1]) - (bStartTime[0] * 60 + bStartTime[1]);
+    })[0];
+
+  // Return the upcoming event or the first event of the day if nothing else is found
+  return upcomingEvent || userEvents[0];
+};
+
 
 export const messages = [
   { id: 1, sender: 'Dr. Evelyn Reed', subject: 'Mid-term results', time: '10:42 AM' },

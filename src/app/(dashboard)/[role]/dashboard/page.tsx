@@ -16,10 +16,8 @@ import {
 import type { UserRole } from '@/lib/data';
 import { userData, VALID_ROLES } from '@/lib/data';
 import WelcomeBanner from '@/components/dashboard/welcome-banner';
-import TimetableCard from '@/components/dashboard/timetable-card';
-import CoursesCard from '@/components/dashboard/courses-card';
+import CurrentEventCard from '@/components/dashboard/current-event-card';
 import SummarizerCard from '@/components/dashboard/summarizer-card';
-import MessagingCard from '@/components/dashboard/messaging-card';
 import StatsCard from '@/components/dashboard/stats-card';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
@@ -54,7 +52,7 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {/* Student Dashboard */}
         {role === 'student' && (
           <>
-            <TimetableCard role="student" />
+            <CurrentEventCard role="student" />
           </>
         )}
 
@@ -62,9 +60,7 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {role === 'professor' && (
           <>
             <SummarizerCard />
-            <TimetableCard role="professor" />
-            <CoursesCard role="professor" />
-            <MessagingCard />
+            <CurrentEventCard role="professor" />
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Student Attendance</CardTitle>
@@ -132,7 +128,7 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
                 </p>
               </CardContent>
             </Card>
-            <TimetableCard role="admin" />
+            <CurrentEventCard role="admin" />
             <SummarizerCard />
           </>
         )}
