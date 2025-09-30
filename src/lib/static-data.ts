@@ -1,4 +1,5 @@
 
+
 import {
   LayoutDashboard,
   BookOpen,
@@ -48,7 +49,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '/student/courses', label: 'Mes cours', icon: BookOpen },
     { href: '/student/timetable', label: 'Emploi du temps', icon: Calendar },
     { href: '/student/evaluations', label: 'Évaluations', icon: ClipboardList },
-    { href: '#', label: 'Résultats', icon: GraduationCap },
+    { href: '/student/results', label: 'Résultats', icon: GraduationCap },
     {
       title: 'Collaboratif',
       links: [
