@@ -1,14 +1,287 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import {
+  File as FileIcon,
+  FileText,
+  FileCode2,
+  FileSpreadsheet,
+  FileArchive,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Download,
+  X,
+  Loader2,
+  Filter,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { courseDocuments, type CourseDocument, type DocumentType } from '@/lib/data';
+
+const ITEMS_PER_PAGE = 5;
+
+const documentTypeConfig: Record<
+  DocumentType,
+  { icon: LucideIcon; color: string; label: string }
+> = {
+  pdf: { icon: FileText, color: 'text-red-500', label: 'PDF' },
+  docx: { icon: FileIcon, color: 'text-blue-500', label: 'Word' },
+  xlsx: { icon: FileSpreadsheet, color: 'text-green-500', label: 'Excel' },
+  pptx: { icon: FileCode2, color: 'text-orange-500', label: 'PowerPoint' },
+  zip: { icon: FileArchive, color: 'text-purple-500', label: 'Archive' },
+};
+
+const FileTypeIcon: React.FC<{ type: DocumentType }> = ({ type }) => {
+  const { icon: Icon, color } = documentTypeConfig[type];
+  const colorBg = color.replace('text-', 'bg-').replace('-500', '-500/10');
+  return (
+    <div className={`flex items-center gap-2`}>
+      <div className={`flex-shrink-0 w-8 h-8 rounded-lg ${colorBg} flex items-center justify-center`}>
+        <Icon className={`w-4 h-4 ${color}`} />
+      </div>
+      <span>{documentTypeConfig[type].label}</span>
+    </div>
+  );
+};
 
 export default function CoursesPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [moduleFilter, setModuleFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [previewDocument, setPreviewDocument] = useState<CourseDocument | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+
+  const modules = useMemo(() => 
+    ['all', ...Array.from(new Set(courseDocuments.map((doc) => doc.module)))]
+  , []);
+
+  const documentTypes = useMemo(() => 
+    ['all', ...Array.from(new Set(courseDocuments.map((doc) => doc.type)))]
+  , []);
+
+  const filteredDocuments = useMemo(() => {
+    return courseDocuments
+      .filter((doc) =>
+        doc.documentName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .filter((doc) => moduleFilter === 'all' || doc.module === moduleFilter)
+      .filter((doc) => typeFilter === 'all' || doc.type === typeFilter);
+  }, [searchTerm, moduleFilter, typeFilter]);
+
+  const totalPages = Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE);
+  const paginatedDocuments = filteredDocuments.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePreview = (doc: CourseDocument) => {
+    setPreviewDocument(doc);
+    setIsPreviewLoading(true);
+    // Simulate loading
+    setTimeout(() => setIsPreviewLoading(false), 1000);
+  };
+  
+  const renderPagination = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+        pages.push(
+            <Button
+                key={i}
+                variant={currentPage === i ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setCurrentPage(i)}
+                className="h-8 w-8"
+            >
+                {i}
+            </Button>
+        );
+    }
+    return pages;
+  };
+
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Mes Cours</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground">La page des cours est en cours de construction.</p>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher un document..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Select value={moduleFilter} onValueChange={setModuleFilter}>
+                <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectValue placeholder="Tous les modules" />
+                </SelectTrigger>
+                <SelectContent>
+                  {modules.map((module) => (
+                    <SelectItem key={module} value={module}>
+                      {module === 'all' ? 'Tous les modules' : module}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectValue placeholder="Tous les types" />
+                </SelectTrigger>
+                <SelectContent>
+                  {documentTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type === 'all' ? 'Tous les types' : documentTypeConfig[type as DocumentType]?.label || type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+               <Button>
+                <Filter className="mr-2 h-4 w-4" />
+                Filtrer
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Module</TableHead>
+                <TableHead>Document</TableHead>
+                <TableHead>Mis en ligne par</TableHead>
+                <TableHead className="text-center">Type</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedDocuments.map((doc) => (
+                <TableRow key={doc.id}>
+                  <TableCell>{doc.date}</TableCell>
+                  <TableCell className="font-medium">{doc.module}</TableCell>
+                  <TableCell>{doc.documentName}</TableCell>
+                  <TableCell>{doc.uploader}</TableCell>
+                  <TableCell className="text-center"><FileTypeIcon type={doc.type} /></TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handlePreview(doc)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <CardContent className="p-4 flex items-center justify-between">
+           <p className="text-sm text-muted-foreground">
+             Affichage de {paginatedDocuments.length} sur {filteredDocuments.length} documents
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="h-8 w-8"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {renderPagination()}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="h-8 w-8"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {previewDocument && (
+        <Dialog open={!!previewDocument} onOpenChange={(open) => !open && setPreviewDocument(null)}>
+          <DialogContent className="sm:max-w-4xl h-[90vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileTypeIcon type={previewDocument.type} />
+                {previewDocument.documentName}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 rounded-lg bg-muted/50 flex items-center justify-center relative overflow-hidden">
+                {isPreviewLoading ? (
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p className="text-muted-foreground">Chargement de l'aperçu...</p>
+                    </div>
+                ) : (
+                    <>
+                    {previewDocument.type === 'pdf' ? (
+                        <iframe
+                            src={previewDocument.fileUrl}
+                            className="w-full h-full"
+                            title={previewDocument.documentName}
+                        />
+                    ) : (
+                        <div className="text-center p-8">
+                            <FileIcon className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">Aperçu non disponible</h3>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Ce type de fichier ne peut pas être prévisualisé directement.
+                            </p>
+                            <Button asChild>
+                                <a href={previewDocument.fileUrl} download>
+                                <Download className="mr-2 h-4 w-4" />
+                                Télécharger le fichier
+                                </a>
+                            </Button>
+                        </div>
+                    )}
+                    </>
+                )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
   );
 }
