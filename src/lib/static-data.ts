@@ -17,6 +17,7 @@ import {
   FileCog,
   BookUser,
   type LucideIcon,
+  ClipboardList,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent, TimetableEventType, PresenceStatus } from './data';
@@ -46,7 +47,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/student/courses', label: 'Mes cours', icon: BookOpen },
     { href: '/student/timetable', label: 'Emploi du temps', icon: Calendar },
-    { href: '#', label: 'Évaluations', icon: ClipboardCheck },
+    { href: '/student/evaluations', label: 'Évaluations', icon: ClipboardList },
     { href: '#', label: 'Résultats', icon: GraduationCap },
     {
       title: 'Collaboratif',
