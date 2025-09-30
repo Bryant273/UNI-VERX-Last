@@ -44,29 +44,22 @@ const getEventForSlot = (
   day: string,
   time: string
 ) => {
-  // A simple heuristic to match events to slots. A real app would need a more robust logic.
-  // This finds the first event of the day that falls into the slot.
-  return events.find(event => {
-      if (event.day !== day) return false;
-      
-      const [eventStartStr] = event.time.split(' - ');
-      const [slotStartStr] = time.split(' - ');
-
-      // Simple string comparison works here because the format is HH:mm
-      return eventStartStr === slotStartStr;
-  });
+  return events.find(event => event.day === day && event.time === time);
 };
 
 export default function TimetablePage() {
   const params = useParams();
   const role = params.role as UserRole;
+  
   // This is a simplified mapping. In a real app, this would be more dynamic.
   const userEvents: (TimetableEvent & {day: string})[] = [
-    { ...allEvents[role][0], day: 'Lundi' }, 
-    { ...allEvents.student[1], day: 'Mardi' }, 
-    { ...allEvents.student[2], day: 'Jeudi' }, 
-    { ...allEvents.student[3], day: 'Vendredi' }, 
-    { ...allEvents.student[4], day: 'Lundi' }, 
+    { ...allEvents.student[0], day: 'Lundi', time: '08:30 - 10:00' },
+    { ...allEvents.student[1], day: 'Mardi', time: '10:30 - 12:00'},
+    { ...allEvents.student[2], day: 'Jeudi', time: '13:30 - 15:00'},
+    { ...allEvents.student[3], day: 'Vendredi', time: '08:30 - 10:00'},
+    { ...allEvents.student[4], day: 'Lundi', time: '15:30 - 17:00'},
+    { ...allEvents.professor[1], day: 'Mercredi', time: '10:30 - 12:00'},
+    { ...allEvents.professor[2], day: 'Samedi', time: '08:30 - 10:00'},
   ];
 
 
@@ -127,13 +120,6 @@ export default function TimetablePage() {
     }
   };
   
-  const timeSlotsToRender = [
-    '08:30 - 10:00',
-    '10:30 - 12:00',
-    '13:30 - 15:00',
-    '15:30 - 17:00',
-  ]
-
   return (
     <div className="flex flex-col h-full gap-6">
       <Card>
