@@ -19,7 +19,8 @@ import { useParams } from 'next/navigation';
 import EventDetailsModal from '@/components/dashboard/event-details-modal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import 'jspdf-autotable';
+
 
 const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const TIME_SLOTS = [
@@ -84,40 +85,65 @@ export default function TimetablePage() {
   const handleGeneratePdf = () => {
     setIsPdfModalOpen(true);
     setIsGeneratingPdf(true);
-    const timetableContent = document.getElementById('timetableContent');
 
-    if (timetableContent) {
-      // Short delay to allow modal to render
-      setTimeout(() => {
-        html2canvas(timetableContent, { scale: 2, backgroundColor: null }).then((canvas) => {
-          const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF('landscape', 'mm', 'a4');
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = pdf.internal.pageSize.getHeight();
-          const imgWidth = canvas.width;
-          const imgHeight = canvas.height;
-          const ratio = imgWidth / imgHeight;
-          let newImgWidth = pdfWidth - 20; // with margin
-          let newImgHeight = newImgWidth / ratio;
-          
-          if (newImgHeight > pdfHeight - 40) {
-            newImgHeight = pdfHeight - 40;
-            newImgWidth = newImgHeight * ratio;
+    setTimeout(() => {
+      const doc = new jsPDF('landscape');
+      
+      doc.setFontSize(18);
+      doc.text('Emploi du temps - Semaine du 24 au 30 Juin 2024', 14, 20);
+      doc.setFontSize(11);
+      doc.setTextColor(100);
+
+      const head = [['Horaire', ...DAYS_OF_WEEK]];
+      const body = TIME_SLOTS.map(time => {
+        const row: string[] = [time];
+        DAYS_OF_WEEK.forEach(day => {
+          const event = getEventForSlot(userEvents, day, time);
+          if (event) {
+            row.push(`${event.course}\n(${event.type.toUpperCase()})\n${event.instructor || ''}\n${event.location}`);
+          } else {
+            row.push('');
           }
-
-          const x = (pdfWidth - newImgWidth) / 2;
-          const y = 20;
-
-          pdf.setFontSize(18);
-          pdf.text('Emploi du temps', pdfWidth / 2, 15, { align: 'center' });
-
-          pdf.addImage(imgData, 'PNG', x, y, newImgWidth, newImgHeight);
-          pdf.save('emploi-du-temps.pdf');
-          setIsGeneratingPdf(false);
-          setIsPdfModalOpen(false);
         });
-      }, 500);
-    }
+        return row;
+      });
+
+      // @ts-ignore
+      doc.autoTable({
+        startY: 30,
+        head: head,
+        body: body,
+        theme: 'grid',
+        headStyles: { fillColor: [22, 163, 74] },
+        styles: {
+          cellPadding: 3,
+          valign: 'middle',
+        },
+        didParseCell: function (data) {
+          if (data.section === 'body' && data.cell.text.length > 1) {
+             const event = getEventForSlot(userEvents, DAYS_OF_WEEK[data.column.index - 1], TIME_SLOTS[data.row.index]);
+             if (event) {
+                const colorMap = {
+                    cours: [59, 130, 246],
+                    td: [249, 115, 22],
+                    tp: [34, 197, 94],
+                    examen: [239, 68, 68],
+                    activité: [168, 85, 247],
+                    devoir: [234, 179, 8],
+                };
+                // @ts-ignore
+                data.cell.styles.fillColor = colorMap[event.type];
+                data.cell.styles.textColor = [255, 255, 255];
+                data.cell.styles.fontStyle = 'bold';
+             }
+          }
+        }
+      });
+      
+      doc.save('emploi-du-temps.pdf');
+      setIsGeneratingPdf(false);
+      setIsPdfModalOpen(false);
+    }, 500);
   };
   
   return (
