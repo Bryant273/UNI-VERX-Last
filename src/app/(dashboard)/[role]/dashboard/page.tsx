@@ -3,10 +3,6 @@ import {
   Users,
   BookOpen,
   ClipboardCheck,
-  BarChart2,
-  BrainCircuit,
-  MessageSquare,
-  Calendar,
   Building,
   Briefcase,
   FileCog,
@@ -17,7 +13,6 @@ import type { UserRole } from '@/lib/data';
 import { userData, VALID_ROLES } from '@/lib/data';
 import WelcomeBanner from '@/components/dashboard/welcome-banner';
 import CurrentEventCard from '@/components/dashboard/current-event-card';
-import SummarizerCard from '@/components/dashboard/summarizer-card';
 import AiReportCard from '@/components/dashboard/ai-report-card';
 import StatsCard from '@/components/dashboard/stats-card';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -65,7 +60,7 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {/* Professor Dashboard */}
         {role === 'professor' && (
           <>
-            <SummarizerCard />
+            <AiReportCard />
             <CurrentEventCard role="professor" />
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -135,7 +130,7 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
               </CardContent>
             </Card>
             <CurrentEventCard role="admin" />
-            <SummarizerCard />
+            <AiReportCard />
           </>
         )}
 
