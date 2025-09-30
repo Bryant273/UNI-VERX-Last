@@ -40,9 +40,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { courseDocuments, type CourseDocument, type DocumentType } from '@/lib/course-data';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -57,18 +59,84 @@ const documentTypeConfig: Record<
   zip: { icon: FileArchive, color: 'text-purple-500', label: 'Archive' },
 };
 
-const FileTypeIcon: React.FC<{ type: DocumentType }> = ({ type }) => {
-  const { icon: Icon, color } = documentTypeConfig[type];
+const FileTypeIcon: React.FC<{ type: DocumentType, showLabel?: boolean }> = ({ type, showLabel = false }) => {
+  const config = documentTypeConfig[type] || { icon: FileIcon, color: 'text-gray-500', label: 'Fichier' };
+  const { icon: Icon, color, label } = config;
   const colorBg = color.replace('text-', 'bg-').replace('-500', '-500/10');
+  
   return (
-    <div className={`flex items-center gap-2`}>
+    <div className="flex items-center gap-2">
       <div className={`flex-shrink-0 w-8 h-8 rounded-lg ${colorBg} flex items-center justify-center`}>
         <Icon className={`w-4 h-4 ${color}`} />
       </div>
-      <span>{documentTypeConfig[type].label}</span>
+      {showLabel && <span>{label}</span>}
     </div>
   );
 };
+
+const ExcelPreview = () => (
+    <div className="p-4 bg-white dark:bg-gray-800 h-full">
+        <Tabs defaultValue="Feuil1">
+            <TabsList>
+                <TabsTrigger value="Feuil1">Feuil1</TabsTrigger>
+                <TabsTrigger value="Feuil2">Feuil2</TabsTrigger>
+                <TabsTrigger value="Stats">Stats</TabsTrigger>
+            </TabsList>
+            <TabsContent value="Feuil1" className="bg-white dark:bg-gray-800">
+                <table className="w-full text-sm border-collapse">
+                    <thead>
+                        <tr>
+                            {['', 'A', 'B', 'C', 'D'].map(h => <th key={h} className="border border-gray-300 dark:border-gray-600 p-2 font-semibold bg-gray-100 dark:bg-gray-700">{h}</th>)}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {[1, 2, 3, 4, 5].map(row => (
+                            <tr key={row}>
+                                <td className="border border-gray-300 dark:border-gray-600 p-2 font-semibold bg-gray-100 dark:bg-gray-700">{row}</td>
+                                <td className="border border-gray-300 dark:border-gray-600 p-2">Donnée {row}-1</td>
+                                <td className="border border-gray-300 dark:border-gray-600 p-2">Donnée {row}-2</td>
+                                <td className="border border-gray-300 dark:border-gray-600 p-2">Donnée {row}-3</td>
+                                <td className="border border-gray-300 dark:border-gray-600 p-2">Donnée {row}-4</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </TabsContent>
+            <TabsContent value="Feuil2">Contenu de la feuille 2.</TabsContent>
+            <TabsContent value="Stats">Graphiques et statistiques ici.</TabsContent>
+        </Tabs>
+    </div>
+);
+
+const PowerPointPreview = () => (
+    <div className="h-full flex items-center justify-center bg-gray-800 p-4">
+        <div className="w-full aspect-video bg-white dark:bg-black flex flex-col items-center justify-center text-center p-8 shadow-2xl">
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Titre de la Diapositive</h2>
+            <ul className="mt-4 text-left list-disc list-inside text-gray-600 dark:text-gray-300">
+                <li>Premier point important.</li>
+                <li>Deuxième point à considérer.</li>
+                <li>Troisième élément clé.</li>
+            </ul>
+        </div>
+    </div>
+);
+
+const ArchivePreview: React.FC<{doc: CourseDocument}> = ({doc}) => (
+    <div className="text-center p-8 flex flex-col items-center justify-center h-full">
+        <FileArchive className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Aperçu non disponible pour les archives</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+            Ce fichier est une archive (.zip) et ne peut pas être prévisualisé directement.
+        </p>
+        <Button asChild>
+            <a href={doc.fileUrl} download>
+            <Download className="mr-2 h-4 w-4" />
+            Télécharger l'archive
+            </a>
+        </Button>
+    </div>
+);
+
 
 export default function CoursesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -124,6 +192,28 @@ export default function CoursesPage() {
         );
     }
     return pages;
+  };
+  
+  const renderPreviewContent = (doc: CourseDocument) => {
+    switch (doc.type) {
+      case 'pdf':
+      case 'docx':
+        return <iframe src={doc.fileUrl} className="w-full h-full" title={doc.documentName} />;
+      case 'pptx':
+        return <PowerPointPreview />;
+      case 'xlsx':
+        return <ExcelPreview />;
+      case 'zip':
+        return <ArchivePreview doc={doc} />;
+      default:
+        return (
+          <div className="text-center p-8">
+            <FileIcon className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Aperçu non disponible</h3>
+            <p className="text-sm text-muted-foreground">Ce type de fichier ne peut pas être prévisualisé.</p>
+          </div>
+        );
+    }
   };
 
 
@@ -195,7 +285,7 @@ export default function CoursesPage() {
                   <TableCell className="font-medium">{doc.module}</TableCell>
                   <TableCell>{doc.documentName}</TableCell>
                   <TableCell>{doc.uploader}</TableCell>
-                  <TableCell className="text-center"><FileTypeIcon type={doc.type} /></TableCell>
+                  <TableCell className="flex justify-center"><FileTypeIcon type={doc.type} /></TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
@@ -243,7 +333,7 @@ export default function CoursesPage() {
           <DialogContent className="sm:max-w-4xl h-[90vh] flex flex-col">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <FileTypeIcon type={previewDocument.type} />
+                <FileTypeIcon type={previewDocument.type} showLabel />
                 {previewDocument.documentName}
               </DialogTitle>
             </DialogHeader>
@@ -254,31 +344,18 @@ export default function CoursesPage() {
                         <p className="text-muted-foreground">Chargement de l'aperçu...</p>
                     </div>
                 ) : (
-                    <>
-                    {previewDocument.type === 'pdf' ? (
-                        <iframe
-                            src={previewDocument.fileUrl}
-                            className="w-full h-full"
-                            title={previewDocument.documentName}
-                        />
-                    ) : (
-                        <div className="text-center p-8">
-                            <FileIcon className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">Aperçu non disponible</h3>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Ce type de fichier ne peut pas être prévisualisé directement.
-                            </p>
-                            <Button asChild>
-                                <a href={previewDocument.fileUrl} download>
-                                <Download className="mr-2 h-4 w-4" />
-                                Télécharger le fichier
-                                </a>
-                            </Button>
-                        </div>
-                    )}
-                    </>
+                    renderPreviewContent(previewDocument)
                 )}
             </div>
+            <DialogFooter className="mt-4">
+                <Button variant="ghost" onClick={() => setPreviewDocument(null)}>Fermer</Button>
+                <Button asChild>
+                    <a href={previewDocument.fileUrl} download>
+                        <Download className="mr-2 h-4 w-4" />
+                        Télécharger
+                    </a>
+                </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
