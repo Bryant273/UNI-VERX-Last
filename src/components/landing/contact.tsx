@@ -91,6 +91,10 @@ export default function Contact() {
                 <Input id="establishment" placeholder="Université de Paris" />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="subject">Objet</Label>
+                <Input id="subject" placeholder="Objet de votre message" />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="message">Message</Label>
                 <Textarea id="message" placeholder="Votre message..." />
               </div>
