@@ -89,6 +89,10 @@ export default function Header() {
                 <Wand2 className="mr-2 h-4 w-4" />
                 Actions
             </DropdownMenuItem>
+            <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                Paramètres
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
