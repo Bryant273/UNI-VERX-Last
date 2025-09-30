@@ -24,10 +24,10 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
 
   if (!event) {
     return (
-      <Card className="aspect-square flex flex-col items-center justify-center bg-muted">
-        <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-          <p className="font-semibold mb-2">Aucun événement pour aujourd'hui</p>
-          <p className="text-sm text-muted-foreground">Profitez de votre journée !</p>
+      <Card className="w-24 h-24 flex flex-col items-center justify-center bg-muted">
+        <CardContent className="flex flex-col items-center justify-center p-2 text-center">
+          <p className="text-xs font-semibold mb-1">Rien de prévu</p>
+          <p className="text-xs text-muted-foreground">Bonne journée !</p>
         </CardContent>
       </Card>
     );
@@ -39,25 +39,21 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
   return (
     <Card 
       className={cn(
-        "aspect-square flex flex-col justify-between p-4 text-white cursor-pointer hover:scale-105 transition-transform",
+        "w-36 h-36 flex flex-col justify-between p-3 text-white cursor-pointer hover:scale-105 transition-transform",
         config.color
       )}
     >
       <div className="flex justify-between items-start">
-        <h3 className="text-xl font-bold">{config.label}</h3>
+        <h3 className="text-sm font-bold">{config.label}</h3>
         <Badge variant="secondary" className="bg-black/20 text-white border-0 text-xs">
           En cours
         </Badge>
       </div>
 
       <div className="space-y-1">
-        <p className="text-base font-semibold">{course}</p>
-        <p className="text-sm">{time}</p>
-        <p className="text-xs opacity-80">{location}</p>
-      </div>
-      
-      <div className="text-center h-4">
-        {/* Placeholder for vertical spacing */}
+        <p className="text-xs font-semibold">{course}</p>
+        <p className="text-[10px]">{time}</p>
+        <p className="text-[10px] opacity-80">{location}</p>
       </div>
     </Card>
   );
