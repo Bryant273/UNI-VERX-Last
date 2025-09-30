@@ -12,9 +12,7 @@ import {
   ChevronRight,
   Eye,
   Download,
-  X,
   Loader2,
-  Filter,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -256,10 +254,6 @@ export default function CoursesPage() {
                   ))}
                 </SelectContent>
               </Select>
-               <Button>
-                <Filter className="mr-2 h-4 w-4" />
-                Filtrer
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -270,6 +264,7 @@ export default function CoursesPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>#</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Module</TableHead>
                 <TableHead>Document</TableHead>
@@ -279,8 +274,9 @@ export default function CoursesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedDocuments.map((doc) => (
-                <TableRow key={doc.id}>
+              {paginatedDocuments.map((doc, index) => (
+                <TableRow key={doc.id} className="even:bg-muted/40">
+                  <TableCell className="font-medium">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                   <TableCell>{doc.date}</TableCell>
                   <TableCell className="font-medium">{doc.module}</TableCell>
                   <TableCell>{doc.documentName}</TableCell>
