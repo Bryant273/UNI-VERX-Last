@@ -2,7 +2,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { PanelLeft, Search, Bell } from 'lucide-react';
+import { PanelLeft, Search, Bell, User, Settings, LogOut, Wand2 } from 'lucide-react';
 
 import type { UserRole } from '@/lib/data';
 import { userData, VALID_ROLES } from '@/lib/data';
@@ -78,14 +78,22 @@ export default function Header() {
                 </Avatar>
             </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-[200px]">
+            <DropdownMenuLabel>{user?.name || 'Mon Compte'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profil</DropdownMenuItem>
-            <DropdownMenuItem>Paramètres</DropdownMenuItem>
-            <DropdownMenuItem>Actions</DropdownMenuItem>
+            <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                Profil
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+                <Wand2 className="mr-2 h-4 w-4" />
+                Actions
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>Déconnexion</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Déconnexion
+            </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
        </div>
