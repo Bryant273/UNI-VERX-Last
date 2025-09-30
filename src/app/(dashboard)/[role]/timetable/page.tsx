@@ -1,165 +1,247 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Printer,
+  Download,
+  Calendar as CalendarIcon,
+  Loader2,
+  FilePdf,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import type { TimetableEvent, TimetableEventType, UserRole } from '@/lib/data';
+import type { TimetableEvent, UserRole } from '@/lib/data';
 import { allEvents } from '@/lib/static-data';
 import { cn } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import EventDetailsModal from '@/components/dashboard/event-details-modal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
-const eventTypeConfig: Record<TimetableEventType, { color: string; label: string }> = {
-  cours: { color: 'bg-blue-500 border-blue-600', label: 'Cours' },
-  devoir: { color: 'bg-yellow-400 border-yellow-500', label: 'Devoir' },
-  examen: { color: 'bg-red-500 border-red-600', label: 'Examen' },
-  activité: { color: 'bg-purple-500 border-purple-600', label: 'Activité' },
-  td: { color: 'bg-green-500 border-green-600', label: 'TD' },
-  tp: { color: 'bg-orange-500 border-orange-600', label: 'TP' },
-};
+const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const TIME_SLOTS = [
+  '08:30 - 10:00',
+  '10:30 - 12:00',
+  '13:30 - 15:00',
+  '15:30 - 17:00',
+];
 
-const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-const TIME_SLOTS = Array.from({ length: 13 }, (_, i) => `${i + 7}:00`); // 7h à 19h
-
-const getEventPosition = (event: TimetableEvent) => {
-  const [startTime, endTime] = event.time.split(' - ').map(t => {
-    const [hours, minutes] = t.split(':').map(Number);
-    return hours + minutes / 60;
-  });
-
-  const startHour = 7;
-  const top = (startTime - startHour) * 4; // 4rem per hour
-  const height = (endTime - startTime) * 4;
-
-  return { top: `${top}rem`, height: `${height}rem` };
+const getEventForSlot = (
+  events: TimetableEvent[],
+  day: string,
+  time: string
+) => {
+  return events.find(event => event.day === day && event.time === time);
 };
 
 export default function TimetablePage() {
   const params = useParams();
   const role = params.role as UserRole;
-  const userEvents = allEvents[role] || [];
+  // This is a simplified mapping. In a real app, this would be more dynamic.
+  const userEvents: (TimetableEvent & {day: string})[] = [
+    { ...allEvents[role][0], day: 'Lundi' }, // Calcul Avancé
+    { ...allEvents.student[1], day: 'Mardi' }, // Physique Quantique (TD)
+    { ...allEvents.student[2], day: 'Jeudi' }, // Devoir de calcul
+    { ...allEvents.student[3], day: 'Vendredi' }, // Club de débat
+    { ...allEvents.student[4], day: 'Lundi' }, // Histoire Ancienne
+  ];
 
-  const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
+
+  const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-  const handleEventClick = (event: TimetableEvent) => {
+  const handleEventClick = (event: TimetableEvent | undefined) => {
+    if (!event) return;
     setSelectedEvent(event);
     setIsModalOpen(true);
   };
-  
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedEvent(null);
-  }
-
-  // Pour cette démo, on assigne les événements à des jours fixes
-  const eventsByDay: Record<string, TimetableEvent[]> = {
-    Lundi: userEvents.filter(e => [1, 9].includes(e.id)),
-    Mardi: userEvents.filter(e => e.id === 2),
-    Mercredi: [],
-    Jeudi: userEvents.filter(e => e.id === 6),
-    Vendredi: userEvents.filter(e => e.id === 7),
-    Samedi: [],
-    Dimanche: [],
   };
 
+  const handleGeneratePdf = () => {
+    setIsPdfModalOpen(true);
+    setIsGeneratingPdf(true);
+    const timetableContent = document.getElementById('timetableContent');
+
+    if (timetableContent) {
+      // Short delay to allow modal to render
+      setTimeout(() => {
+        html2canvas(timetableContent, { scale: 2, backgroundColor: null }).then((canvas) => {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF('landscape', 'mm', 'a4');
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgWidth = canvas.width;
+          const imgHeight = canvas.height;
+          const ratio = imgWidth / imgHeight;
+          let newImgWidth = pdfWidth - 20; // with margin
+          let newImgHeight = newImgWidth / ratio;
+          
+          if (newImgHeight > pdfHeight - 40) {
+            newImgHeight = pdfHeight - 40;
+            newImgWidth = newImgHeight * ratio;
+          }
+
+          const x = (pdfWidth - newImgWidth) / 2;
+          const y = 20;
+
+          pdf.setFontSize(18);
+          pdf.text('Emploi du temps', pdfWidth / 2, 15, { align: 'center' });
+
+          pdf.addImage(imgData, 'PNG', x, y, newImgWidth, newImgHeight);
+          pdf.save('emploi-du-temps.pdf');
+          setIsGeneratingPdf(false);
+          setIsPdfModalOpen(false);
+        });
+      }, 500);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full gap-6">
-        <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <h2 className="text-xl font-semibold">Semaine du 24 au 30 Juin 2024</h2>
-                    <Button variant="outline" size="sm">Aujourd'hui</Button>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                        <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                     <Button variant="outline" size="icon" className="h-8 w-8">
-                        <CalendarIcon className="h-4 w-4" />
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
-      
-        <div className="flex-1 overflow-auto rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="grid grid-cols-[auto,1fr,1fr,1fr,1fr,1fr,1fr,1fr] min-w-[80rem]">
-                {/* Time column */}
-                <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-2 text-center border-b border-r">
-                    <Clock className="h-5 w-5 mx-auto text-muted-foreground"/>
-                </div>
+      <Card>
+        <CardContent className="p-4 flex flex-col lg:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-4">
+             <h2 className="text-xl font-semibold">
+              Semaine du 24 au 30 Juin 2024
+            </h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline">
+              <CalendarIcon className="mr-2" />
+              Aujourd'hui
+            </Button>
+            <Button variant="outline" size="icon">
+              <ChevronLeft />
+            </Button>
+            <Button variant="outline" size="icon">
+              <ChevronRight />
+            </Button>
+             <Button onClick={handleGeneratePdf} >
+              <FilePdf className="mr-2" />
+              Exporter en PDF
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-                {/* Day headers */}
-                {DAYS_OF_WEEK.map((day, index) => (
-                    <div key={day} className="col-start-2 row-start-1 p-2 text-center font-semibold border-b">
-                        <p>{day}</p>
-                        <p className="text-sm font-normal text-muted-foreground">{24 + index}</p>
-                    </div>
-                ))}
+      <div className="overflow-x-auto rounded-lg border bg-card text-card-foreground shadow-sm">
+        <table id="timetableContent" className="w-full min-w-[80rem] border-collapse">
+          <thead>
+            <tr className="bg-muted/50">
+              <th className="p-2 border font-semibold text-sm w-32">JOURS</th>
+              {DAYS_OF_WEEK.map((day, index) => (
+                <th key={day} className="p-2 border font-semibold text-sm">
+                  {day.toUpperCase()}
+                  <span className="block font-normal text-xs text-muted-foreground">
+                    {24 + index}/06
+                  </span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {TIME_SLOTS.map((time, timeIndex) => (
+              <React.Fragment key={time}>
+                <tr>
+                  <td className="p-2 border font-medium text-sm text-center bg-muted/30">
+                    {time}
+                  </td>
+                  {DAYS_OF_WEEK.map((day) => {
+                    const event = getEventForSlot(userEvents, day, time);
+                    return (
+                      <td
+                        key={`${day}-${time}`}
+                        className={cn(
+                          'p-2 border align-top cursor-pointer hover:bg-muted/20 transition-colors',
+                           event ? 'bg-muted/10' : ''
+                        )}
+                        onClick={() => handleEventClick(event)}
+                      >
+                        {event && (
+                          <div>
+                            <p className="font-bold text-primary text-sm">
+                              {event.course}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {event.instructor}
+                            </p>
+                            <p className="text-xs italic text-muted-foreground/80 mt-1">
+                              {event.location}
+                            </p>
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+                {timeIndex === 0 && (
+                  <tr>
+                    <td
+                      colSpan={DAYS_OF_WEEK.length + 1}
+                      className="p-1 text-center text-xs font-medium bg-secondary/20 text-secondary-foreground border"
+                    >
+                      RÉCRÉATION
+                    </td>
+                  </tr>
+                )}
+                 {timeIndex === 1 && (
+                  <tr>
+                    <td
+                      colSpan={DAYS_OF_WEEK.length + 1}
+                      className="p-1.5 text-center text-sm font-bold bg-muted/80 border"
+                    >
+                      PAUSE
+                    </td>
+                  </tr>
+                )}
+                 {timeIndex === 2 && (
+                  <tr>
+                    <td
+                      colSpan={DAYS_OF_WEEK.length + 1}
+                      className="p-1 text-center text-xs font-medium bg-secondary/20 text-secondary-foreground border"
+                    >
+                      RÉCRÉATION
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-                {/* Time slots */}
-                <div className="col-start-1 row-start-2 grid divide-y">
-                    {TIME_SLOTS.map(time => (
-                        <div key={time} className="h-16 flex items-center justify-center border-r">
-                            <span className="text-xs text-muted-foreground">{time}</span>
-                        </div>
-                    ))}
-                </div>
+      {selectedEvent && (
+        <EventDetailsModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          event={selectedEvent}
+        />
+      )}
 
-                {/* Event grid */}
-                <div className="col-start-2 col-end-9 row-start-2 grid grid-cols-7 relative">
-                    {/* Background lines */}
-                    {Array.from({ length: 12 }).map((_, i) => (
-                        <div key={i} className="col-span-7 h-16 border-b" />
-                    ))}
-                    {Array.from({ length: 7 }).map((_, i) => (
-                        <div key={i} className={`row-start-1 row-span-full h-full ${i < 6 ? 'border-r' : ''}`} style={{ gridColumnStart: i + 1 }} />
-                    ))}
-                    
-                    {/* Events */}
-                    {DAYS_OF_WEEK.map((day, dayIndex) => (
-                        <div key={day} className="relative" style={{ gridColumnStart: dayIndex + 1 }}>
-                            {(eventsByDay[day] || []).map(event => {
-                                const { top, height } = getEventPosition(event);
-                                const config = eventTypeConfig[event.type];
-                                return (
-                                    <div
-                                        key={event.id}
-                                        className={cn(
-                                            'absolute w-[95%] left-1/2 -translate-x-1/2 p-2 rounded-lg text-white cursor-pointer hover:opacity-90 transition-opacity border-l-4',
-                                            config.color,
-                                            { 'line-through opacity-60': event.isPast }
-                                        )}
-                                        style={{ top, height }}
-                                        onClick={() => handleEventClick(event)}
-                                    >
-                                        <p className="text-xs font-bold leading-tight">{event.course}</p>
-                                        <p className="text-[10px] opacity-90 leading-tight">{event.time}</p>
-                                        <Badge variant="secondary" className="mt-1 bg-black/20 text-white text-[9px] h-auto p-0.5 px-1.5 border-0">
-                                            {config.label}
-                                        </Badge>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-
-        {selectedEvent && (
-            <EventDetailsModal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                event={selectedEvent}
-            />
-        )}
+      <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Génération du PDF</DialogTitle>
+            <DialogDescription>
+              Veuillez patienter pendant la création de votre emploi du temps au format PDF.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
