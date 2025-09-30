@@ -1,8 +1,9 @@
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, PanelLeft } from 'lucide-react';
 
 import type { UserRole } from '@/lib/data';
 import { navLinks, bottomNavLinks } from '@/lib/data';
@@ -14,13 +15,35 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  useSidebar,
 } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import Logo from '@/components/logo';
 
 function isNavGroup(item: any): item is { title: string; links: any[] } {
   return item && typeof item.title === 'string' && Array.isArray(item.links);
 }
+
+function SidebarHeaderContent() {
+    const { toggleSidebar } = useSidebar();
+  
+    return (
+      <div className="flex items-center justify-between">
+        <Link href="/">
+          <Logo />
+        </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden md:flex"
+          onClick={toggleSidebar}
+        >
+          <PanelLeft />
+        </Button>
+      </div>
+    );
+  }
 
 export default function AppSidebar() {
   const pathname = usePathname();
@@ -30,9 +53,7 @@ export default function AppSidebar() {
   return (
     <UISidebar>
       <SidebarHeader>
-        <Link href="/">
-          <Logo />
-        </Link>
+        <SidebarHeaderContent />
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>

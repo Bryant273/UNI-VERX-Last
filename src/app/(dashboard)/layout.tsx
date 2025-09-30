@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
 
@@ -10,14 +11,14 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen w-full">
         <AppSidebar />
-        <SidebarInset className="flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col">
           <Header />
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-muted/40">
             {children}
           </main>
-        </SidebarInset>
+        </div>
       </div>
     </SidebarProvider>
   );
