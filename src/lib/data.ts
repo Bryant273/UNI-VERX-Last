@@ -277,7 +277,7 @@ const allEvents: Record<UserRole, TimetableEvent[]> = {
 
 
 // Function to get the current or next event for a user
-export const getActiveEvent = (role: UserRole): TimetableEvent | null => {
+export const getActiveEvent = async (role: UserRole): Promise<TimetableEvent | null> => {
   const now = new Date();
   const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes from midnight
 

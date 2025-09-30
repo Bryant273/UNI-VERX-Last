@@ -23,7 +23,10 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    setEvent(getActiveEvent(role));
+    const fetchEvent = async () => {
+        setEvent(await getActiveEvent(role));
+    }
+    fetchEvent();
   }, [role]);
 
   const handleCardClick = () => {
