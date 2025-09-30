@@ -18,6 +18,8 @@ import {
   Pause,
   Rewind,
   FastForward,
+  SkipBack,
+  SkipForward,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -113,18 +115,33 @@ const ExcelPreview = () => (
     </div>
 );
 
-const PowerPointPreview = () => (
-    <div className="h-full flex items-center justify-center bg-gray-800 p-4">
-        <div className="w-full aspect-video bg-white dark:bg-black flex flex-col items-center justify-center text-center p-8 shadow-2xl">
-            <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Titre de la Diapositive</h2>
-            <ul className="mt-4 text-left list-disc list-inside text-gray-600 dark:text-gray-300">
-                <li>Premier point important.</li>
-                <li>Deuxième point à considérer.</li>
-                <li>Troisième élément clé.</li>
-            </ul>
+const PowerPointPreview = () => {
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    return (
+        <div className="h-full flex flex-col items-center justify-center bg-gray-800 p-4">
+            <div className="w-full aspect-video bg-white dark:bg-black flex flex-col items-center justify-center text-center p-8 shadow-2xl mb-4">
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Titre de la Diapositive</h2>
+                <ul className="mt-4 text-left list-disc list-inside text-gray-600 dark:text-gray-300">
+                    <li>Premier point important.</li>
+                    <li>Deuxième point à considérer.</li>
+                    <li>Troisième élément clé.</li>
+                </ul>
+            </div>
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <SkipBack />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-12 w-12" onClick={() => setIsPlaying(!isPlaying)}>
+                    {isPlaying ? <Pause size={28}/> : <Play size={28}/>}
+                </Button>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <SkipForward />
+                </Button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const ArchivePreview: React.FC<{doc: CourseDocument}> = ({doc}) => (
     <div className="text-center p-8 flex flex-col items-center justify-center h-full">
