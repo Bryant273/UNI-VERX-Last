@@ -24,9 +24,9 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
 
   if (!event) {
     return (
-      <Card className="w-36 h-36 flex flex-col items-center justify-center bg-muted">
+      <Card className="w-40 h-40 flex flex-col items-center justify-center bg-muted">
         <CardContent className="flex flex-col items-center justify-center p-2 text-center">
-          <p className="text-xs font-semibold mb-1">Rien de prévu</p>
+          <p className="text-sm font-semibold mb-1">Rien de prévu</p>
           <p className="text-xs text-muted-foreground">Bonne journée !</p>
         </CardContent>
       </Card>
@@ -39,21 +39,21 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
   return (
     <Card 
       className={cn(
-        "w-36 h-36 flex flex-col justify-between p-3 text-white cursor-pointer hover:scale-105 transition-transform",
+        "w-40 h-40 flex flex-col justify-between p-4 text-white cursor-pointer hover:scale-105 transition-transform",
         config.color
       )}
     >
       <div className="flex justify-between items-start">
-        <h3 className="text-sm font-bold">{config.label}</h3>
+        <h3 className="text-base font-bold">{config.label}</h3>
         <Badge variant="secondary" className="bg-black/20 text-white border-0 text-xs">
           En cours
         </Badge>
       </div>
 
       <div className="space-y-1">
-        <p className="text-xs font-semibold">{course}</p>
-        <p className="text-[10px]">{time}</p>
-        <p className="text-[10px] opacity-80">{location}</p>
+        <p className="text-sm font-semibold">{course}</p>
+        <p className="text-xs">{time}</p>
+        <p className="text-xs opacity-80">{location}</p>
       </div>
     </Card>
   );

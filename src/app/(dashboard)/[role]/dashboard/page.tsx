@@ -52,7 +52,12 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {/* Student Dashboard */}
         {role === 'student' && (
           <>
-            <CurrentEventCard role="student" />
+            <div className="lg:col-span-2 space-y-6">
+              <SummarizerCard />
+            </div>
+            <div className="flex justify-center md:justify-end">
+                <CurrentEventCard role="student" />
+            </div>
           </>
         )}
 
