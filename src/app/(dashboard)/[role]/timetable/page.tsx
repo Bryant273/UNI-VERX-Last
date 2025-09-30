@@ -23,14 +23,15 @@ import html2canvas from 'html2canvas';
 
 const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const TIME_SLOTS = [
-  '08:30 - 10:00',
-  '10:30 - 12:00',
-  '13:30 - 15:00',
-  '15:30 - 17:00',
+  '09:00 - 11:00',
+  '13:00 - 15:00',
+  '15:00 - 16:00',
+  '16:00 - 18:00',
+  '08:00 - 10:00'
 ];
 
 const getEventForSlot = (
-  events: TimetableEvent[],
+  events: (TimetableEvent & { day: string })[],
   day: string,
   time: string
 ) => {
@@ -42,11 +43,11 @@ export default function TimetablePage() {
   const role = params.role as UserRole;
   // This is a simplified mapping. In a real app, this would be more dynamic.
   const userEvents: (TimetableEvent & {day: string})[] = [
-    { ...allEvents[role][0], day: 'Lundi' }, // Calcul Avancé
-    { ...allEvents.student[1], day: 'Mardi' }, // Physique Quantique (TD)
-    { ...allEvents.student[2], day: 'Jeudi' }, // Devoir de calcul
-    { ...allEvents.student[3], day: 'Vendredi' }, // Club de débat
-    { ...allEvents.student[4], day: 'Lundi' }, // Histoire Ancienne
+    { ...allEvents[role][0], day: 'Lundi' }, 
+    { ...allEvents.student[1], day: 'Mardi' }, 
+    { ...allEvents.student[2], day: 'Jeudi' }, 
+    { ...allEvents.student[3], day: 'Vendredi' }, 
+    { ...allEvents.student[4], day: 'Lundi' }, 
   ];
 
 
@@ -106,6 +107,13 @@ export default function TimetablePage() {
       }, 500);
     }
   };
+  
+  const timeSlotsToRender = [
+    '08:30 - 10:00',
+    '10:30 - 12:00',
+    '13:30 - 15:00',
+    '15:30 - 17:00',
+  ]
 
   return (
     <div className="flex flex-col h-full gap-6">
@@ -151,7 +159,7 @@ export default function TimetablePage() {
             </tr>
           </thead>
           <tbody>
-            {TIME_SLOTS.map((time, timeIndex) => (
+            {timeSlotsToRender.map((time, timeIndex) => (
               <React.Fragment key={time}>
                 <tr className='h-28'>
                   <td className="p-2 border font-medium text-sm text-center bg-muted/30">
@@ -173,6 +181,7 @@ export default function TimetablePage() {
                             <p className="font-bold text-primary text-sm">
                               {event.course}
                             </p>
+                             <p className="text-xs text-muted-foreground font-medium">{event.type.toUpperCase()}</p>
                             <p className="text-xs text-muted-foreground">
                               {event.instructor}
                             </p>
@@ -189,7 +198,7 @@ export default function TimetablePage() {
                   <tr>
                     <td
                       colSpan={DAYS_OF_WEEK.length + 1}
-                      className="p-1 text-center text-xs font-medium bg-secondary/20 text-secondary-foreground border"
+                      className="p-1 text-center text-xs font-medium bg-blue-900 text-white border"
                     >
                       RÉCRÉATION
                     </td>
@@ -209,7 +218,7 @@ export default function TimetablePage() {
                   <tr>
                     <td
                       colSpan={DAYS_OF_WEEK.length + 1}
-                      className="p-1 text-center text-xs font-medium bg-secondary/20 text-secondary-foreground border"
+                       className="p-1 text-center text-xs font-medium bg-blue-900 text-white border"
                     >
                       RÉCRÉATION
                     </td>
