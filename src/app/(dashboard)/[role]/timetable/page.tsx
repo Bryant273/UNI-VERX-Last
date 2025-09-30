@@ -29,13 +29,13 @@ const TIME_SLOTS = [
   '15:30 - 17:00',
 ];
 
-const eventTypeColors: Record<TimetableEventType, string> = {
-  cours: 'bg-blue-100 dark:bg-blue-900/30',
-  td: 'bg-orange-100 dark:bg-orange-900/30',
-  tp: 'bg-green-100 dark:bg-green-900/30',
-  examen: 'bg-red-100 dark:bg-red-900/30',
-  devoir: 'bg-yellow-100 dark:bg-yellow-900/30',
-  activité: 'bg-purple-100 dark:bg-purple-900/30',
+const eventTypeColors: Record<TimetableEventType, { border: string; bg: string; text: string }> = {
+  cours: { border: 'border-blue-500', bg: 'bg-blue-500/10', text: 'text-blue-700 dark:text-blue-300' },
+  td: { border: 'border-orange-500', bg: 'bg-orange-500/10', text: 'text-orange-700 dark:text-orange-300' },
+  tp: { border: 'border-green-500', bg: 'bg-green-500/10', text: 'text-green-700 dark:text-green-300' },
+  examen: { border: 'border-red-500', bg: 'bg-red-500/10', text: 'text-red-700 dark:text-red-300' },
+  devoir: { border: 'border-yellow-500', bg: 'bg-yellow-500/10', text: 'text-yellow-700 dark:text-yellow-300' },
+  activité: { border: 'border-purple-500', bg: 'bg-purple-500/10', text: 'text-purple-700 dark:text-purple-300' },
 };
 
 
@@ -172,22 +172,23 @@ export default function TimetablePage() {
                   </td>
                   {DAYS_OF_WEEK.map((day) => {
                     const event = getEventForSlot(userEvents, day, time);
+                    const colorConfig = event ? eventTypeColors[event.type] : null;
                     return (
                       <td
                         key={`${day}-${time}`}
                         className={cn(
-                          'p-2 border align-top cursor-pointer hover:bg-muted/20 transition-colors',
-                           event ? eventTypeColors[event.type] : ''
+                          'p-0 border align-top transition-colors',
+                           event ? 'cursor-pointer hover:bg-muted/30' : 'bg-muted/10'
                         )}
                         onClick={() => handleEventClick(event)}
                       >
-                        {event && (
-                          <div>
-                            <p className="font-bold text-primary text-sm">
+                        {event && colorConfig && (
+                          <div className={cn("h-full w-full p-2.5 border-l-4", colorConfig.border, colorConfig.bg)}>
+                            <p className={cn("font-bold", colorConfig.text)}>
                               {event.course}
                             </p>
-                             <p className="text-xs text-muted-foreground font-medium">{event.type.toUpperCase()}</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs font-semibold text-muted-foreground mt-0.5">{event.type.toUpperCase()}</p>
+                            <p className="text-xs text-muted-foreground mt-2">
                               {event.instructor}
                             </p>
                             <p className="text-xs italic text-muted-foreground/80 mt-1">
