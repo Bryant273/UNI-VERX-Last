@@ -21,7 +21,7 @@ export default function WelcomeBanner({ name, role }: { name: string, role: stri
         {greeting ? `${greeting}, ${name} !` : `Bienvenue, ${name} !`}
       </h1>
       <p className="text-muted-foreground">
-        Bienvenue sur votre tableau de bord {role}.
+        Bienvenue sur votre tableau de bord.
       </p>
     </div>
   );
