@@ -95,7 +95,10 @@ export default function TimetablePage() {
       doc.setTextColor(100);
 
       const head = [['Horaire', ...DAYS_OF_WEEK]];
-      const body = TIME_SLOTS.map(time => {
+      const body: any[] = [];
+
+      TIME_SLOTS.forEach((time, index) => {
+        // Add event row
         const row: string[] = [time];
         DAYS_OF_WEEK.forEach(day => {
           const event = getEventForSlot(userEvents, day, time);
@@ -105,8 +108,20 @@ export default function TimetablePage() {
             row.push('');
           }
         });
-        return row;
+        body.push(row);
+
+        // Add break rows
+        if (index === 0) {
+            body.push([{ content: 'RÉCRÉATION', colSpan: 7, styles: { halign: 'center', fillColor: [30, 58, 138], textColor: [255, 255, 255] } }]);
+        }
+        if (index === 1) {
+            body.push([{ content: 'PAUSE', colSpan: 7, styles: { halign: 'center', fillColor: [51, 65, 85], textColor: [255, 255, 255] } }]);
+        }
+        if (index === 2) {
+             body.push([{ content: 'RÉCRÉATION', colSpan: 7, styles: { halign: 'center', fillColor: [30, 58, 138], textColor: [255, 255, 255] } }]);
+        }
       });
+
 
       // @ts-ignore
       doc.autoTable({
@@ -118,23 +133,22 @@ export default function TimetablePage() {
         styles: {
           cellPadding: 3,
           valign: 'middle',
+          minCellHeight: 15,
         },
         didParseCell: function (data) {
-          if (data.section === 'body' && data.cell.text.length > 1) {
-             const event = getEventForSlot(userEvents, DAYS_OF_WEEK[data.column.index - 1], TIME_SLOTS[data.row.index]);
+          if (data.section === 'body' && !data.cell.raw.colSpan) { // Check it's not a recreation/pause row
+             const event = getEventForSlot(userEvents, DAYS_OF_WEEK[data.column.index - 1], body[data.row.index][0]);
              if (event) {
                 const colorMap = {
-                    cours: [59, 130, 246],
-                    td: [249, 115, 22],
-                    tp: [34, 197, 94],
-                    examen: [239, 68, 68],
-                    activité: [168, 85, 247],
-                    devoir: [234, 179, 8],
+                    cours: [240, 248, 255],
+                    td: [255, 247, 237],
+                    tp: [240, 253, 244],
+                    examen: [254, 242, 242],
+                    activité: [250, 245, 255],
+                    devoir: [255, 251, 235],
                 };
                 // @ts-ignore
                 data.cell.styles.fillColor = colorMap[event.type];
-                data.cell.styles.textColor = [255, 255, 255];
-                data.cell.styles.fontStyle = 'bold';
              }
           }
         }
@@ -193,7 +207,7 @@ export default function TimetablePage() {
             {TIME_SLOTS.map((time, timeIndex) => (
               <React.Fragment key={time}>
                 <tr className='h-28'>
-                  <td className="p-2 border font-medium text-sm text-center bg-muted/30">
+                  <td className="p-2 border font-medium text-sm text-center bg-muted/30 w-36">
                     {time}
                   </td>
                   {DAYS_OF_WEEK.map((day) => {
@@ -204,12 +218,18 @@ export default function TimetablePage() {
                         key={`${day}-${time}`}
                         className={cn(
                           'p-0 border align-top transition-colors',
-                           event ? 'cursor-pointer hover:bg-muted/30' : 'bg-muted/10'
+                           event ? 'cursor-pointer' : 'bg-muted/10'
                         )}
                         onClick={() => handleEventClick(event)}
                       >
-                        {event && colorConfig && (
-                          <div className={cn("h-full w-full p-2.5 border-l-4", colorConfig.border, colorConfig.bg)}>
+                        {event && colorConfig ? (
+                          <div className={cn(
+                            "h-full w-full p-2.5 border-l-4 transition-colors", 
+                            colorConfig.border, 
+                            colorConfig.bg,
+                            'hover:bg-opacity-20',
+                            `hover:${colorConfig.bg.replace('/10', '/20')}`
+                            )}>
                             <p className={cn("font-bold", colorConfig.text)}>
                               {event.course}
                             </p>
@@ -221,6 +241,8 @@ export default function TimetablePage() {
                               {event.location}
                             </p>
                           </div>
+                        ) : (
+                          <div className="hover:bg-muted/30 h-full w-full">&nbsp;</div>
                         )}
                       </td>
                     );
