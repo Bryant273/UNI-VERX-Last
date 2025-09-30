@@ -27,7 +27,7 @@ function isNavGroup(item: any): item is { title: string; links: any[] } {
 
 function SidebarHeaderContent() {
     return (
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-center pt-4">
         <Link href="/">
           <Logo />
         </Link>
