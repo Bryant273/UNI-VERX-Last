@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import type { TimetableEvent, UserRole, TimetableEventType } from '@/lib/data';
-import { allEvents } from '@/lib/static-data';
+import { allEvents, studentData } from '@/lib/static-data';
 import { cn } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import EventDetailsModal from '@/components/dashboard/event-details-modal';
@@ -89,10 +89,19 @@ export default function TimetablePage() {
     setTimeout(() => {
       const doc = new jsPDF('landscape');
       
+      const weekString = 'Semaine du 24 au 30 Juin 2024';
+
       doc.setFontSize(18);
-      doc.text('Emploi du temps - Semaine du 24 au 30 Juin 2024', 14, 20);
+      doc.text('Emploi du temps', 14, 20);
+      
       doc.setFontSize(11);
       doc.setTextColor(100);
+      doc.text(weekString, 14, 28);
+
+      const headerX = doc.internal.pageSize.width - 14;
+      doc.text(`Classe: ${studentData.class}`, headerX, 20, { align: 'right' });
+      doc.text(`Niveau: ${studentData.class.split(' - ')[0]}`, headerX, 28, { align: 'right' });
+
 
       const head = [['Horaire', ...DAYS_OF_WEEK]];
       const body: any[] = [];
@@ -125,7 +134,7 @@ export default function TimetablePage() {
 
       // @ts-ignore
       doc.autoTable({
-        startY: 30,
+        startY: 35,
         head: head,
         body: body,
         theme: 'grid',
