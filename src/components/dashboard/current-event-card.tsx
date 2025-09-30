@@ -24,7 +24,7 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
 
   if (!event) {
     return (
-      <Card className="w-24 h-24 flex flex-col items-center justify-center bg-muted">
+      <Card className="w-36 h-36 flex flex-col items-center justify-center bg-muted">
         <CardContent className="flex flex-col items-center justify-center p-2 text-center">
           <p className="text-xs font-semibold mb-1">Rien de prévu</p>
           <p className="text-xs text-muted-foreground">Bonne journée !</p>
