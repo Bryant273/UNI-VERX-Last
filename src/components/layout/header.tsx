@@ -54,6 +54,7 @@ export default function Header() {
         </Button>
 
       <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <DateTime />
         <div className="ml-auto flex-1 sm:flex-initial">
             <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -64,7 +65,6 @@ export default function Header() {
                 />
             </div>
         </div>
-        <DateTime />
         <ThemeToggle />
         <Button variant="ghost" size="icon" aria-label="Notifications">
             <Bell className="h-5 w-5" />
