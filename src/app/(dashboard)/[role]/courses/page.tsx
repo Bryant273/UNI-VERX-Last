@@ -20,6 +20,8 @@ import {
   FastForward,
   SkipBack,
   SkipForward,
+  Maximize,
+  Minimize,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -51,6 +53,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { courseDocuments, type CourseDocument, type DocumentType } from '@/lib/course-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 
 const ITEMS_PER_PAGE = 5;
 
@@ -161,17 +166,19 @@ const ArchivePreview: React.FC<{doc: CourseDocument}> = ({doc}) => (
 
 const VideoPreview: React.FC<{ doc: CourseDocument }> = ({ doc }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const progressContainerRef = useRef<HTMLDivElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState('00:00');
     const [duration, setDuration] = useState('00:00');
+    const [controlsVisible, setControlsVisible] = useState(true);
 
     const formatTime = (timeInSeconds: number) => {
         const minutes = Math.floor(timeInSeconds / 60);
         const seconds = Math.floor(timeInSeconds % 60);
         return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     };
-
+    
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
@@ -182,15 +189,27 @@ const VideoPreview: React.FC<{ doc: CourseDocument }> = ({ doc }) => {
         };
 
         const setVideoDuration = () => {
-            setDuration(formatTime(video.duration));
+             if (video.duration && isFinite(video.duration)) {
+                setDuration(formatTime(video.duration));
+            }
         };
+
+        const handlePlay = () => setIsPlaying(true);
+        const handlePause = () => setIsPlaying(false);
 
         video.addEventListener('timeupdate', updateProgress);
         video.addEventListener('loadedmetadata', setVideoDuration);
+        video.addEventListener('play', handlePlay);
+        video.addEventListener('pause', handlePause);
+        video.addEventListener('ended', handlePause);
+
 
         return () => {
             video.removeEventListener('timeupdate', updateProgress);
             video.removeEventListener('loadedmetadata', setVideoDuration);
+            video.removeEventListener('play', handlePlay);
+            video.removeEventListener('pause', handlePause);
+            video.removeEventListener('ended', handlePause);
         };
     }, []);
 
@@ -199,10 +218,8 @@ const VideoPreview: React.FC<{ doc: CourseDocument }> = ({ doc }) => {
         if (video) {
             if (video.paused) {
                 video.play();
-                setIsPlaying(true);
             } else {
                 video.pause();
-                setIsPlaying(false);
             }
         }
     };
@@ -210,14 +227,14 @@ const VideoPreview: React.FC<{ doc: CourseDocument }> = ({ doc }) => {
     const handleSeek = (amount: number) => {
         const video = videoRef.current;
         if (video) {
-            video.currentTime += amount;
+            video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + amount));
         }
     };
     
     const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        const progressContainer = e.currentTarget;
+        const progressContainer = progressContainerRef.current;
         const video = videoRef.current;
-        if (video) {
+        if (video && progressContainer) {
             const rect = progressContainer.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const width = rect.width;
@@ -227,26 +244,33 @@ const VideoPreview: React.FC<{ doc: CourseDocument }> = ({ doc }) => {
     };
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-black rounded-lg overflow-hidden">
-            <video ref={videoRef} src={doc.fileUrl} className="w-full h-full object-contain" />
-            <div className="w-full p-4 bg-black/50 backdrop-blur-sm space-y-2">
-                <div className="w-full cursor-pointer" onClick={handleProgressClick}>
-                   <Progress value={progress} className="h-2" />
-                </div>
-                <div className="flex justify-between items-center text-white">
-                    <span className="text-xs font-mono">{currentTime}</span>
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(-5)}>
-                            <Rewind />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-12 w-12" onClick={togglePlay}>
-                            {isPlaying ? <Pause size={28}/> : <Play size={28}/>}
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(5)}>
-                            <FastForward />
-                        </Button>
+        <div className="w-full h-full flex flex-col items-center justify-center bg-black rounded-lg overflow-hidden relative group">
+            <video ref={videoRef} src={doc.fileUrl} className="w-full h-full object-contain" onClick={togglePlay}/>
+
+             <div className={cn(
+                "absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300",
+                "opacity-0 group-hover:opacity-100",
+                isPlaying && "opacity-0"
+             )}>
+                <div className="space-y-2">
+                    <div ref={progressContainerRef} className="w-full cursor-pointer py-2" onClick={handleProgressClick}>
+                       <Progress value={progress} className="h-1.5" />
                     </div>
-                    <span className="text-xs font-mono">{duration}</span>
+                    <div className="flex justify-between items-center text-white">
+                        <span className="text-xs font-mono">{currentTime}</span>
+                        <div className="flex items-center gap-4">
+                            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(-5)}>
+                                <Rewind />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-14 w-14" onClick={togglePlay}>
+                                {isPlaying ? <Pause size={32}/> : <Play size={32}/>}
+                            </Button>
+                            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(5)}>
+                                <FastForward />
+                            </Button>
+                        </div>
+                        <span className="text-xs font-mono">{duration}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -261,6 +285,7 @@ export default function CoursesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [previewDocument, setPreviewDocument] = useState<CourseDocument | null>(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const modules = useMemo(() => 
     ['all', ...Array.from(new Set(courseDocuments.map((doc) => doc.module)))]
@@ -292,6 +317,13 @@ export default function CoursesPage() {
     setTimeout(() => setIsPreviewLoading(false), 1000);
   };
   
+  const handleClosePreview = () => {
+    setPreviewDocument(null);
+    if(isFullScreen) {
+        setIsFullScreen(false);
+    }
+  }
+
   const renderPagination = () => {
     const pages = [];
     for (let i = 1; i <= totalPages; i++) {
@@ -445,13 +477,32 @@ export default function CoursesPage() {
       </Card>
 
       {previewDocument && (
-        <Dialog open={!!previewDocument} onOpenChange={(open) => !open && setPreviewDocument(null)}>
-          <DialogContent className="sm:max-w-4xl h-[90vh] flex flex-col p-0">
-            <DialogHeader className="p-4">
+        <Dialog open={!!previewDocument} onOpenChange={(open) => !open && handleClosePreview()}>
+          <DialogContent className={cn(
+                "flex flex-col p-0 transition-all duration-300",
+                isFullScreen 
+                    ? "w-screen h-screen max-w-full" 
+                    : "sm:max-w-4xl h-[90vh]"
+            )}>
+            <DialogHeader className="p-4 flex-row items-center justify-between">
               <DialogTitle className="flex items-center gap-2">
                 <FileTypeIcon type={previewDocument.type} showLabel />
                 {previewDocument.documentName}
               </DialogTitle>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={() => setIsFullScreen(!isFullScreen)}>
+                                {isFullScreen ? <Minimize className="h-5 w-5"/> : <Maximize className="h-5 w-5" />}
+                                <span className="sr-only">{isFullScreen ? 'Réduire' : 'Agrandir'}</span>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                           <p>{isFullScreen ? 'Réduire' : 'Agrandir'}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+
             </DialogHeader>
             <div className="flex-1 rounded-lg bg-muted/50 flex items-center justify-center relative overflow-hidden">
                 {isPreviewLoading ? (
@@ -464,7 +515,7 @@ export default function CoursesPage() {
                 )}
             </div>
             <DialogFooter className="mt-auto p-4 border-t">
-                <Button variant="ghost" onClick={() => setPreviewDocument(null)}>Fermer</Button>
+                <Button variant="ghost" onClick={handleClosePreview}>Fermer</Button>
                 <Button asChild>
                     <a href={previewDocument.fileUrl} download>
                         <Download className="mr-2 h-4 w-4" />
@@ -478,3 +529,5 @@ export default function CoursesPage() {
     </div>
   );
 }
+
+    
