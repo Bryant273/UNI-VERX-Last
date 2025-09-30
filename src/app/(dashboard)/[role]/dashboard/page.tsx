@@ -55,8 +55,6 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {role === 'student' && (
           <>
             <TimetableCard role="student" />
-            <CoursesCard role="student" />
-            <MessagingCard />
           </>
         )}
 
