@@ -236,13 +236,13 @@ const VideoPreview: React.FC<{ doc: CourseDocument }> = ({ doc }) => {
                 <div className="flex justify-between items-center text-white">
                     <span className="text-xs font-mono">{currentTime}</span>
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(-10)}>
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(-5)}>
                             <Rewind />
                         </Button>
                         <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-12 w-12" onClick={togglePlay}>
                             {isPlaying ? <Pause size={28}/> : <Play size={28}/>}
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(10)}>
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(5)}>
                             <FastForward />
                         </Button>
                     </div>
