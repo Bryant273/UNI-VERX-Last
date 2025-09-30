@@ -42,7 +42,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { courseDocuments, type CourseDocument, type DocumentType } from '@/lib/data';
+import { courseDocuments, type CourseDocument, type DocumentType } from '@/lib/course-data';
 
 const ITEMS_PER_PAGE = 5;
 
