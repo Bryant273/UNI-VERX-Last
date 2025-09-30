@@ -46,7 +46,6 @@ export default function Header() {
         <Button
           size="icon"
           variant="ghost"
-          className="md:hidden"
           onClick={toggleSidebar}
         >
           <PanelLeft className="h-5 w-5" />

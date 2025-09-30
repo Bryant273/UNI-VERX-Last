@@ -26,21 +26,11 @@ function isNavGroup(item: any): item is { title: string; links: any[] } {
 }
 
 function SidebarHeaderContent() {
-    const { toggleSidebar } = useSidebar();
-  
     return (
       <div className="flex items-center justify-between">
         <Link href="/">
           <Logo />
         </Link>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hidden md:flex"
-          onClick={toggleSidebar}
-        >
-          <PanelLeft />
-        </Button>
       </div>
     );
   }
@@ -55,7 +45,7 @@ export default function AppSidebar() {
       <SidebarHeader>
         <SidebarHeaderContent />
       </SidebarHeader>
-      <SidebarContent className="p-2">
+      <SidebarContent className="p-2 pt-8">
         <SidebarMenu>
           {currentNavItems.map((item, index) => {
             if (isNavGroup(item)) {
