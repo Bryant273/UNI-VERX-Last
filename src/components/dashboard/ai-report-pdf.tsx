@@ -16,7 +16,7 @@ const ReportSectionPDF: React.FC<{ title: string; children: React.ReactNode }> =
 );
 
 export default function AiReportPDF({ report }: AiReportPDFProps) {
-  const { studentName, semester, generalAverage, subjectAverages, courses, absenceHours, comment } = report;
+  const { studentName, studentId, studentClass, semester, generalAverage, subjectAverages, courses, absenceHours, comment } = report;
 
   return (
     <div
@@ -29,12 +29,15 @@ export default function AiReportPDF({ report }: AiReportPDFProps) {
         color: '#000',
       }}
     >
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #6A5ACD', paddingBottom: '15px', marginBottom: '30px' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #6A5ACD', paddingBottom: '15px', marginBottom: '30px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0 }}>Rapport de Performance IA</h1>
-          <p style={{ fontSize: '14px', color: '#555', margin: '4px 0 0' }}>
-            Rapport pour {studentName} - {semester}
-          </p>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Rapport de Performance IA</h1>
+          <div style={{ fontSize: '11px', color: '#555' }}>
+            <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Étudiant :</strong> {studentName}</p>
+            <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Matricule :</strong> {studentId}</p>
+            <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Classe :</strong> {studentClass}</p>
+            <p style={{ margin: 0 }}><strong style={{ color: '#000' }}>Semestre :</strong> {semester}</p>
+          </div>
         </div>
         <Logo />
       </header>

@@ -9,11 +9,14 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { studentData } from '@/lib/data';
 
 // Mock student data - in a real app, this would come from a database.
 const MOCK_STUDENT_DATA = {
     "student-alex-dupont": {
         name: "Alex Dupont",
+        id: studentData.id,
+        class: studentData.class,
         "Semestre 1": {
             generalAverage: 14.5,
             subjectAverages: [
@@ -45,6 +48,8 @@ export type GenerateStudentReportInput = z.infer<typeof GenerateStudentReportInp
 
 const GenerateStudentReportOutputSchema = z.object({
   studentName: z.string(),
+  studentId: z.string(),
+  studentClass: z.string(),
   semester: z.string(),
   generalAverage: z.number(),
   subjectAverages: z.array(z.object({
@@ -130,6 +135,8 @@ const generateStudentReportFlow = ai.defineFlow(
     return {
       ...promptInput,
       ...semesterData,
+      studentId: student.id,
+      studentClass: student.class,
       comment: output!.comment,
     };
   }
