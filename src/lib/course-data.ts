@@ -1,4 +1,4 @@
-export type DocumentType = 'pdf' | 'docx' | 'xlsx' | 'pptx' | 'zip';
+export type DocumentType = 'pdf' | 'docx' | 'xlsx' | 'pptx' | 'zip' | 'mp4';
 
 export interface CourseDocument {
   id: number;
@@ -16,6 +16,8 @@ export const courseDocuments: CourseDocument[] = [
   { id: 3, date: '02/05/2025', module: 'Programmation', documentName: 'Exemples de code.zip', type: 'zip', uploader: 'Dr. Thomas Laurent', fileUrl: '/documents/exemples-code.zip' },
   { id: 4, date: '28/04/2025', module: 'Développement Web', documentName: 'Introduction JavaScript.pptx', type: 'pptx', uploader: 'Prof. Jean Leroy', fileUrl: '/documents/intro-js.pptx' },
   { id: 5, date: '25/04/2025', module: 'Réseaux', documentName: 'Planning laboratoire réseau.xlsx', type: 'xlsx', uploader: 'Dr. Laurent Rivière', fileUrl: '/documents/planning-reseau.xlsx' },
-  { id: 6, date: '22/04/2025', module: 'Bases de Données', documentName: 'Introduction NoSQL.pdf', type: 'pdf', uploader: 'Dr. Claire Dubois', fileUrl: '/documents/intro-nosql.pdf' },
-  { id: 7, date: '18/04/2025', module: 'Algorithmique', documentName: 'Complexité algorithmique.pdf', type: 'pdf', uploader: 'Prof. Michel Martin', fileUrl: '/documents/complexite.pdf' },
+  { id: 6, date: '23/04/2025', module: 'Développement Web', documentName: 'Tutoriel Flexbox CSS.mp4', type: 'mp4', uploader: 'Prof. Jean Leroy', fileUrl: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
+  { id: 7, date: '22/04/2025', module: 'Bases de Données', documentName: 'Introduction NoSQL.pdf', type: 'pdf', uploader: 'Dr. Claire Dubois', fileUrl: '/documents/intro-nosql.pdf' },
+  { id: 8, date: '18/04/2025', module: 'Algorithmique', documentName: 'Complexité algorithmique.pdf', type: 'pdf', uploader: 'Prof. Michel Martin', fileUrl: '/documents/complexite.pdf' },
+  { id: 9, date: '15/04/2025', module: 'Programmation', documentName: 'Cours vidéo sur les Design Patterns.mp4', type: 'mp4', uploader: 'Dr. Thomas Laurent', fileUrl: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
 ];

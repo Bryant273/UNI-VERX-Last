@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   File as FileIcon,
   FileText,
@@ -13,6 +13,11 @@ import {
   Eye,
   Download,
   Loader2,
+  Video,
+  Play,
+  Pause,
+  Rewind,
+  FastForward,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -43,6 +48,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { courseDocuments, type CourseDocument, type DocumentType } from '@/lib/course-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -55,6 +61,7 @@ const documentTypeConfig: Record<
   xlsx: { icon: FileSpreadsheet, color: 'text-green-500', label: 'Excel' },
   pptx: { icon: FileCode2, color: 'text-orange-500', label: 'PowerPoint' },
   zip: { icon: FileArchive, color: 'text-purple-500', label: 'Archive' },
+  mp4: { icon: Video, color: 'text-indigo-500', label: 'Vidéo' },
 };
 
 const FileTypeIcon: React.FC<{ type: DocumentType, showLabel?: boolean }> = ({ type, showLabel = false }) => {
@@ -135,6 +142,100 @@ const ArchivePreview: React.FC<{doc: CourseDocument}> = ({doc}) => (
     </div>
 );
 
+const VideoPreview: React.FC<{ doc: CourseDocument }> = ({ doc }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [currentTime, setCurrentTime] = useState('00:00');
+    const [duration, setDuration] = useState('00:00');
+
+    const formatTime = (timeInSeconds: number) => {
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        const updateProgress = () => {
+            setProgress((video.currentTime / video.duration) * 100);
+            setCurrentTime(formatTime(video.currentTime));
+        };
+
+        const setVideoDuration = () => {
+            setDuration(formatTime(video.duration));
+        };
+
+        video.addEventListener('timeupdate', updateProgress);
+        video.addEventListener('loadedmetadata', setVideoDuration);
+
+        return () => {
+            video.removeEventListener('timeupdate', updateProgress);
+            video.removeEventListener('loadedmetadata', setVideoDuration);
+        };
+    }, []);
+
+    const togglePlay = () => {
+        const video = videoRef.current;
+        if (video) {
+            if (video.paused) {
+                video.play();
+                setIsPlaying(true);
+            } else {
+                video.pause();
+                setIsPlaying(false);
+            }
+        }
+    };
+
+    const handleSeek = (amount: number) => {
+        const video = videoRef.current;
+        if (video) {
+            video.currentTime += amount;
+        }
+    };
+    
+    const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        const progressContainer = e.currentTarget;
+        const video = videoRef.current;
+        if (video) {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const width = rect.width;
+            const newTime = (clickX / width) * video.duration;
+            video.currentTime = newTime;
+        }
+    };
+
+    return (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-black rounded-lg overflow-hidden">
+            <video ref={videoRef} src={doc.fileUrl} className="w-full h-full object-contain" />
+            <div className="w-full p-4 bg-black/50 backdrop-blur-sm space-y-2">
+                <div className="w-full cursor-pointer" onClick={handleProgressClick}>
+                   <Progress value={progress} className="h-2" />
+                </div>
+                <div className="flex justify-between items-center text-white">
+                    <span className="text-xs font-mono">{currentTime}</span>
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(-10)}>
+                            <Rewind />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-12 w-12" onClick={togglePlay}>
+                            {isPlaying ? <Pause size={28}/> : <Play size={28}/>}
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => handleSeek(10)}>
+                            <FastForward />
+                        </Button>
+                    </div>
+                    <span className="text-xs font-mono">{duration}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export default function CoursesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -203,6 +304,8 @@ export default function CoursesPage() {
         return <ExcelPreview />;
       case 'zip':
         return <ArchivePreview doc={doc} />;
+      case 'mp4':
+        return <VideoPreview doc={doc} />;
       default:
         return (
           <div className="text-center p-8">
@@ -326,8 +429,8 @@ export default function CoursesPage() {
 
       {previewDocument && (
         <Dialog open={!!previewDocument} onOpenChange={(open) => !open && setPreviewDocument(null)}>
-          <DialogContent className="sm:max-w-4xl h-[90vh] flex flex-col">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-4xl h-[90vh] flex flex-col p-0">
+            <DialogHeader className="p-4">
               <DialogTitle className="flex items-center gap-2">
                 <FileTypeIcon type={previewDocument.type} showLabel />
                 {previewDocument.documentName}
@@ -343,7 +446,7 @@ export default function CoursesPage() {
                     renderPreviewContent(previewDocument)
                 )}
             </div>
-            <DialogFooter className="mt-4">
+            <DialogFooter className="mt-auto p-4 border-t">
                 <Button variant="ghost" onClick={() => setPreviewDocument(null)}>Fermer</Button>
                 <Button asChild>
                     <a href={previewDocument.fileUrl} download>
