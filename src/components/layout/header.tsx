@@ -50,7 +50,7 @@ export default function Header() {
         className="md:hidden"
       >
         <PanelLeft className="h-5 w-5" />
-        <span className="sr-only">Toggle Sidebar</span>
+        <span className="sr-only">Ouvrir/Fermer le menu</span>
       </Button>
 
       <DateTime />
@@ -62,14 +62,14 @@ export default function Header() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search..."
+            placeholder="Rechercher..."
             className="w-full rounded-lg bg-muted pl-8 md:w-[200px] lg:w-[320px]"
           />
         </div>
         <ThemeToggle />
         <Button variant="ghost" size="icon" aria-label="Notifications">
             <Bell className="h-5 w-5" />
-            <span className="sr-only">Toggle notifications</span>
+            <span className="sr-only">Afficher les notifications</span>
         </Button>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -80,7 +80,7 @@ export default function Header() {
                 </Avatar>
             </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
+            <DropdownMenuContent align="end" className="w-[220px]">
             <DropdownMenuLabel>{user?.name || 'Mon Compte'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>

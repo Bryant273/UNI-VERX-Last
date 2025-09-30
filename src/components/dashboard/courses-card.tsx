@@ -21,9 +21,9 @@ export default function CoursesCard({ role }: { role: UserRole }) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>My Courses</CardTitle>
+            <CardTitle>Mes Cours</CardTitle>
             <CardDescription>
-              {role === 'student' ? 'Courses you are enrolled in' : 'Courses you are teaching'}
+              {role === 'student' ? 'Cours auxquels vous êtes inscrit' : 'Cours que vous enseignez'}
             </CardDescription>
           </div>
           <BookOpen className="h-6 w-6 text-muted-foreground" />
@@ -51,9 +51,9 @@ export default function CoursesCard({ role }: { role: UserRole }) {
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <p className="text-xs text-muted-foreground">
-                    {role === 'student' ? course.instructor : `${course.students} students`}
+                    {role === 'student' ? course.instructor : `${course.students} étudiants`}
                   </p>
-                  <Button className="w-full mt-4" size="sm">Go to course</Button>
+                  <Button className="w-full mt-4" size="sm">Aller au cours</Button>
                 </CardContent>
               </Card>
             );

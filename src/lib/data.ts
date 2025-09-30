@@ -155,11 +155,11 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
     avatar: studentData.avatar,
   },
   professor: {
-    name: 'Dr. Evelyn Reed',
+    name: 'Dr. Évelyne Dubois',
     avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-2')?.imageUrl || '',
   },
   admin: {
-    name: 'Samuel Carter',
+    name: 'Samuel Morin',
     avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
   },
   'academic-advisor': {
@@ -182,13 +182,13 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
 
 export const courses = {
   student: [
-    { id: 1, title: 'Advanced Calculus', code: 'MATH301', instructor: 'Dr. Alan Turing', thumbnailId: 'course-thumb-1' },
-    { id: 2, title: 'Quantum Physics', code: 'PHY305', instructor: 'Dr. Marie Curie', thumbnailId: 'course-thumb-2' },
-    { id: 3, title: 'World History: 20th Century', code: 'HIST210', instructor: 'Dr. Indiana Jones', thumbnailId: 'course-thumb-3' },
+    { id: 1, title: 'Calcul Avancé', code: 'MATH301', instructor: 'Dr. Alan Turing', thumbnailId: 'course-thumb-1' },
+    { id: 2, title: 'Physique Quantique', code: 'PHY305', instructor: 'Dr. Marie Curie', thumbnailId: 'course-thumb-2' },
+    { id: 3, title: 'Histoire du 20ème Siècle', code: 'HIST210', instructor: 'Dr. Indiana Jones', thumbnailId: 'course-thumb-3' },
   ],
   professor: [
-    { id: 1, title: 'Advanced Calculus', code: 'MATH301', students: 45, thumbnailId: 'course-thumb-1' },
-    { id: 4, title: 'Literary Theory', code: 'LIT402', students: 30, thumbnailId: 'course-thumb-4' },
+    { id: 1, title: 'Calcul Avancé', code: 'MATH301', students: 45, thumbnailId: 'course-thumb-1' },
+    { id: 4, title: 'Théorie Littéraire', code: 'LIT402', students: 30, thumbnailId: 'course-thumb-4' },
   ],
 };
 
@@ -213,8 +213,8 @@ const allEvents: Record<UserRole, TimetableEvent[]> = {
     { 
       id: 1, 
       time: '09:00 - 11:00', 
-      course: 'Advanced Calculus', 
-      location: 'Hall A', 
+      course: 'Calcul Avancé', 
+      location: 'Amphi A', 
       type: 'cours',
       instructor: 'Dr. Alan Turing',
       fileLink: '/files/calculus-notes.pdf',
@@ -225,8 +225,8 @@ const allEvents: Record<UserRole, TimetableEvent[]> = {
     { 
       id: 2, 
       time: '13:00 - 15:00', 
-      course: 'Quantum Physics', 
-      location: 'Lab 3B', 
+      course: 'Physique Quantique', 
+      location: 'Labo 3B', 
       type: 'tp',
       instructor: 'Dr. Marie Curie',
       presenceStatus: 'pending',
@@ -262,13 +262,13 @@ const allEvents: Record<UserRole, TimetableEvent[]> = {
     },
   ],
   professor: [
-    { id: 1, time: '09:00 - 11:00', course: 'Advanced Calculus', location: 'Hall A', type: 'cours' },
-    { id: 3, time: '11:00 - 12:00', course: 'Office Hours', location: 'Office 101', type: 'activité' },
+    { id: 1, time: '09:00 - 11:00', course: 'Calcul Avancé', location: 'Amphi A', type: 'cours' },
+    { id: 3, time: '11:00 - 12:00', course: 'Heures de bureau', location: 'Bureau 101', type: 'activité' },
     { id: 8, time: '14:00 - 16:00', course: 'Examen de mi-semestre', location: 'Amphi B', type: 'examen' },
   ],
   admin: [
-    { id: 4, time: '10:00 - 11:00', course: 'Faculty Meeting', location: 'Conference Room 1', type: 'activité' },
-    { id: 5, time: '14:00 - 15:00', course: 'Budget Review', location: 'Admin Building', type: 'activité' },
+    { id: 4, time: '10:00 - 11:00', course: 'Réunion du corps professoral', location: 'Salle de conférence 1', type: 'activité' },
+    { id: 5, time: '14:00 - 15:00', course: 'Revue budgétaire', location: 'Bâtiment administratif', type: 'activité' },
   ],
   'academic-advisor': [],
   secretariat: [],
@@ -307,7 +307,7 @@ export const getActiveEvent = (role: UserRole): TimetableEvent | null => {
 
 
 export const messages = [
-  { id: 1, sender: 'Dr. Evelyn Reed', subject: 'Mid-term results', time: '10:42 AM' },
-  { id: 2, sender: 'University Admin', subject: 'Campus-wide power outage notice', time: 'Yesterday' },
-  { id: 3, sender: 'Alex Dupont', subject: 'Question about assignment 3', time: '2 days ago' },
+  { id: 1, sender: 'Dr. Évelyne Dubois', subject: 'Résultats de mi-semestre', time: '10:42' },
+  { id: 2, sender: 'Administration', subject: 'Avis de coupure de courant sur le campus', time: 'Hier' },
+  { id: 3, sender: 'Alex Dupont', subject: 'Question sur le devoir 3', time: 'Il y a 2 jours' },
 ];

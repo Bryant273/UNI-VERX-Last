@@ -23,8 +23,8 @@ export default function MessagingCard() {
       <CardHeader>
         <div className="flex items-center justify-between">
             <div>
-                <CardTitle>Inbox</CardTitle>
-                <CardDescription>Recent messages and announcements.</CardDescription>
+                <CardTitle>Boîte de réception</CardTitle>
+                <CardDescription>Messages et annonces récents.</CardDescription>
             </div>
             <MessageSquare className="h-6 w-6 text-muted-foreground" />
         </div>

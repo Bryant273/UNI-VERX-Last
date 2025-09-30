@@ -23,20 +23,20 @@ import {
 } from '@/components/ui/chart';
 
 const chartData = [
-  { year: '2020', enrollment: 10500, graduation: 2300 },
-  { year: '2021', enrollment: 11200, graduation: 2500 },
-  { year: '2022', enrollment: 11800, graduation: 2600 },
-  { year: '2023', enrollment: 12400, graduation: 2800 },
-  { year: '2024', enrollment: 13100, graduation: 3000 },
+  { year: '2020', inscription: 10500, diplome: 2300 },
+  { year: '2021', inscription: 11200, diplome: 2500 },
+  { year: '2022', inscription: 11800, diplome: 2600 },
+  { year: '2023', inscription: 12400, diplome: 2800 },
+  { year: '2024', inscription: 13100, diplome: 3000 },
 ];
 
 const chartConfig = {
-  enrollment: {
-    label: 'Enrollment',
+  inscription: {
+    label: 'Inscriptions',
     color: 'hsl(var(--primary))',
   },
-  graduation: {
-    label: 'Graduation',
+  diplome: {
+    label: 'Diplômés',
     color: 'hsl(var(--secondary-foreground))',
   },
 } satisfies ChartConfig;
@@ -47,8 +47,8 @@ export default function StatsCard() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>University Statistics</CardTitle>
-            <CardDescription>Enrollment and graduation rates over the last 5 years.</CardDescription>
+            <CardTitle>Statistiques de l'université</CardTitle>
+            <CardDescription>Taux d'inscription et de diplomation des 5 dernières années.</CardDescription>
           </div>
           <BarChart className="h-6 w-6 text-muted-foreground" />
         </div>
@@ -75,13 +75,13 @@ export default function StatsCard() {
                 content={<ChartTooltipContent />}
             />
             <Bar
-              dataKey="enrollment"
-              fill={chartConfig.enrollment.color}
+              dataKey="inscription"
+              fill={chartConfig.inscription.color}
               radius={[4, 4, 0, 0]}
             />
             <Bar
-              dataKey="graduation"
-              fill={chartConfig.graduation.color}
+              dataKey="diplome"
+              fill={chartConfig.diplome.color}
               radius={[4, 4, 0, 0]}
             />
           </RechartsBarChart>

@@ -5,7 +5,7 @@ import { generateStudentReport } from "@/ai/flows/generate-student-report";
 import { z } from "zod";
 
 const summarySchema = z.object({
-  courseMaterial: z.string().min(10, { message: "Course material must be at least 10 characters long." }),
+  courseMaterial: z.string().min(10, { message: "Le matériel de cours doit contenir au moins 10 caractères." }),
 });
 
 export async function getSummary(prevState: any, formData: FormData) {
@@ -24,7 +24,7 @@ export async function getSummary(prevState: any, formData: FormData) {
     return { summary: result.summary };
   } catch (error) {
     console.error(error);
-    return { error: "Failed to generate summary. Please try again." };
+    return { error: "La génération du résumé a échoué. Veuillez réessayer." };
   }
 }
 
