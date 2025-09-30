@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useLoginModal } from '@/hooks/use-login-modal';
 import { useToast } from '@/hooks/use-toast';
 import type { UserRole } from '@/lib/data';
-import { userRolesForLogin } from '@/lib/data';
+import { userRolesForLogin } from '@/lib/static-data';
 
 export default function LoginModal() {
   const { isOpen, onClose } = useLoginModal();

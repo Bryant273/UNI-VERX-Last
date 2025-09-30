@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 import type { UserRole } from '@/lib/data';
-import { userData, VALID_ROLES } from '@/lib/data';
+import { userData, VALID_ROLES } from '@/lib/static-data';
 import WelcomeBanner from '@/components/dashboard/welcome-banner';
 import CurrentEventCard from '@/components/dashboard/current-event-card';
 import AiReportCard from '@/components/dashboard/ai-report-card';

@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { UserRole } from '@/lib/data';
-import { courses } from '@/lib/data';
+import { courses } from '@/lib/static-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function CoursesCard({ role }: { role: UserRole }) {

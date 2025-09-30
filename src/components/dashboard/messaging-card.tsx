@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { messages, userData } from '@/lib/data';
+import { messages, userData } from '@/lib/static-data';
 
 function getInitials(name: string) {
     return name

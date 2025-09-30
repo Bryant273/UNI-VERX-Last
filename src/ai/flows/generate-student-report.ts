@@ -9,7 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { studentData } from '@/lib/data';
+import { studentData } from '@/lib/static-data';
 
 // Mock student data - in a real app, this would come from a database.
 const MOCK_STUDENT_DATA = {

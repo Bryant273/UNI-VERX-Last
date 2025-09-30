@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { PanelLeft, Search, Bell, User, Settings, LogOut, Wand2 } from 'lucide-react';
 
 import type { UserRole } from '@/lib/data';
-import { userData, VALID_ROLES } from '@/lib/data';
+import { userData, VALID_ROLES } from '@/lib/static-data';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,16 +43,18 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-      <Button
-        size="icon"
-        variant="ghost"
-        onClick={toggleSidebar}
-      >
-        <PanelLeft className="h-5 w-5" />
-        <span className="sr-only">Ouvrir/Fermer le menu</span>
-      </Button>
-
-      <DateTime />
+      <div className="flex items-center gap-2">
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={toggleSidebar}
+          className="md:flex"
+        >
+          <PanelLeft className="h-5 w-5" />
+          <span className="sr-only">Ouvrir/Fermer le menu</span>
+        </Button>
+        <DateTime />
+      </div>
       
       <div className="flex-1" />
 

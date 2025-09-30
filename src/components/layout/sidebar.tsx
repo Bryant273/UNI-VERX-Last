@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, PanelLeft } from 'lucide-react';
 
-import type { UserRole } from '@/lib/data';
-import { navLinks, bottomNavLinks } from '@/lib/data';
+import type { UserRole, NavItem } from '@/lib/data';
+import { navLinks, bottomNavLinks } from '@/lib/static-data';
 import {
   Sidebar as UISidebar,
   SidebarHeader,

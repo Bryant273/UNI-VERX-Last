@@ -7,7 +7,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { studentData } from '@/lib/data';
+import { studentData } from '@/lib/static-data';
 
 const InfoLine = ({ label, value }: { label: string; value: string | number }) => (
   <div className="flex justify-between items-center text-sm">
