@@ -15,8 +15,6 @@ import {
   Briefcase,
   FileCog,
   BookUser,
-  FolderKanban,
-  File,
   type LucideIcon,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
@@ -128,10 +126,33 @@ export const bottomNavLinks: NavLink[] = [
   { href: '#', label: 'Déconnexion', icon: LogOut },
 ];
 
+export const studentData = {
+  id: 'ETU-2024-12345',
+  name: 'Alex Dupont',
+  class: 'Master 1 - Ingénierie Logicielle',
+  avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
+  semesters: {
+    'Semestre 1': { average: 14.5, totalStudents: 50, rank: 10 },
+    'Semestre 2': { average: 15.2, totalStudents: 48, rank: 5 },
+  },
+  get overallAverage() {
+    const semesterAverages = Object.values(this.semesters).map(s => s.average);
+    return semesterAverages.reduce((acc, cur) => acc + cur, 0) / semesterAverages.length;
+  },
+  get overallRank() {
+    // This is a simplified rank calculation
+    return Math.round(Object.values(this.semesters).reduce((acc, cur) => acc + cur.rank, 0) / Object.values(this.semesters).length);
+  },
+  get totalStudents() {
+    // Assuming the number of students is roughly the same across semesters
+    return this.semesters['Semestre 1']?.totalStudents || 0;
+  }
+};
+
 export const userData: Record<UserRole, { name: string; avatar: string }> = {
   student: {
-    name: 'Alex Dupont',
-    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
+    name: studentData.name,
+    avatar: studentData.avatar,
   },
   professor: {
     name: 'Dr. Evelyn Reed',

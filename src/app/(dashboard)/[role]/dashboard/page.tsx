@@ -14,6 +14,7 @@ import { userData, VALID_ROLES } from '@/lib/data';
 import WelcomeBanner from '@/components/dashboard/welcome-banner';
 import CurrentEventCard from '@/components/dashboard/current-event-card';
 import AiReportCard from '@/components/dashboard/ai-report-card';
+import AverageCard from '@/components/dashboard/average-card';
 import StatsCard from '@/components/dashboard/stats-card';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
@@ -49,12 +50,13 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {role === 'student' && (
           <>
             <div className="lg:col-span-2 space-y-6">
+                <AverageCard />
                 <div className="grid gap-6 lg:grid-cols-2">
                     <AiReportCard />
-                    <div className="flex justify-center lg:justify-end">
-                        <CurrentEventCard role="student" />
-                    </div>
                 </div>
+            </div>
+            <div className="flex justify-center lg:justify-start">
+                <CurrentEventCard role="student" />
             </div>
           </>
         )}
