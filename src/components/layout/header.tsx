@@ -47,7 +47,6 @@ export default function Header() {
         size="icon"
         variant="ghost"
         onClick={toggleSidebar}
-        className="md:hidden"
       >
         <PanelLeft className="h-5 w-5" />
         <span className="sr-only">Ouvrir/Fermer le menu</span>
