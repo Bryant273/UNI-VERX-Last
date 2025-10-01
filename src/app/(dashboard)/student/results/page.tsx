@@ -1,12 +1,8 @@
-
-
-
-
 'use client';
 
 import { useState } from 'react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import {
   FileText,
   GraduationCap,
@@ -85,12 +81,40 @@ export default function ResultsPage() {
 
   const generatePdf = async () => {
     setIsGeneratingPdf(true);
-    const doc = new jsPDF('p', 'pt', 'a4');
-    const pageHeight = doc.internal.pageSize.height;
-    const pageWidth = doc.internal.pageSize.width;
-    let y = 20;
 
-    // --- Header ---
+    const tableElement = document.getElementById('annual-bulletin-table');
+    if (!tableElement) {
+        console.error("Table element not found for PDF generation.");
+        setIsGeneratingPdf(false);
+        return;
+    }
+
+    // Temporarily increase resolution for better quality capture
+    const originalWidth = tableElement.style.width;
+    tableElement.style.width = '1200px';
+
+    const canvas = await html2canvas(tableElement, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        backgroundColor: '#ffffff', // Ensure background is white
+    });
+    
+    // Restore original width
+    tableElement.style.width = originalWidth;
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    let y = 0;
+
+    // --- En-tête ---
+    pdf.setFontSize(18);
+    pdf.setFont(undefined, 'bold');
+    pdf.text('Bulletin de Résultats', pdfWidth / 2, y + 40, { align: 'center' });
+    y += 70;
+
+    // Logo
     const logoSvgString = getLogoSvg();
     const img = new Image();
     const svgBlob = new Blob([logoSvgString], { type: 'image/svg+xml;charset=utf-8' });
@@ -100,10 +124,10 @@ export default function ResultsPage() {
         return new Promise((resolve, reject) => {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                canvas.width = 80;
-                canvas.height = 80;
+                canvas.width = 40;
+                canvas.height = 40;
                 const ctx = canvas.getContext('2d');
-                ctx?.drawImage(img, 0, 0, 80, 80);
+                ctx?.drawImage(img, 0, 0, 40, 40);
                 URL.revokeObjectURL(url);
                 resolve(canvas.toDataURL('image/png'));
             };
@@ -117,131 +141,33 @@ export default function ResultsPage() {
 
     try {
         const pngDataUrl = await convertSvgToPng();
-        doc.addImage(pngDataUrl, 'PNG', 40, y, 80, 80);
+        pdf.addImage(pngDataUrl, 'PNG', 40, y, 40, 40);
     } catch (e) {
         console.error("Failed to render SVG to PNG for PDF", e);
     }
 
-
-    doc.setFontSize(10);
-    doc.text('Année universitaire :', 300, y + 10);
-    doc.setFont(undefined, 'bold');
-    doc.text(studentData.academicYear, 390, y + 10);
-    doc.setFont(undefined, 'normal');
-
-    doc.setFillColor(84, 44, 138); // Purple
-    doc.rect(200, y + 22, 230, 20, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('RELEVE DE NOTES', pageWidth / 2, y + 35, { align: 'center' });
-
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
-
-    const rightHeaderTextX = pageWidth - 60;
-    doc.text('REPUBLIQUE "PAYS"', rightHeaderTextX, y + 10, { align: 'right' });
-    doc.text('Devise pays', rightHeaderTextX, y + 25, { align: 'right' });
-    doc.text('Emblême pays', rightHeaderTextX, y + 40, { align: 'right' });
-
+    // Student Info
+    pdf.setFontSize(10);
+    pdf.setFont(undefined, 'normal');
+    pdf.text(`Nom: ${studentData.lastName}`, 100, y + 10);
+    pdf.text(`Prénoms: ${studentData.firstName}`, 100, y + 25);
+    pdf.text(`Matricule: ${studentData.id}`, 300, y + 10);
+    pdf.text(`Classe: ${studentData.class}`, 300, y + 25);
     y += 50;
-    const studentInfoX = 140;
-    doc.text(`Nom: ${studentData.lastName}`, studentInfoX, y);
-    doc.text(`Prénoms: ${studentData.firstName}`, studentInfoX, y + 15);
-    doc.text(`Date & lieu de naissance: ${studentData.birthDate} à ${studentData.birthPlace}`, studentInfoX, y + 30);
-    doc.text(`Genre: ${studentData.gender}`, studentInfoX, y + 45);
 
-    const studentInfoX2 = 340;
-    doc.text(`Niveau: ${studentData.level}`, studentInfoX2, y);
-    doc.text(`UFR: ${studentData.ufr}`, studentInfoX2, y + 15);
-    doc.text(`Spécialité: ${studentData.speciality}`, studentInfoX2, y + 30);
-    doc.text(`Matricule: ${studentData.id}`, studentInfoX2, y + 45);
+    // --- Table Image ---
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgHeight = (imgProps.height * (pdfWidth - 80)) / imgProps.width;
+    pdf.addImage(imgData, 'PNG', 40, y, pdfWidth - 80, imgHeight);
+    y += imgHeight;
+    
+    // --- Pied de page ---
+    pdf.setFontSize(8);
+    pdf.setTextColor(150);
+    pdf.text('Imprimé via UNI-VERX®', pdfWidth / 2, pdfHeight - 30, { align: 'center' });
 
-    y += 60;
 
-    // --- Table ---
-    const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
-    const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
-    const tableBody: any[] = [];
-
-    const addSemesterToBody = (groupedCourses: any, coursesList: any[], semesterName: string) => {
-        Object.entries(groupedCourses).forEach(([ue, courses], ueIndex) => {
-            (courses as any[]).forEach((course: any, courseIndex: number) => {
-                const row = [
-                    courseIndex === 0 && ueIndex === 0 ? { content: '', rowSpan: coursesList.length } : '', // Placeholder for vertical text
-                    courseIndex === 0 ? { content: ue, rowSpan: (courses as any[]).length, styles: { valign: 'middle' } } : '',
-                    course.module,
-                    { content: course.grade, styles: { fontStyle: 'bold' } },
-                    { content: course.creditsToValidate, styles: { halign: 'center' } },
-                    { content: course.creditsValidated, styles: { halign: 'center' } },
-                ];
-                tableBody.push(row);
-            });
-        });
-    };
-
-    addSemesterToBody(s1Grouped, semesterResults.s1.courses, 'SEMESTRE 1');
-    addSemesterToBody(s2Grouped, semesterResults.s2.courses, 'SEMESTRE 2');
-
-    doc.autoTable({
-        startY: y,
-        head: [['SEMESTRE', 'UE', 'MODULE', 'MOYENNE', 'CREDITS A VALIDER', 'CREDITS VALIDES']],
-        body: tableBody,
-        theme: 'grid',
-        headStyles: {
-            fillColor: [226, 232, 240], // bg-slate-200
-            textColor: [0, 0, 0],
-            fontStyle: 'bold',
-        },
-        styles: {
-            fontSize: 8,
-            cellPadding: 4,
-        },
-        columnStyles: {
-            0: { cellWidth: 50, halign: 'center' },
-            1: { cellWidth: 100 },
-            2: { cellWidth: 'auto' },
-            3: { cellWidth: 60, halign: 'center' },
-            4: { cellWidth: 70, halign: 'center' },
-            5: { cellWidth: 70, halign: 'center' },
-        },
-        didDrawCell: (data) => {
-            if (data.section === 'body' && data.column.index === 0) {
-                 if (data.row.index === 0) {
-                    doc.setFont(undefined, 'bold');
-                    doc.text('S\nE\nM\nE\nS\nT\nR\nE\n\n1', data.cell.x + data.cell.width / 2, data.cell.y + 15, { halign: 'center' });
-                 }
-                 if (data.row.index === semesterResults.s1.courses.length) {
-                    doc.setFont(undefined, 'bold');
-                    doc.text('S\nE\nM\nE\nS\nT\nR\nE\n\n2', data.cell.x + data.cell.width / 2, data.cell.y + 15, { halign: 'center' });
-                 }
-            }
-        },
-        didParseCell: (data) => {
-            if (data.column.index === 3 && data.cell.section === 'body') {
-                const numericGrade = parseFloat(String(data.cell.raw).split('/')[0].replace(',', '.'));
-                if (numericGrade >= 16) data.cell.styles.textColor = [22, 163, 74];
-                else if (numericGrade >= 14) data.cell.styles.textColor = [37, 99, 235];
-                else if (numericGrade >= 10) data.cell.styles.textColor = [202, 138, 4];
-                else data.cell.styles.textColor = [220, 38, 38];
-            }
-        },
-    });
-
-    y = (doc as any).autoTable.previous.finalY + 30;
-
-    // --- Footer ---
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'bold');
-    doc.text('COMMENTAIRE :', 40, y);
-    doc.setFont(undefined, 'normal');
-    doc.text(semesterResults.annual.juryComment, 40, y + 15, { maxWidth: 350 });
-
-    doc.rect(pageWidth - 160, y, 120, 50);
-    doc.text('CACHET', pageWidth - 100, y + 30, { align: 'center' });
-
-    doc.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
+    pdf.save(`bulletin_annuel_${studentData.name.replace(' ', '_')}.pdf`);
     setIsGeneratingPdf(false);
   };
 
@@ -343,7 +269,7 @@ export default function ResultsPage() {
                 <CardTitle>Bulletin annuel</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="overflow-x-auto mb-8">
+                <div id="annual-bulletin-table" className="overflow-x-auto mb-8">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -594,7 +520,7 @@ export default function ResultsPage() {
                         <p className="text-sm text-muted-foreground">{studentData.class} • {studentData.id}</p>
                     </div>
                 </div>
-                <Button onClick={generatePdf} disabled={isGeneratingPdf}>
+                <Button onClick={generatePdf} disabled={isGeneratingPdf || semester !== 'annual'}>
                   {isGeneratingPdf ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -603,7 +529,7 @@ export default function ResultsPage() {
                   ) : (
                     <>
                       <Download className="mr-2 h-4 w-4" />
-                      Télécharger le bulletin
+                      Télécharger le bulletin annuel
                     </>
                   )}
                 </Button>
@@ -668,3 +594,4 @@ export default function ResultsPage() {
   );
 }
 
+    
