@@ -79,77 +79,92 @@ export default function ResultsPage() {
 
   const generatePdf = () => {
     const doc = new jsPDF();
-
+    
     // Header
     doc.setFontSize(20);
     doc.text("Bulletin de résultats", 14, 22);
     doc.setFontSize(11);
     doc.setTextColor(100);
     doc.text(`${studentData.name} - ${studentData.class}`, 14, 30);
-    
-    // Auto-table
+
     let head: string[][] = [];
     let body: any[] = [];
     let finalY = 0;
 
     if(displayType === 'bulletin') {
       if(semester === 'annual') {
-        head = [['Semestre', 'UE', 'Module', 'Note', 'Crédits ECTS']];
+        head = [['Semestre', 'UE', 'Module', 'Note', 'Crédits ECTS', 'Crédits validés']];
+        
+        // Process S1
         const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
         Object.entries(s1Grouped).forEach(([ue, courses], ueIndex) => {
           courses.forEach((course, courseIndex) => {
-            let row = [
-              ueIndex === 0 && courseIndex === 0 ? { content: 'Semestre 1', rowSpan: semesterResults.s1.courses.length } : '',
-              courseIndex === 0 ? { content: ue, rowSpan: courses.length } : '',
+            let row: any[] = [];
+            if (ueIndex === 0 && courseIndex === 0) {
+              row.push({ content: 'Semestre 1', rowSpan: semesterResults.s1.courses.length, styles: { valign: 'middle', halign: 'center' } });
+            }
+            if (courseIndex === 0) {
+              row.push({ content: ue, rowSpan: courses.length, styles: { valign: 'middle' } });
+            }
+            row.push(
               course.module,
               course.grade,
-              `${course.creditsValidated}/${course.creditsToValidate}`
-            ];
+              course.creditsToValidate,
+              course.creditsValidated
+            );
             body.push(row);
           });
         });
 
+        // Process S2
         const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
-         Object.entries(s2Grouped).forEach(([ue, courses], ueIndex) => {
+        Object.entries(s2Grouped).forEach(([ue, courses], ueIndex) => {
           courses.forEach((course, courseIndex) => {
-            let row = [
-              ueIndex === 0 && courseIndex === 0 ? { content: 'Semestre 2', rowSpan: semesterResults.s2.courses.length } : '',
-              courseIndex === 0 ? { content: ue, rowSpan: courses.length } : '',
+            let row: any[] = [];
+            if (ueIndex === 0 && courseIndex === 0) {
+              row.push({ content: 'Semestre 2', rowSpan: semesterResults.s2.courses.length, styles: { valign: 'middle', halign: 'center' } });
+            }
+            if (courseIndex === 0) {
+              row.push({ content: ue, rowSpan: courses.length, styles: { valign: 'middle' } });
+            }
+            row.push(
               course.module,
               course.grade,
-              `${course.creditsValidated}/${course.creditsToValidate}`
-            ];
+              course.creditsToValidate,
+              course.creditsValidated
+            );
             body.push(row);
           });
         });
         
         body.push([
-            { content: "Total Année", colSpan: 2, styles: { halign: 'right', fontStyle: 'bold' } },
-            '',
+            { content: "Total Année", colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
             { content: semesterResults.annual.average, styles: { fontStyle: 'bold' } },
-            { content: semesterResults.annual.credits, styles: { fontStyle: 'bold' } }
+            { content: '60', styles: { fontStyle: 'bold' } },
+            { content: semesterResults.annual.credits.split('/')[0], styles: { fontStyle: 'bold' } }
         ]);
 
       } else { // Semester view
         const semesterKey = semester as 's1' | 's2';
         const semesterData = semesterResults[semesterKey];
         const groupedCourses = groupCoursesByUE(semesterData.courses);
-        head = [['UE', 'Module', 'Note', 'Crédits ECTS']];
+        head = [['UE', 'Module', 'Note', 'Crédits ECTS', 'Crédits validés']];
         Object.entries(groupedCourses).forEach(([ue, courses]) => {
             courses.forEach((course, courseIndex) => {
                  body.push([
-                    courseIndex === 0 ? { content: ue, rowSpan: courses.length } : '',
+                    courseIndex === 0 ? { content: ue, rowSpan: courses.length, styles: { valign: 'middle' } } : '',
                     course.module,
                     course.grade,
-                    `${course.creditsValidated}/${course.creditsToValidate}`
+                    course.creditsToValidate,
+                    course.creditsValidated,
                  ]);
             });
         });
          body.push([
-            { content: `Total Semestre ${semesterKey === 's1' ? 1 : 2}`, colSpan: 1, styles: { halign: 'right', fontStyle: 'bold' } },
-            '',
+            { content: `Total Semestre ${semesterKey === 's1' ? 1 : 2}`, colSpan: 2, styles: { halign: 'right', fontStyle: 'bold' } },
             { content: semesterData.average, styles: { fontStyle: 'bold' } },
-            { content: semesterData.credits, styles: { fontStyle: 'bold' } }
+            { content: '30', styles: { fontStyle: 'bold' } },
+            { content: semesterData.credits.split('/')[0], styles: { fontStyle: 'bold' } }
         ]);
       }
     } else { // Course detail view
@@ -175,10 +190,12 @@ export default function ResultsPage() {
         body: body,
         startY: displayType === 'course' && course ? 52 : 40,
         theme: 'grid',
+        headStyles: { fillColor: [22, 163, 74] },
         didDrawPage: (data: any) => {
-            finalY = data.cursor.y;
+            finalY = data.cursor?.y || 0;
         }
     });
+    
 
     if (displayType === 'bulletin' && semester === 'annual') {
         doc.setFontSize(10);
@@ -191,6 +208,7 @@ export default function ResultsPage() {
     
     doc.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
   }
+
 
   const renderSemesterTable = (semesterKey: 's1' | 's2') => {
     const data = semesterResults[semesterKey];
@@ -280,7 +298,6 @@ export default function ResultsPage() {
 
   const renderAnnualView = () => {
     const data = semesterResults.annual;
-    const creditsValue = (parseInt(data.credits.split('/')[0]) / parseInt(data.credits.split('/')[1])) * 100;
     const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
     const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
 
@@ -356,7 +373,7 @@ export default function ResultsPage() {
                                 <TableCell colSpan={3} className="text-right font-extrabold">Total Année</TableCell>
                                 <TableCell className={cn("font-extrabold", getGradeClass(data.average))}>{data.average}</TableCell>
                                 <TableCell className="font-extrabold">60</TableCell>
-                                <TableCell className="font-extrabold">{data.credits}</TableCell>
+                                <TableCell className="font-extrabold">{data.credits.split('/')[0]}</TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>
@@ -371,12 +388,9 @@ export default function ResultsPage() {
                         </div>
                     </Card>
                     <Card className="flex flex-col items-center justify-center p-6">
-                        <div className="relative h-24 w-24 mb-3">
-                            <svg className="h-full w-full" viewBox="0 0 36 36">
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="hsl(var(--muted))" strokeWidth="2"></path>
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray={`${creditsValue}, 100`}></path>
-                            </svg>
-                             <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-primary">{Math.round(creditsValue)}%</div>
+                         <div className="relative h-24 w-24 mb-3">
+                            <Progress value={(parseInt(data.credits.split('/')[0]) / 60) * 100} className="absolute w-full h-full rounded-full" />
+                             <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-primary">{Math.round((parseInt(data.credits.split('/')[0]) / 60) * 100)}%</div>
                         </div>
                         <div className="text-center">
                            <CardTitle className="text-base font-medium">Crédits validés</CardTitle>
@@ -608,3 +622,4 @@ export default function ResultsPage() {
     </div>
   );
 }
+
