@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { studentData } from '@/lib/static-data';
-import { coursesResultsData, semesterResults, type CourseResult } from '@/lib/results-data';
+import { coursesResultsData, semesterResults } from '@/lib/results-data';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -89,11 +89,28 @@ export default function ResultsPage() {
     }
 
     try {
+      // Temporarily make the container visible for rendering
+      pdfContainer.style.position = 'fixed';
+      pdfContainer.style.left = '0';
+      pdfContainer.style.top = '0';
+      pdfContainer.style.zIndex = '1000';
+      pdfContainer.style.opacity = '0';
+
       const canvas = await html2canvas(pdfContainer, {
-        scale: 2,
+        scale: 2, // Higher scale for better quality
         useCORS: true,
-        backgroundColor: null,
+        backgroundColor: '#ffffff',
+        width: pdfContainer.offsetWidth,
+        height: pdfContainer.offsetHeight,
       });
+      
+      // Hide the container again
+      pdfContainer.style.position = 'absolute';
+      pdfContainer.style.left = '-9999px';
+      pdfContainer.style.top = '0';
+      pdfContainer.style.zIndex = '-10';
+      pdfContainer.style.opacity = '1';
+
 
       const imgData = canvas.toDataURL('image/png');
       
@@ -451,7 +468,7 @@ export default function ResultsPage() {
   return (
     <div className="space-y-6">
         {/* Hidden container for PDF generation */}
-        <div id="pdf-container" style={{ position: 'absolute', left: '-9999px', top: 0, zIndex: -10 }}>
+        <div id="pdf-container" style={{ position: 'absolute', left: '-9999px', top: 0 }}>
           <BulletinPDF 
             displayType={displayType} 
             semester={semester} 
