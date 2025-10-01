@@ -1,6 +1,7 @@
 
 
 
+
 'use client';
 
 import { useState } from 'react';
@@ -91,17 +92,34 @@ export default function ResultsPage() {
 
     // --- Header ---
     const logoSvgString = getLogoSvg();
-    const parser = new DOMParser();
-    const svgElem = parser.parseFromString(logoSvgString, "image/svg+xml").documentElement;
-    svgElem.setAttribute('width', '80');
-    svgElem.setAttribute('height', '80');
-    
-    // JSPDF SVG plugin is not added by default in all environments
-    // a try-catch will prevent crashes if it fails.
+    const img = new Image();
+    const svgBlob = new Blob([logoSvgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    const convertSvgToPng = (): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 80;
+                canvas.height = 80;
+                const ctx = canvas.getContext('2d');
+                ctx?.drawImage(img, 0, 0, 80, 80);
+                URL.revokeObjectURL(url);
+                resolve(canvas.toDataURL('image/png'));
+            };
+            img.onerror = (err) => {
+                URL.revokeObjectURL(url);
+                reject(err);
+            };
+            img.src = url;
+        });
+    };
+
     try {
-        await doc.svg(svgElem, { x: 40, y: y });
-    } catch(e) {
-        console.error("Failed to render SVG in PDF", e);
+        const pngDataUrl = await convertSvgToPng();
+        doc.addImage(pngDataUrl, 'PNG', 40, y, 80, 80);
+    } catch (e) {
+        console.error("Failed to render SVG to PNG for PDF", e);
     }
 
 
@@ -649,3 +667,4 @@ export default function ResultsPage() {
     </div>
   );
 }
+
