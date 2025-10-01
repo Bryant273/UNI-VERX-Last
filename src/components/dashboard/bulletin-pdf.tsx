@@ -4,7 +4,7 @@
 import React from 'react';
 import { studentData } from '@/lib/static-data';
 import { coursesResultsData, semesterResults, type CourseResult } from '@/lib/results-data';
-import Logo from '@/components/logo';
+import { getLogoSvg } from '@/components/logo';
 
 interface BulletinPDFProps {
   displayType: string;
@@ -23,17 +23,17 @@ const getGradeStyle = (grade: string): React.CSSProperties => {
 
 export default function BulletinPDF({ displayType, semester, courseId }: BulletinPDFProps) {
   const renderHeader = () => (
-    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #3F51B5', paddingBottom: '15px', marginBottom: '20px' }}>
-      <div style={{display: 'flex', alignItems: 'center'}}>
-        <Logo />
-        <div style={{ marginLeft: '15px' }}>
-          <p style={{ margin: '0 0 2px 0', fontSize: '11px' }}><strong style={{ color: '#000' }}>Nom:</strong> {studentData.name.split(' ').pop()}</p>
-          <p style={{ margin: '0 0 2px 0', fontSize: '11px' }}><strong style={{ color: '#000' }}>Prénom(s):</strong> {studentData.name.split(' ').slice(0, -1).join(' ')}</p>
-          <p style={{ margin: '0 0 2px 0', fontSize: '11px' }}><strong style={{ color: '#000' }}>Matricule:</strong> {studentData.id}</p>
-          <p style={{ margin: '0', fontSize: '11px' }}><strong style={{ color: '#000' }}>Classe:</strong> {studentData.class}</p>
+     <header style={{ borderBottom: '2px solid #3F51B5', paddingBottom: '15px', marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 20px 0', color: '#3F51B5', textAlign: 'center' }}>Bulletin de Résultats</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div dangerouslySetInnerHTML={{ __html: getLogoSvg() }} style={{ flexShrink: 0 }} />
+            <div style={{ marginLeft: '15px', flexGrow: 1 }}>
+                <p style={{ margin: '0 0 2px 0', fontSize: '11px' }}><strong style={{ color: '#000' }}>Nom:</strong> {studentData.name.split(' ').pop()}</p>
+                <p style={{ margin: '0 0 2px 0', fontSize: '11px' }}><strong style={{ color: '#000' }}>Prénom(s):</strong> {studentData.name.split(' ').slice(0, -1).join(' ')}</p>
+                <p style={{ margin: '0 0 2px 0', fontSize: '11px' }}><strong style={{ color: '#000' }}>Matricule:</strong> {studentData.id}</p>
+                <p style={{ margin: '0', fontSize: '11px' }}><strong style={{ color: '#000' }}>Classe:</strong> {studentData.class}</p>
+            </div>
         </div>
-      </div>
-      <h1 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0', color: '#3F51B5' }}>Bulletin de Résultats</h1>
     </header>
   );
 
@@ -179,12 +179,15 @@ export default function BulletinPDF({ displayType, semester, courseId }: Bulleti
         backgroundColor: 'white',
         fontFamily: 'Arial, sans-serif',
         color: '#000',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {displayType === 'course' ? renderCourseDetail() : renderBulletin()}
+      <div style={{ flexGrow: 1 }}>
+        {displayType === 'course' ? renderCourseDetail() : renderBulletin()}
+      </div>
       <footer style={{ marginTop: '30px', paddingTop: '10px', borderTop: '1px solid #ddd', fontSize: '9px', color: '#888', textAlign: 'center' }}>
-        <p>Généré via UNI-VERX® - Le Système Universitaire Intelligent</p>
-        <p>© {new Date().getFullYear()} INNOV'KORP. Tous droits réservés.</p>
+        <p>Imprimé via UNI-VERX®</p>
       </footer>
     </div>
   );
