@@ -60,9 +60,9 @@ const getCreditsClass = (status: 'validated' | 'failed' | 'pending') => {
 }
 
 const allCoursesForFilter = [
-    ...semesterResults.s1.courses.map(c => ({...c, id: c.module.toLowerCase().replace(/ /g, '_') + '_s1', semester: 'Semestre 1'})),
-    ...semesterResults.s2.courses.map(c => ({...c, id: c.module.toLowerCase().replace(/ /g, '_') + '_s2', semester: 'Semestre 2'}))
-];
+    ...semesterResults.s1.courses,
+    ...semesterResults.s2.courses,
+].map(c => ({...c, semester: c.id.endsWith('_s1') ? 'Semestre 1' : 'Semestre 2' }));
 
 const groupCoursesByUE = (courses: typeof semesterResults.s1.courses) => {
     return courses.reduce((acc, course) => {
@@ -255,6 +255,15 @@ export default function ResultsPage() {
                 // Apply background color to UE cells
                  if (data.column.index === 1 && data.cell.raw.rowSpan) {
                     data.cell.styles.fillColor = '#fafafa';
+                }
+                 // Color grades
+                if (data.column.index === 3) {
+                    const grade = data.cell.raw;
+                    const numericGrade = parseFloat(String(grade).split('/')[0].replace(',', '.'));
+                    if (numericGrade >= 16) data.cell.styles.textColor = [34, 139, 34]; // ForestGreen
+                    else if (numericGrade >= 14) data.cell.styles.textColor = [0, 0, 255]; // Blue
+                    else if (numericGrade >= 10) data.cell.styles.textColor = [255, 165, 0]; // Orange
+                    else data.cell.styles.textColor = [255, 0, 0]; // Red
                 }
             }
         }
