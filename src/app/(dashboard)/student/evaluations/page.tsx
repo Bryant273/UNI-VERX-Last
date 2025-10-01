@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -119,6 +120,14 @@ export default function EvaluationsPage() {
         if (files && files.length > 0) {
             setSelectedFile(files[0]);
         }
+    };
+    
+    const handleQcmModalOpenChange = (open: boolean) => {
+        if (!open && qcmStep === 'test') {
+            // If modal is closed during the test, submit automatically.
+            setQcmStep('results');
+        }
+        setQcmModalOpen(open);
     };
 
     const renderQcmContent = () => {
@@ -511,7 +520,7 @@ export default function EvaluationsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isQcmModalOpen} onOpenChange={setQcmModalOpen}>
+      <Dialog open={isQcmModalOpen} onOpenChange={handleQcmModalOpenChange}>
           <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col">
               <DialogHeader>
                   <DialogTitle>Interrogation : Développement Web</DialogTitle>
@@ -522,5 +531,7 @@ export default function EvaluationsPage() {
     </div>
   );
 }
+
+    
 
     
