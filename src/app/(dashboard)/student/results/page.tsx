@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import {
   FileText,
-  UserGraduate,
+  GraduationCap,
   Award,
   CircleDotDashed,
   TrendingUp,
@@ -321,7 +321,7 @@ export default function ResultsPage() {
             <CardHeader className="flex-col md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <UserGraduate className="h-6 w-6" />
+                        <GraduationCap className="h-6 w-6" />
                     </div>
                     <div>
                         <h1 className="text-xl font-bold">{studentData.name}</h1>
