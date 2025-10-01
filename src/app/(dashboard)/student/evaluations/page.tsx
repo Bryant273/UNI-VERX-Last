@@ -84,26 +84,66 @@ const qcmQuestions = Array.from({ length: 20 }, (_, i) => ({
 
 const QCM_HISTORY_ITEMS_PER_PAGE = 5;
 
+const generateQuestions = (topic: string, count: number) => {
+    return Array.from({ length: count }, (_, i) => ({
+        id: `q${i+1}`,
+        question: `Question ${i+1} sur ${topic}`,
+        options: ['Option A', 'Option B', 'Option C', 'Option D'],
+        userAnswer: ['Option A', 'Option B', 'Option C', 'Option D'][Math.floor(Math.random() * 4)],
+        correctAnswer: ['Option A', 'Option B'][Math.floor(Math.random() * 2)],
+    }));
+};
+
 const allQcmHistory = [
     { 
         id: 'QCM-032', 
         module: 'Mathématiques Discrètes', 
         date: '10/05/2025', 
         average: '17/20',
-        questions: Array.from({ length: 20 }, (_, i) => ({
-            id: `q${i+1}`,
-            question: `Question ${i+1} sur les graphes`,
-            options: ['Option A', 'Option B', 'Option C', 'Option D'],
-            userAnswer: i % 2 === 0 ? 'Option A' : 'Option B',
-            correctAnswer: 'Option A'
-        }))
+        questions: generateQuestions('les graphes', 20),
     },
-    { id: 'QCM-031', module: 'Algorithmique Avancée', date: '08/05/2025', average: '14/20' },
-    { id: 'QCM-030', module: 'Programmation Orientée Objet', date: '05/05/2025', average: '19/20' },
-    { id: 'QCM-029', module: 'Développement Web', date: '01/05/2025', average: '16/20' },
-    { id: 'QCM-028', module: 'Bases de Données', date: '28/04/2025', average: '15/20' },
-    { id: 'QCM-027', module: 'Réseaux', date: '25/04/2025', average: '12/20' },
-    { id: 'QCM-026', module: 'Systèmes d\'exploitation', date: '22/04/2025', average: '18/20' },
+    { 
+        id: 'QCM-031', 
+        module: 'Algorithmique Avancée', 
+        date: '08/05/2025', 
+        average: '14/20',
+        questions: generateQuestions('la complexité', 20),
+    },
+    { 
+        id: 'QCM-030', 
+        module: 'Programmation Orientée Objet', 
+        date: '05/05/2025', 
+        average: '19/20',
+        questions: generateQuestions('le polymorphisme', 20),
+    },
+    { 
+        id: 'QCM-029', 
+        module: 'Développement Web', 
+        date: '01/05/2025', 
+        average: '16/20',
+        questions: generateQuestions('les API REST', 20),
+    },
+    { 
+        id: 'QCM-028', 
+        module: 'Bases de Données', 
+        date: '28/04/2025', 
+        average: '15/20',
+        questions: generateQuestions('le SQL', 20),
+    },
+    { 
+        id: 'QCM-027', 
+        module: 'Réseaux', 
+        date: '25/04/2025', 
+        average: '12/20',
+        questions: generateQuestions('le modèle OSI', 20),
+    },
+    { 
+        id: 'QCM-026', 
+        module: 'Systèmes d\'exploitation', 
+        date: '22/04/2025', 
+        average: '18/20',
+        questions: generateQuestions('la gestion de la mémoire', 20),
+    },
 ];
 
 const QUESTIONS_PER_PAGE = 5;
@@ -705,5 +745,3 @@ export default function EvaluationsPage() {
     </div>
   );
 }
-
-    
