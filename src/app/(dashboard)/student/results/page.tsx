@@ -161,8 +161,9 @@ export default function ResultsPage() {
     const infoLine = (label: string, value: string, x: number, y: number) => {
         doc.setFont(undefined, 'bold');
         doc.text(label, x, y);
+        const labelWidth = doc.getTextWidth(label);
         doc.setFont(undefined, 'normal');
-        doc.text(value, x + 100, y);
+        doc.text(value, x + labelWidth + 5, y);
     }
     
     infoLine('Nom :', studentData.lastName, infoCol1X, infoY);
