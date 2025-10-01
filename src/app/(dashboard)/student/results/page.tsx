@@ -36,6 +36,7 @@ import {
   TableFooter
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { studentData } from '@/lib/static-data';
 import { coursesResultsData, semesterResults } from '@/lib/results-data';
 import { cn } from '@/lib/utils';
@@ -681,5 +682,3 @@ export default function ResultsPage() {
     </div>
   );
 }
-
-    
