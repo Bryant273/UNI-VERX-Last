@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ClipboardList,
   FileText,
@@ -20,7 +20,9 @@ import {
   Check,
   AlertTriangle,
   Info,
-  Download
+  Download,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -54,6 +56,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 const difficultyColors = {
   Facile: 'text-green-600 dark:text-green-400 bg-green-500',
@@ -69,54 +73,101 @@ const statusColors: { [key: string]: string } = {
   'En cours d\'évaluation': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
 };
 
+const qcmQuestions = Array.from({ length: 20 }, (_, i) => ({
+    id: `q${i + 1}`,
+    question: `Quelle est la capitale de la France ? Question ${i + 1}`,
+    options: ['Paris', 'Londres', 'Berlin', 'Madrid'],
+}));
+
+const QUESTIONS_PER_PAGE = 5;
+const TOTAL_PAGES = Math.ceil(qcmQuestions.length / QUESTIONS_PER_PAGE);
+
 
 export default function EvaluationsPage() {
-    const [activeTab, setActiveTab] = useState('interrogations');
     const [isSubjectModalOpen, setSubjectModalOpen] = useState(false);
     const [isUploadModalOpen, setUploadModalOpen] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isQcmModalOpen, setQcmModalOpen] = useState(false);
     const [qcmStep, setQcmStep] = useState('start'); // 'start', 'test', 'results'
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [qcmCurrentPage, setQcmCurrentPage] = useState(1);
+    const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [timeLeft, setTimeLeft] = useState(15 * 60);
+
+    useEffect(() => {
+        if (qcmStep !== 'test') return;
+
+        if (timeLeft <= 0) {
+            setQcmStep('results');
+            return;
+        }
+
+        const timer = setInterval(() => {
+            setTimeLeft((prevTime) => prevTime - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [qcmStep, timeLeft]);
+
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
 
     const handleFileChange = (files: FileList | null) => {
         if (files && files.length > 0) {
             setSelectedFile(files[0]);
         }
     };
-    
+
     const renderQcmContent = () => {
         switch (qcmStep) {
             case 'test':
+                const startIndex = (qcmCurrentPage - 1) * QUESTIONS_PER_PAGE;
+                const endIndex = startIndex + QUESTIONS_PER_PAGE;
+                const currentQuestions = qcmQuestions.slice(startIndex, endIndex);
+
                 return (
-                <div>
-                    <div className="mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-semibold">Temps restant :</span>
-                            <span className="font-mono text-base font-bold text-primary">14:32</span>
+                <div className='flex flex-col h-full'>
+                    <div className="bg-muted/50 p-3 rounded-lg mb-4">
+                        <div className="flex justify-between items-center text-sm font-semibold">
+                           <span>Développement Web - QCM N°1</span>
+                           <div className='flex items-center gap-2'>
+                             <Clock className="h-4 w-4" />
+                             <span>Temps restant : {formatTime(timeLeft)}</span>
+                           </div>
+                           <span>Page {qcmCurrentPage}/{TOTAL_PAGES}</span>
                         </div>
-                        <Progress value={95} />
                     </div>
                     
-                    <div className="space-y-6">
-                        {[1, 2].map(i => (
-                            <div key={i}>
-                                <p className="font-medium mb-3">Question {i}: En CSS, quelle propriété est utilisée pour changer la couleur du texte ?</p>
-                                <div className="space-y-2">
-                                    {['color', 'background-color', 'font-size', 'text-align'].map(opt => (
-                                        <label key={opt} className="flex items-center p-3 rounded-lg border bg-muted/20 hover:bg-muted/50 cursor-pointer">
-                                            <Input type="radio" name={`q${i}`} className="mr-3"/>
+                    <div className="space-y-6 flex-grow overflow-auto pr-2">
+                        {currentQuestions.map((q, index) => (
+                            <div key={q.id}>
+                                <p className="font-medium mb-3">{startIndex + index + 1}. {q.question}</p>
+                                <RadioGroup 
+                                    value={answers[q.id]}
+                                    onValueChange={(value) => setAnswers(prev => ({...prev, [q.id]: value}))}
+                                    className="grid grid-cols-2 gap-3"
+                                >
+                                    {q.options.map((opt, optIndex) => (
+                                        <Label key={optIndex} htmlFor={`${q.id}-${optIndex}`} className="flex items-center p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer has-[input:checked]:bg-primary/10 has-[input:checked]:border-primary">
+                                            <RadioGroupItem value={opt} id={`${q.id}-${optIndex}`} className="mr-3"/>
                                             <span>{opt}</span>
-                                        </label>
+                                        </Label>
                                     ))}
-                                </div>
+                                </RadioGroup>
                             </div>
                         ))}
                     </div>
 
-                    <DialogFooter className="mt-8">
-                       <Button variant="outline" onClick={() => setQcmStep('start')}><ChevronLeft /> Précédent</Button>
-                       <Button onClick={() => setQcmStep('results')}>Terminer et envoyer <Check className="ml-2" /></Button>
+                    <DialogFooter className="mt-8 pt-4 border-t">
+                        <Button variant="outline" onClick={() => setQcmCurrentPage(p => p-1)} disabled={qcmCurrentPage === 1}><ArrowLeft className="mr-2"/> Précédent</Button>
+                        {qcmCurrentPage < TOTAL_PAGES ? (
+                            <Button onClick={() => setQcmCurrentPage(p => p+1)}>Suivant <ArrowRight className="ml-2"/></Button>
+                        ) : (
+                            <Button onClick={() => setQcmStep('results')} className="bg-green-600 hover:bg-green-700">Soumettre les réponses <Check className="ml-2" /></Button>
+                        )}
                     </DialogFooter>
                 </div>
                 );
@@ -139,7 +190,7 @@ export default function EvaluationsPage() {
                           </div>
                           <div className="flex justify-between items-center">
                               <span className="text-sm font-medium">Temps utilisé :</span>
-                              <span className="text-sm font-bold">12:34</span>
+                              <span className="text-sm font-bold">{formatTime((15*60) - timeLeft)}</span>
                           </div>
                         </CardContent>
                     </Card>
@@ -157,7 +208,7 @@ export default function EvaluationsPage() {
                     </DialogDescription>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setQcmModalOpen(false)}>Annuler</Button>
-                        <Button onClick={() => setQcmStep('test')}>Commencer</Button>
+                        <Button onClick={() => { setTimeLeft(15*60); setQcmStep('test'); }}>Commencer</Button>
                     </DialogFooter>
                 </div>
                 );
@@ -220,7 +271,7 @@ export default function EvaluationsPage() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button className="w-full" onClick={() => { setQcmStep('start'); setQcmModalOpen(true);}}>
+                      <Button className="w-full" onClick={() => { setQcmCurrentPage(1); setAnswers({}); setQcmStep('start'); setQcmModalOpen(true);}}>
                         Commencer l'interrogation
                       </Button>
                     </CardFooter>
@@ -461,7 +512,7 @@ export default function EvaluationsPage() {
       </Dialog>
 
       <Dialog open={isQcmModalOpen} onOpenChange={setQcmModalOpen}>
-          <DialogContent className="sm:max-w-2xl">
+          <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col">
               <DialogHeader>
                   <DialogTitle>Interrogation : Développement Web</DialogTitle>
               </DialogHeader>
