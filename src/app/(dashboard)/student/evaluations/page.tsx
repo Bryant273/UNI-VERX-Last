@@ -24,6 +24,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Search,
+  History,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -61,7 +62,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { allEvents } from '@/lib/static-data';
+import { allEvents, studentData } from '@/lib/static-data';
+import type { UserRole } from '@/lib/data';
+import { useParams } from 'next/navigation';
 
 // --- Interfaces & Types ---
 interface QcmQuestion {
@@ -72,20 +75,25 @@ interface QcmQuestion {
     userAnswer?: string;
 }
 
+type QcmStatus = 'Effectué' | 'Manqué' | 'Rattrapage';
+
 interface QcmHistoryItem {
     id: string;
     module: string;
     date: string;
     average: string;
     questions: QcmQuestion[];
+    status: QcmStatus;
 }
 
 interface Qcm {
+    id: string;
     title: string;
     difficulty: 'Facile' | 'Moyenne' | 'Difficile';
     startTime: Date;
     endTime: Date;
     questions: QcmQuestion[];
+    isRattrapage?: boolean;
 }
 
 
@@ -102,12 +110,15 @@ const statusColors: { [key: string]: string } = {
   'Rendu confirmé': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
   'Noté': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
   'En cours d\'évaluation': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+  'Effectué': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+  'Manqué': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+  'Rattrapage': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
 };
 
 
 const generateQuestions = (topic: string, count: number): QcmQuestion[] => {
     return Array.from({ length: count }, (_, i) => ({
-        id: `q${i+1}`,
+        id: `${topic.replace(/\s+/g, '-')}-q${i+1}`,
         question: `Question ${i+1} sur ${topic}`,
         options: ['Option A', 'Option B', 'Option C', 'Option D'],
         correctAnswer: ['Option A', 'Option B', 'Option C', 'Option D'][Math.floor(Math.random() * 4)],
@@ -121,6 +132,7 @@ const initialQcmHistory: QcmHistoryItem[] = [
         date: '10/05/2025', 
         average: '17/20',
         questions: generateQuestions('les graphes', 20).map(q => ({...q, userAnswer: q.options[Math.floor(Math.random()*4)]})),
+        status: 'Effectué',
     },
     { 
         id: 'QCM-031', 
@@ -128,7 +140,16 @@ const initialQcmHistory: QcmHistoryItem[] = [
         date: '08/05/2025', 
         average: '14/20',
         questions: generateQuestions('la complexité', 20).map(q => ({...q, userAnswer: q.options[Math.floor(Math.random()*4)]})),
+        status: 'Effectué',
     },
+    {
+      id: 'QCM-030',
+      module: 'Sécurité Informatique',
+      date: '05/05/2025',
+      average: '0/20',
+      questions: generateQuestions('la cryptographie', 20),
+      status: 'Manqué',
+    }
 ];
 
 const QUESTIONS_PER_PAGE = 5;
@@ -145,11 +166,15 @@ const formatTime = (seconds: number) => {
 
 const getDailyQcms = (): Qcm[] => {
     const now = new Date();
+    const todayDay = now.toLocaleString('fr-FR', { weekday: 'long' });
     const studentEvents = allEvents['student'];
+    
+    // In a real app, date comparison would be more robust. Here we simplify.
     const todayEvents = studentEvents.filter(event => {
-        // This is a mock-up. In a real app, you would parse event dates properly.
-        // For now, we assume all events in `allEvents` are for today for demonstration.
-        return event.type === 'cours' || event.type === 'td' || event.type === 'tp';
+        // Simplified: check if event is today based on a mock "day" property
+        const eventDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Mock event date
+        return (event.type === 'cours' || event.type === 'td' || event.type === 'tp') && 
+               now.toDateString() === eventDate.toDateString();
     });
 
     return todayEvents.map(event => {
@@ -162,6 +187,7 @@ const getDailyQcms = (): Qcm[] => {
         if (event.course.includes('Introduction')) difficulty = 'Facile';
 
         return {
+            id: `QCM-${event.id}-${now.toISOString().split('T')[0]}`,
             title: event.course,
             difficulty: difficulty,
             startTime,
@@ -173,14 +199,14 @@ const getDailyQcms = (): Qcm[] => {
 
 
 // --- Sub-components for QCM Modal ---
-const QcmStart: React.FC<{ onStart: () => void, onClose: () => void }> = ({ onStart, onClose }) => (
+const QcmStart: React.FC<{ onStart: () => void, onClose: () => void, qcm: Qcm }> = ({ onStart, onClose, qcm }) => (
     <div>
         <DialogDescription className="mb-6">
-            Vous êtes sur le point de commencer l'interrogation. Une fois démarré, vous disposez de {QCM_DURATION_MINUTES} minutes pour terminer le QCM.
+            Vous êtes sur le point de commencer {qcm.isRattrapage ? "un rattrapage" : "l'interrogation"}. Une fois démarré, vous disposez de {QCM_DURATION_MINUTES} minutes pour terminer.
         </DialogDescription>
         <DialogFooter>
             <Button variant="ghost" onClick={onClose}>Annuler</Button>
-            <Button onClick={onStart}>Commencer</Button>
+            <Button onClick={onStart}>{qcm.isRattrapage ? "Commencer le rattrapage" : "Commencer"}</Button>
         </DialogFooter>
     </div>
 );
@@ -280,6 +306,9 @@ const QcmResults: React.FC<{
 
 // --- Main Component ---
 export default function EvaluationsPage() {
+    const params = useParams();
+    const role = params.role as UserRole;
+    
     // --- State ---
     const [now, setNow] = useState(new Date());
     const [isSubjectModalOpen, setSubjectModalOpen] = useState(false);
@@ -300,6 +329,7 @@ export default function EvaluationsPage() {
     const [qcmHistorySearch, setQcmHistorySearch] = useState('');
     const [qcmHistoryModule, setQcmHistoryModule] = useState('all');
     const [qcmHistoryCurrentPage, setQcmHistoryCurrentPage] = useState(1);
+    const [rattrapageActive, setRattrapageActive] = useState(false);
     
     // --- Memos & Derived State ---
     const dailyQcms = useMemo(getDailyQcms, [now]);
@@ -316,6 +346,22 @@ export default function EvaluationsPage() {
         (qcmHistoryCurrentPage - 1) * QCM_HISTORY_ITEMS_PER_PAGE,
         qcmHistoryCurrentPage * QCM_HISTORY_ITEMS_PER_PAGE
     );
+    
+    const missedQcmsForRattrapage = useMemo(() => {
+        if (!rattrapageActive) return [];
+        return allQcmHistory
+            .filter(h => h.status === 'Manqué')
+            .map(h => ({
+                id: h.id,
+                title: h.module,
+                difficulty: 'Moyenne' as 'Moyenne',
+                startTime: new Date(),
+                endTime: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48h from now
+                questions: h.questions,
+                isRattrapage: true,
+            }));
+    }, [rattrapageActive, allQcmHistory]);
+
 
     // --- Effects ---
     useEffect(() => {
@@ -344,15 +390,28 @@ export default function EvaluationsPage() {
         if (!selectedQcm) return;
 
         const score = selectedQcm.questions.filter(q => answers[q.id] === q.correctAnswer).length;
-        const newHistoryItem: QcmHistoryItem = {
-            id: `QCM-${Date.now()}`,
-            module: selectedQcm.title,
-            date: new Date().toLocaleDateString('fr-FR'),
-            average: `${score}/${selectedQcm.questions.length}`,
-            questions: selectedQcm.questions.map(q => ({ ...q, userAnswer: answers[q.id] })),
-        };
-
-        setAllQcmHistory(prev => [newHistoryItem, ...prev]);
+        
+        // If it's a rattrapage, update the existing history item
+        if (selectedQcm.isRattrapage) {
+            setAllQcmHistory(prev => 
+                prev.map(h => 
+                    h.id === selectedQcm.id
+                    ? { ...h, status: 'Rattrapage', average: `${score}/${selectedQcm.questions.length}` }
+                    : h
+                )
+            );
+        } else {
+             const newHistoryItem: QcmHistoryItem = {
+                id: selectedQcm.id,
+                module: selectedQcm.title,
+                date: new Date().toLocaleDateString('fr-FR'),
+                average: `${score}/${selectedQcm.questions.length}`,
+                questions: selectedQcm.questions.map(q => ({ ...q, userAnswer: answers[q.id] })),
+                status: 'Effectué',
+            };
+            setAllQcmHistory(prev => [newHistoryItem, ...prev]);
+        }
+        
         setQcmStep('results');
     }, [selectedQcm, answers]);
 
@@ -379,6 +438,7 @@ export default function EvaluationsPage() {
         setQcmCurrentPage(1);
         setAnswers({});
         setQcmStep('start');
+        setTimeLeft(QCM_DURATION_MINUTES * 60);
         setQcmModalOpen(true);
     };
 
@@ -407,11 +467,15 @@ export default function EvaluationsPage() {
     
     const renderQcmButton = (qcm: Qcm) => {
         const isAvailable = now >= qcm.startTime && now <= qcm.endTime;
+        const alreadyDone = allQcmHistory.some(h => h.id === qcm.id && (h.status === 'Effectué' || h.status === 'Rattrapage'));
 
         let buttonContent = <Button className="w-full" onClick={() => handleStartQcm(qcm)}>Commencer l'interrogation</Button>;
         let description = `Disponible jusqu'à ${qcm.endTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
 
-        if (!isAvailable) {
+        if (alreadyDone) {
+             buttonContent = <Button className="w-full" disabled>Déjà effectué</Button>;
+             description = "Vous avez déjà complété ce QCM.";
+        } else if (!isAvailable) {
             buttonContent = <Button className="w-full" disabled>Commencer l'interrogation</Button>;
             if (now < qcm.startTime) {
                 description = `Disponible à partir de ${qcm.startTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
@@ -421,7 +485,7 @@ export default function EvaluationsPage() {
         }
         
         return (
-            <Card key={qcm.title} className="flex flex-col">
+            <Card key={qcm.id} className="flex flex-col">
                 <CardHeader>
                   <CardTitle className="text-lg">{qcm.title}</CardTitle>
                   <CardDescription>
@@ -474,7 +538,7 @@ export default function EvaluationsPage() {
                  />;
             case 'start':
             default:
-                return <QcmStart onStart={() => { setTimeLeft(QCM_DURATION_MINUTES * 60); setQcmStep('test'); }} onClose={() => handleQcmModalOpenChange(false)} />;
+                return <QcmStart onStart={() => setQcmStep('test')} onClose={() => handleQcmModalOpenChange(false)} qcm={selectedQcm}/>;
         }
     };
 
@@ -491,6 +555,37 @@ export default function EvaluationsPage() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="interrogations" className="space-y-6 mt-6">
+            {role === 'admin' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Zone Administrateur</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Button onClick={() => setRattrapageActive(prev => !prev)}>
+                            <History className="mr-2" />
+                            {rattrapageActive ? "Désactiver" : "Activer"} la session de rattrapage (48h)
+                        </Button>
+                        {rattrapageActive && <p className="text-sm text-green-600 mt-2">La session de rattrapage est active.</p>}
+                    </CardContent>
+                </Card>
+            )}
+
+            {rattrapageActive && (
+                 <Card>
+                    <CardHeader>
+                      <CardTitle>QCM de Rattrapage</CardTitle>
+                       <AlertDescription className="text-blue-700 dark:text-blue-400">
+                            Voici les QCM que vous avez manqués. Vous avez 48h pour les compléter.
+                       </AlertDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {missedQcmsForRattrapage.length > 0 ? missedQcmsForRattrapage.map(qcm => renderQcmButton(qcm)) : <p className="text-muted-foreground col-span-full text-center">Vous n'avez aucun QCM à rattraper. Bravo !</p>}
+                      </div>
+                    </CardContent>
+                </Card>
+            )}
+
           <Card>
             <CardHeader>
               <CardTitle>QCM du jour</CardTitle>
@@ -504,11 +599,11 @@ export default function EvaluationsPage() {
                     <Info className="h-4 w-4 text-blue-500" />
                     <AlertTitle className="text-blue-800 dark:text-blue-300">QCM programmés pour aujourd'hui</AlertTitle>
                     <AlertDescription className="text-blue-700 dark:text-blue-400">
-                        Vous avez {dailyQcms.length} interrogation{dailyQcms.length > 1 ? 's' : ''} prévue{dailyQcms.length > 1 ? 's' : ''} aujourd'hui. Chaque QCM est disponible pendant les 15 premières minutes du cours.
+                        {`Vous avez ${dailyQcms.length} interrogation(s) prévue(s) aujourd'hui, correspondant à votre emploi du temps. Chaque QCM est disponible pendant les 15 premières minutes du cours.`}
                     </AlertDescription>
                 </Alert>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {dailyQcms.length > 0 ? dailyQcms.map(renderQcmButton) : <p className="text-muted-foreground col-span-full text-center">Aucun QCM prévu pour aujourd'hui.</p>}
+                {dailyQcms.length > 0 ? dailyQcms.map(renderQcmButton) : <p className="text-muted-foreground col-span-full text-center">Aucun QCM prévu pour aujourd'hui dans votre emploi du temps.</p>}
               </div>
             </CardContent>
           </Card>
@@ -543,22 +638,22 @@ export default function EvaluationsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>#</TableHead>
                     <TableHead>ID</TableHead>
                     <TableHead>Module</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Moyenne</TableHead>
+                    <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedQcmHistory.length > 0 ? paginatedQcmHistory.map((item, index) => (
+                    {paginatedQcmHistory.length > 0 ? paginatedQcmHistory.map((item) => (
                         <TableRow key={item.id} className="even:bg-muted/40">
-                            <TableCell className="font-medium">{(qcmHistoryCurrentPage - 1) * QCM_HISTORY_ITEMS_PER_PAGE + index + 1}</TableCell>
                             <TableCell>{item.id}</TableCell>
                             <TableCell>{item.module}</TableCell>
                             <TableCell>{item.date}</TableCell>
                             <TableCell className="font-semibold">{item.average}</TableCell>
+                            <TableCell><Badge variant="outline" className={`border-0 ${statusColors[item.status]}`}>{item.status}</Badge></TableCell>
                             <TableCell className="text-right">
                                 <Button variant="ghost" size="icon" onClick={() => handleHistoryClick(item)}>
                                     <Eye className="h-4 w-4"/>
