@@ -166,42 +166,46 @@ export default function ResultsPage() {
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                     <Card className="lg:col-span-1 bg-gradient-to-br from-primary/10 to-secondary/10">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base font-medium">Moyenne annuelle</CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-center">
+                     <Card className="lg:col-span-1 bg-gradient-to-br from-primary/10 to-secondary/10 flex flex-col items-center justify-center p-6">
+                        <div className="text-center">
+                            <CardTitle className="text-base font-medium text-center mb-1">Moyenne annuelle</CardTitle>
                             <p className={cn("text-4xl font-bold", getGradeClass(data.average))}>{data.average}</p>
                             <p className="text-sm text-muted-foreground mt-1">Mention : {data.mention}</p>
-                        </CardContent>
+                        </div>
                     </Card>
-                     <Card>
-                        <CardHeader className="pb-2">
-                           <CardTitle className="text-base font-medium flex items-center gap-2"><CircleDotDashed/>Crédits validés</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold text-center">{data.credits}</div>
-                            <Progress value={creditsValue} className="h-2 mt-2"/>
-                            <p className="text-xs text-muted-foreground text-center mt-2">{data.creditsStatus}</p>
-                        </CardContent>
+                    <Card className="flex flex-col items-center justify-center p-6">
+                        <div className="relative h-24 w-24 mb-3">
+                            <svg className="h-full w-full" viewBox="0 0 36 36">
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="hsl(var(--muted))" strokeWidth="2"></path>
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray={`${creditsValue}, 100`}></path>
+                            </svg>
+                             <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-primary">{Math.round(creditsValue)}%</div>
+                        </div>
+                        <div className="text-center">
+                           <CardTitle className="text-base font-medium">Crédits validés</CardTitle>
+                           <p className="text-lg font-bold">{data.credits}</p>
+                           <p className="text-sm text-muted-foreground">{data.creditsStatus}</p>
+                        </div>
                     </Card>
-                    <Card>
-                        <CardHeader className="pb-2">
-                           <CardTitle className="text-base font-medium flex items-center gap-2"><Award />Classement</CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-center">
-                             <p className="text-3xl font-bold">{data.rank}</p>
-                             <p className="text-sm text-muted-foreground">sur {data.totalStudents} étudiants (Top 10%)</p>
-                        </CardContent>
+                    <Card className="flex flex-col items-center justify-center p-6">
+                         <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                            <Award className="h-10 w-10" />
+                        </div>
+                        <div className="text-center">
+                           <CardTitle className="text-base font-medium">Classement</CardTitle>
+                           <p className="text-lg font-bold">{data.rank}</p>
+                           <p className="text-sm text-muted-foreground">sur {data.totalStudents} étudiants (Top 10%)</p>
+                        </div>
                     </Card>
-                     <Card>
-                        <CardHeader className="pb-2">
-                           <CardTitle className="text-base font-medium flex items-center gap-2"><CheckCircle2 />Statut</CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-center">
-                            <p className="text-3xl font-bold text-green-600">{data.status}</p>
+                     <Card className="flex flex-col items-center justify-center p-6">
+                        <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 mb-3">
+                            <CheckCircle2 className="h-10 w-10" />
+                        </div>
+                         <div className="text-center">
+                           <CardTitle className="text-base font-medium">Statut</CardTitle>
+                           <p className="text-lg font-bold text-green-600">{data.status}</p>
                             <p className="text-sm text-muted-foreground">{data.statusDetails}</p>
-                        </CardContent>
+                        </div>
                     </Card>
                 </div>
 
@@ -382,7 +386,7 @@ export default function ResultsPage() {
                     ) : (
                         <div className="md:col-span-2">
                            <label htmlFor="course" className="text-sm font-medium text-muted-foreground">Matière</label>
-                            <Select value={course} onValueChange={setCourse}>
+                           <Select value={course} onValueChange={setCourse}>
                                 <SelectTrigger id="course">
                                     <SelectValue placeholder="Sélectionner une matière" />
                                 </SelectTrigger>
