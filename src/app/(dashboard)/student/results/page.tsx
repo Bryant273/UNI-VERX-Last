@@ -19,7 +19,9 @@ import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -303,6 +305,19 @@ export default function ResultsPage() {
 
   const renderContent = () => {
     if (displayType === 'course') {
+        if (!course) {
+            return (
+                <Card>
+                    <CardContent className="pt-6">
+                         <div className="text-center p-8 border-2 border-dashed rounded-lg">
+                            <Info className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                            <h3 className="mt-4 text-lg font-medium">Veuillez sélectionner une matière</h3>
+                            <p className="mt-1 text-sm text-muted-foreground">Choisissez une matière dans le menu ci-dessus pour voir les détails.</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            )
+        }
         return renderCourseDetailView();
     }
     
@@ -372,13 +387,14 @@ export default function ResultsPage() {
                                     <SelectValue placeholder="Sélectionner une matière" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="" disabled>Sélectionner une matière</SelectItem>
-                                    <optgroup label="Semestre 1">
-                                        {allCoursesForFilter.filter(c => c.semester === 'Semestre 1').map(c => <option key={c.id} value={c.id}>{c.module}</option>)}
-                                    </optgroup>
-                                     <optgroup label="Semestre 2">
-                                        {allCoursesForFilter.filter(c => c.semester === 'Semestre 2').map(c => <option key={c.id} value={c.id}>{c.module}</option>)}
-                                    </optgroup>
+                                    <SelectGroup>
+                                        <SelectLabel>Semestre 1</SelectLabel>
+                                        {allCoursesForFilter.filter(c => c.semester === 'Semestre 1').map(c => <SelectItem key={c.id} value={c.id}>{c.module}</SelectItem>)}
+                                    </SelectGroup>
+                                    <SelectGroup>
+                                        <SelectLabel>Semestre 2</SelectLabel>
+                                        {allCoursesForFilter.filter(c => c.semester === 'Semestre 2').map(c => <SelectItem key={c.id} value={c.id}>{c.module}</SelectItem>)}
+                                    </SelectGroup>
                                 </SelectContent>
                             </Select>
                         </div>
