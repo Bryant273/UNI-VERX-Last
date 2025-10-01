@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -131,14 +132,16 @@ export default function EvaluationsPage() {
                         18/20
                     </div>
                     <Card className="text-left p-4">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-medium">Bonnes réponses :</span>
-                            <span className="text-sm font-bold text-green-600">18/20</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium">Temps utilisé :</span>
-                            <span className="text-sm font-bold">12:34</span>
-                        </div>
+                        <CardContent className="p-0">
+                          <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium">Bonnes réponses :</span>
+                              <span className="text-sm font-bold text-green-600">18/20</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium">Temps utilisé :</span>
+                              <span className="text-sm font-bold">12:34</span>
+                          </div>
+                        </CardContent>
                     </Card>
                     <DialogFooter className="mt-6">
                         <Button onClick={() => setQcmModalOpen(false)} className="w-full">Fermer</Button>
@@ -468,3 +471,5 @@ export default function EvaluationsPage() {
     </div>
   );
 }
+
+    

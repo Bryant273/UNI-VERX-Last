@@ -1,17 +1,16 @@
+
 'use client';
 
 import { useState } from 'react';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import 'jspdf-autotable';
+import type { jsPDF as jsPDFType } from 'jspdf';
 import {
-  FileText,
   GraduationCap,
   Award,
-  CircleDotDashed,
   TrendingUp,
   Download,
   CheckCircle2,
-  XCircle,
   MessageCircle,
   Info,
   Loader2,
@@ -39,8 +38,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { studentData } from '@/lib/static-data';
 import { coursesResultsData, semesterResults } from '@/lib/results-data';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { getLogoSvg } from '@/components/logo';
 
@@ -53,6 +50,16 @@ const getGradeClass = (grade: string): string => {
   if (numericGrade >= 10) return 'text-amber-600 dark:text-amber-400';
   return 'text-red-600 dark:text-red-400';
 };
+
+const getPdfGradeColor = (grade: string): [number, number, number] => {
+    if (!grade) return [0, 0, 0]; // Black
+    const numericGrade = parseFloat(grade.split('/')[0].replace(',', '.'));
+    if (numericGrade >= 16) return [34, 139, 34]; // ForestGreen
+    if (numericGrade >= 14) return [0, 0, 255]; // Blue
+    if (numericGrade >= 10) return [255, 165, 0]; // Orange
+    return [255, 0, 0]; // Red
+};
+
 
 const getCreditsClass = (status: 'validated' | 'failed' | 'pending') => {
     if (status === 'validated') return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
@@ -81,40 +88,18 @@ export default function ResultsPage() {
 
   const generatePdf = async () => {
     setIsGeneratingPdf(true);
-
-    const tableElement = document.getElementById('annual-bulletin-table');
-    if (!tableElement) {
-        console.error("Table element not found for PDF generation.");
-        setIsGeneratingPdf(false);
-        return;
-    }
-
-    // Temporarily increase resolution for better quality capture
-    const originalWidth = tableElement.style.width;
-    tableElement.style.width = '1200px';
-
-    const canvas = await html2canvas(tableElement, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true,
-        backgroundColor: '#ffffff', // Ensure background is white
-    });
-    
-    // Restore original width
-    tableElement.style.width = originalWidth;
-
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const doc = new jsPDF('p', 'pt', 'a4');
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.getWidth();
     let y = 0;
 
     // --- En-tête ---
-    pdf.setFontSize(18);
-    pdf.setFont(undefined, 'bold');
-    pdf.text('Bulletin de Résultats', pdfWidth / 2, y + 40, { align: 'center' });
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text('Bulletin de Résultats', pageWidth / 2, y + 40, { align: 'center' });
     y += 70;
 
-    // Logo
+    // --- Logo ---
     const logoSvgString = getLogoSvg();
     const img = new Image();
     const svgBlob = new Blob([logoSvgString], { type: 'image/svg+xml;charset=utf-8' });
@@ -124,10 +109,12 @@ export default function ResultsPage() {
         return new Promise((resolve, reject) => {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                canvas.width = 40;
-                canvas.height = 40;
+                const desiredWidth = 40;
+                const aspectRatio = img.width / img.height;
+                canvas.width = desiredWidth;
+                canvas.height = desiredWidth / aspectRatio;
                 const ctx = canvas.getContext('2d');
-                ctx?.drawImage(img, 0, 0, 40, 40);
+                ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
                 URL.revokeObjectURL(url);
                 resolve(canvas.toDataURL('image/png'));
             };
@@ -141,33 +128,138 @@ export default function ResultsPage() {
 
     try {
         const pngDataUrl = await convertSvgToPng();
-        pdf.addImage(pngDataUrl, 'PNG', 40, y, 40, 40);
+        doc.addImage(pngDataUrl, 'PNG', 40, y - 20, 40, 40);
     } catch (e) {
         console.error("Failed to render SVG to PNG for PDF", e);
     }
 
-    // Student Info
-    pdf.setFontSize(10);
-    pdf.setFont(undefined, 'normal');
-    pdf.text(`Nom: ${studentData.lastName}`, 100, y + 10);
-    pdf.text(`Prénoms: ${studentData.firstName}`, 100, y + 25);
-    pdf.text(`Matricule: ${studentData.id}`, 300, y + 10);
-    pdf.text(`Classe: ${studentData.class}`, 300, y + 25);
-    y += 50;
-
-    // --- Table Image ---
-    const imgProps = pdf.getImageProperties(imgData);
-    const imgHeight = (imgProps.height * (pdfWidth - 80)) / imgProps.width;
-    pdf.addImage(imgData, 'PNG', 40, y, pdfWidth - 80, imgHeight);
-    y += imgHeight;
+    // --- Informations de l'étudiant ---
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    const studentInfoX = 100;
+    doc.text(`Nom: ${studentData.lastName}`, studentInfoX, y - 10);
+    doc.text(`Prénoms: ${studentData.firstName}`, studentInfoX, y + 5);
+    doc.text(`Matricule: ${studentData.id}`, studentInfoX, y + 20);
+    doc.text(`Classe: ${studentData.class}`, studentInfoX + 200, y - 10);
     
+    y += 40;
+
+    // --- Table des résultats ---
+    const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
+    const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
+
+    const head = [['Semestre', 'UE', 'Module', 'Note', 'Crédits validés']];
+    const body: any[] = [];
+    
+    // Process Semestre 1
+    const s1Courses = Object.values(s1Grouped).flat();
+    Object.entries(s1Grouped).forEach(([ue, courses], ueIndex) => {
+        courses.forEach((course, courseIndex) => {
+            const row = [];
+            // Semestre Cell
+            if (ueIndex === 0 && courseIndex === 0) {
+                row.push({ content: 'Semestre 1', rowSpan: s1Courses.length, styles: { valign: 'middle', halign: 'center' } });
+            }
+            // UE Cell
+            if (courseIndex === 0) {
+                row.push({ content: ue, rowSpan: courses.length, styles: { valign: 'middle' } });
+            }
+            // Other cells
+            row.push(course.module);
+            row.push({ content: course.grade, styles: { textColor: getPdfGradeColor(course.grade) } });
+            row.push(course.creditsValidated);
+            body.push(row);
+        });
+    });
+
+    // Process Semestre 2
+    const s2Courses = Object.values(s2Grouped).flat();
+    Object.entries(s2Grouped).forEach(([ue, courses], ueIndex) => {
+        courses.forEach((course, courseIndex) => {
+            const row = [];
+            // Semestre Cell
+            if (ueIndex === 0 && courseIndex === 0) {
+                row.push({ content: 'Semestre 2', rowSpan: s2Courses.length, styles: { valign: 'middle', halign: 'center' } });
+            }
+            // UE Cell
+            if (courseIndex === 0) {
+                row.push({ content: ue, rowSpan: courses.length, styles: { valign: 'middle' } });
+            }
+            // Other cells
+            row.push(course.module);
+            row.push({ content: course.grade, styles: { textColor: getPdfGradeColor(course.grade) } });
+            row.push(course.creditsValidated);
+            body.push(row);
+        });
+    });
+    
+    // Total row
+    const totalData = semesterResults.annual;
+    body.push([
+        { content: 'Total Année', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold', fillColor: '#F1F5F9' } },
+        { content: totalData.average, styles: { fontStyle: 'bold', textColor: getPdfGradeColor(totalData.average), fillColor: '#F1F5F9' } },
+        { content: totalData.credits, styles: { fontStyle: 'bold', fillColor: '#F1F5F9' } }
+    ]);
+
+
+    (doc as jsPDFType).autoTable({
+        head: head,
+        body: body,
+        startY: y,
+        theme: 'grid',
+        headStyles: { fillColor: [241, 245, 249], textColor: [51, 65, 85], fontStyle: 'bold' },
+        styles: {
+            font: 'helvetica',
+            fontSize: 9,
+            cellPadding: 6,
+        },
+        columnStyles: {
+            0: { cellWidth: 60, fontStyle: 'bold' },
+            1: { cellWidth: 140, fontStyle: 'bold' },
+            2: { cellWidth: 'auto' },
+            3: { halign: 'center', cellWidth: 60, fontStyle: 'bold' },
+            4: { halign: 'center', cellWidth: 80, fontStyle: 'bold' }
+        },
+        didParseCell: (data) => {
+            if (data.section === 'body' && data.row.raw.length > 3) { // Exclude total row
+                // Apply background color to UE cells
+                 if (data.column.index === 1 && data.cell.raw.rowSpan) {
+                    data.cell.styles.fillColor = '#fafafa';
+                }
+            }
+        }
+    });
+
     // --- Pied de page ---
-    pdf.setFontSize(8);
-    pdf.setTextColor(150);
-    pdf.text('Imprimé via UNI-VERX®', pdfWidth / 2, pdfHeight - 30, { align: 'center' });
+    y = (doc as any).lastAutoTable.finalY + 20;
+
+    const juryComment = semesterResults.annual.juryComment;
+    if (juryComment) {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text("Commentaires du jury:", 40, y);
+        y += 20;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'italic');
+        const splitComment = doc.splitTextToSize(juryComment, pageWidth - 80);
+        doc.text(splitComment, 40, y);
+        y += (splitComment.length * 10) + 30;
+    }
+    
+    doc.setLineWidth(1.5);
+    doc.line(40, y, pageWidth - 40, y);
+    y += 15;
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text("Cachet de l'établissement :", pageWidth - 40, y, { align: 'right'});
 
 
-    pdf.save(`bulletin_annuel_${studentData.name.replace(' ', '_')}.pdf`);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text('Imprimé via UNI-VERX®', pageWidth / 2, pageHeight - 30, { align: 'center' });
+
+    doc.save(`bulletin_annuel_${studentData.name.replace(' ', '_')}.pdf`);
     setIsGeneratingPdf(false);
   };
 
@@ -277,7 +369,6 @@ export default function ResultsPage() {
                                 <TableHead>UE</TableHead>
                                 <TableHead>Module</TableHead>
                                 <TableHead>Moyenne</TableHead>
-                                <TableHead>Crédits à valider</TableHead>
                                 <TableHead>Crédits validés</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -296,7 +387,6 @@ export default function ResultsPage() {
                                         )}
                                         <TableCell>{course.module}</TableCell>
                                         <TableCell className={cn("font-semibold", getGradeClass(course.grade))}>{course.grade}</TableCell>
-                                        <TableCell>{course.creditsToValidate}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className={`border-0 ${getCreditsClass(course.creditsValidated > 0 ? 'validated' : 'failed')}`}>
                                                 {course.creditsValidated}
@@ -320,7 +410,6 @@ export default function ResultsPage() {
                                         )}
                                         <TableCell>{course.module}</TableCell>
                                         <TableCell className={cn("font-semibold", getGradeClass(course.grade))}>{course.grade}</TableCell>
-                                        <TableCell>{course.creditsToValidate}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className={`border-0 ${getCreditsClass(course.creditsValidated > 0 ? 'validated' : 'failed')}`}>
                                                 {course.creditsValidated}
@@ -331,11 +420,10 @@ export default function ResultsPage() {
                             ))}
                         </TableBody>
                         <TableFooter>
-                            <TableRow className="text-base">
+                            <TableRow className="text-base bg-muted/80">
                                 <TableCell colSpan={3} className="text-right font-extrabold">Total Année</TableCell>
                                 <TableCell className={cn("font-extrabold", getGradeClass(data.average))}>{data.average}</TableCell>
-                                <TableCell className="font-extrabold">60</TableCell>
-                                <TableCell className="font-extrabold">{data.credits.split('/')[0]}</TableCell>
+                                <TableCell className="font-extrabold">{data.credits}</TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>

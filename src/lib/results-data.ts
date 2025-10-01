@@ -1,4 +1,5 @@
 
+
 export interface CourseResultDetail {
     name: string;
     date: string;
@@ -61,9 +62,9 @@ export const coursesResultsData: { [key: string]: CourseResult } = {
 
 export const semesterResults = {
     s1: {
-        average: "15,5/20",
+        average: "15.50/20",
         mention: "Bien",
-        credits: "30/30",
+        credits: "30",
         creditsStatus: "Tous crédits validés",
         rank: "4ème",
         totalStudents: 67,
@@ -78,9 +79,9 @@ export const semesterResults = {
         ]
     },
     s2: {
-        average: "14,6/20",
+        average: "14.60/20",
         mention: "Bien",
-        credits: "24/30",
+        credits: "24",
         creditsStatus: "6 crédits à rattraper",
         rank: "7ème",
         totalStudents: 65,
@@ -105,3 +106,5 @@ export const semesterResults = {
         juryComment: "Excellente année avec des résultats solides. L'étudiant(e) a montré de très bonnes aptitudes en programmation et développement web. Un rattrapage sera nécessaire pour le module d'Intelligence Artificielle. Le jury salue l'implication et les performances générales qui placent l'étudiant(e) dans le top 10% de sa promotion."
     }
 }
+
+    
