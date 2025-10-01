@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -93,24 +94,20 @@ export default function ResultsPage() {
     const pageHeight = doc.internal.pageSize.getHeight();
     const pageWidth = doc.internal.pageSize.getWidth();
     let y = 0;
+    const margin = 40;
+
 
     // --- En-tête ---
-    doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
-    doc.text('Bulletin de Résultats', pageWidth / 2, y + 40, { align: 'center' });
-    y += 70;
-
-    // --- Logo ---
     const logoSvgString = getLogoSvg();
     const img = new Image();
     const svgBlob = new Blob([logoSvgString], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
-
+    
     const convertSvgToPng = (): Promise<string> => {
         return new Promise((resolve, reject) => {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const desiredWidth = 40;
+                const desiredWidth = 50; 
                 const aspectRatio = img.width / img.height;
                 canvas.width = desiredWidth;
                 canvas.height = desiredWidth / aspectRatio;
@@ -126,24 +123,65 @@ export default function ResultsPage() {
             img.src = url;
         });
     };
-
+    
     try {
         const pngDataUrl = await convertSvgToPng();
-        doc.addImage(pngDataUrl, 'PNG', 40, y - 20, 40, 40);
+        doc.addImage(pngDataUrl, 'PNG', margin, margin, 40, 40);
     } catch (e) {
         console.error("Failed to render SVG to PNG for PDF", e);
     }
 
-    // --- Informations de l'étudiant ---
+    y = margin + 50;
+
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
-    const studentInfoX = 100;
-    doc.text(`Nom: ${studentData.lastName}`, studentInfoX, y - 10);
-    doc.text(`Prénoms: ${studentData.firstName}`, studentInfoX, y + 5);
-    doc.text(`Matricule: ${studentData.id}`, studentInfoX, y + 20);
-    doc.text(`Classe: ${studentData.class}`, studentInfoX + 200, y - 10);
+    doc.text(`Année universitaire : ${studentData.academicYear}`, pageWidth - margin, y, { align: 'right'});
+    y += 20;
+
+    // --- Bandeau RELEVE DE NOTES ---
+    const primaryColor = [98, 90, 205]; // HSL(241, 68%, 61%) to RGB
+    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.rect(margin, y, pageWidth - (margin * 2), 25, 'F');
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('RELEVE DE NOTES', pageWidth / 2, y + 16, { align: 'center' });
+    y += 45;
+
+
+    // --- Informations de l'étudiant ---
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(0, 0, 0);
+
+    const infoCol1X = margin + 20;
+    const infoCol2X = pageWidth / 2 + 20;
+    let infoY = y;
+
+    const infoLine = (label: string, value: string, x: number, y: number) => {
+        doc.setFont(undefined, 'bold');
+        doc.text(label, x, y);
+        doc.setFont(undefined, 'normal');
+        doc.text(value, x + 100, y);
+    }
     
-    y += 40;
+    infoLine('Nom :', studentData.lastName, infoCol1X, infoY);
+    infoLine('Niveau :', studentData.level, infoCol2X, infoY);
+    infoY += 20;
+
+    infoLine('Prénoms :', studentData.firstName, infoCol1X, infoY);
+    infoLine('UFR :', studentData.ufr, infoCol2X, infoY);
+    infoY += 20;
+
+    infoLine('Date & lieu de naissance :', `${studentData.birthDate} à ${studentData.birthPlace}`, infoCol1X, infoY);
+    infoLine('Spécialité :', studentData.speciality, infoCol2X, infoY);
+    infoY += 20;
+
+    infoLine('Genre :', studentData.gender, infoCol1X, infoY);
+    infoLine('Matricule :', studentData.id, infoCol2X, infoY);
+    
+    y = infoY + 30;
+
 
     // --- Table des résultats ---
     const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
@@ -682,3 +720,5 @@ export default function ResultsPage() {
     </div>
   );
 }
+
+    
