@@ -79,150 +79,178 @@ export default function ResultsPage() {
 
   const generatePdf = () => {
     const doc = new jsPDF('landscape');
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.getWidth();
     
-    // Header
-    doc.setFontSize(20);
-    doc.text("Bulletin de résultats", 14, 22);
-    doc.setFontSize(11);
-    doc.setTextColor(100);
-    doc.text(`${studentData.name} - ${studentData.class}`, 14, 30);
+    // En-tête
+    const logoContainer = document.createElement('div');
+    const logoSvg = document.querySelector('#logo-for-pdf svg')?.cloneNode(true) as SVGElement;
+    if (logoSvg) {
+        logoSvg.setAttribute('width', '28');
+        logoSvg.setAttribute('height', '28');
+        logoContainer.appendChild(logoSvg);
+        doc.html(logoContainer, {
+            x: 14,
+            y: 15,
+            callback: function (doc) {
+                // Informations étudiant
+                const nameParts = studentData.name.split(' ');
+                const lastName = nameParts.pop();
+                const firstName = nameParts.join(' ');
 
-    let head: string[][] = [];
-    let body: any[] = [];
-    let finalY = 0;
+                doc.setFontSize(10);
+                doc.setTextColor(40);
+                doc.text(`Nom: ${lastName}`, 48, 20);
+                doc.text(`Prénom(s): ${firstName}`, 48, 25);
+                doc.text(`Matricule: ${studentData.id}`, 48, 30);
+                doc.text(`Classe: ${studentData.class}`, 48, 35);
+                
+                // Titre
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text("Bulletin de Résultats", pageWidth / 2, 25, { align: 'center' });
 
-    if(displayType === 'bulletin') {
-      if(semester === 'annual') {
-        head = [['Semestre', 'UE', 'Module', 'Note', 'Crédits ECTS', 'Crédits validés']];
-        
-        // Process S1
-        const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
-        Object.entries(s1Grouped).forEach(([ue, courses], ueIndex) => {
-          courses.forEach((course, courseIndex) => {
-            let row: any[] = [];
-            if (ueIndex === 0 && courseIndex === 0) {
-              row.push({ content: 'Semestre 1', rowSpan: semesterResults.s1.courses.length, styles: { valign: 'middle', halign: 'center' } });
+                let head: string[][] = [];
+                let body: any[] = [];
+                let finalY = 0;
+                let startY = 50;
+
+                if(displayType === 'bulletin') {
+                    if(semester === 'annual') {
+                        head = [['Semestre', 'UE', 'Module', 'Note', 'Crédits ECTS', 'Crédits validés']];
+                        
+                        // Process S1
+                        const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
+                        Object.entries(s1Grouped).forEach(([ue, courses], ueIndex) => {
+                          courses.forEach((course, courseIndex) => {
+                            let row: any[] = [];
+                            if (courseIndex === 0 && ueIndex === 0) {
+                              row.push({ content: 'Semestre 1', rowSpan: semesterResults.s1.courses.length, styles: { valign: 'middle', halign: 'center' } });
+                            }
+                            if (courseIndex === 0) {
+                              row.push({ content: ue, rowSpan: courses.length, styles: { valign: 'middle' } });
+                            }
+                            row.push(
+                              course.module,
+                              course.grade,
+                              course.creditsToValidate,
+                              course.creditsValidated
+                            );
+                            body.push(row);
+                          });
+                        });
+
+                        // Process S2
+                        const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
+                        Object.entries(s2Grouped).forEach(([ue, courses], ueIndex) => {
+                          courses.forEach((course, courseIndex) => {
+                            let row: any[] = [];
+                            if (courseIndex === 0 && ueIndex === 0) {
+                              row.push({ content: 'Semestre 2', rowSpan: semesterResults.s2.courses.length, styles: { valign: 'middle', halign: 'center' } });
+                            }
+                            if (courseIndex === 0) {
+                              row.push({ content: ue, rowSpan: courses.length, styles: { valign: 'middle' } });
+                            }
+                            row.push(
+                              course.module,
+                              course.grade,
+                              course.creditsToValidate,
+                              course.creditsValidated
+                            );
+                            body.push(row);
+                          });
+                        });
+                        
+                        body.push([
+                            { content: "Total Année", colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
+                            { content: semesterResults.annual.average, styles: { fontStyle: 'bold' } },
+                            { content: '60', styles: { fontStyle: 'bold' } },
+                            { content: semesterResults.annual.credits.split('/')[0], styles: { fontStyle: 'bold' } }
+                        ]);
+
+                    } else { // Semester view
+                        const semesterKey = semester as 's1' | 's2';
+                        const semesterData = semesterResults[semesterKey];
+                        const groupedCourses = groupCoursesByUE(semesterData.courses);
+                        head = [['UE', 'Module', 'Note', 'Crédits ECTS', 'Crédits validés']];
+                        Object.entries(groupedCourses).forEach(([ue, courses]) => {
+                            courses.forEach((course, courseIndex) => {
+                                 body.push([
+                                    courseIndex === 0 ? { content: ue, rowSpan: courses.length, styles: { valign: 'middle' } } : '',
+                                    course.module,
+                                    course.grade,
+                                    course.creditsToValidate,
+                                    course.creditsValidated,
+                                 ]);
+                            });
+                        });
+                         body.push([
+                            { content: `Total Semestre ${semesterKey === 's1' ? 1 : 2}`, colSpan: 2, styles: { halign: 'right', fontStyle: 'bold' } },
+                            { content: semesterData.average, styles: { fontStyle: 'bold' } },
+                            { content: '30', styles: { fontStyle: 'bold' } },
+                            { content: semesterData.credits.split('/')[0], styles: { fontStyle: 'bold' } }
+                        ]);
+                      }
+                } else { // Course detail view
+                    const courseData = coursesResultsData[course];
+                    if(courseData) {
+                        startY = 60;
+                        doc.setFontSize(12);
+                        doc.text(`Matière: ${courseData.name}`, 14, 48);
+                        doc.text(`Enseignant: ${courseData.teacher}`, 14, 54);
+
+                        head = [['Évaluation', 'Date', 'Note', 'Coefficient']];
+                        courseData.details.forEach(d => {
+                            body.push([d.name, d.date, d.grade, `x ${d.coef}`]);
+                        });
+                        body.push([
+                            { content: 'Moyenne finale', colSpan: 2, styles: { halign: 'right', fontStyle: 'bold' } },
+                            { content: courseData.grade, styles: { fontStyle: 'bold' } },
+                            ''
+                        ]);
+                    }
+                }
+
+                (doc as any).autoTable({
+                    head: head,
+                    body: body,
+                    startY: startY,
+                    theme: 'grid',
+                    headStyles: { fillColor: [22, 163, 74] },
+                    didDrawPage: (data: any) => {
+                        // Footer
+                        const pageCount = doc.internal.getNumberOfPages();
+                        doc.setFontSize(8);
+                        doc.setTextColor(150);
+                        doc.text(
+                            `Généré via UNI-VERX®`,
+                            data.settings.margin.left,
+                            pageHeight - 10
+                        );
+                        doc.text(
+                            `Page ${data.pageNumber} sur ${pageCount}`,
+                            pageWidth - data.settings.margin.right,
+                            pageHeight - 10,
+                            { align: 'right' }
+                        );
+
+                        finalY = data.cursor?.y || 0;
+                    }
+                });
+                
+                if (displayType === 'bulletin' && semester === 'annual') {
+                    doc.setFontSize(10);
+                    doc.text("Commentaire du jury:", 14, finalY + 10);
+                    doc.setFontSize(9);
+                    doc.setTextColor(80);
+                    const splitText = doc.splitTextToSize(semesterResults.annual.juryComment, pageWidth - 30);
+                    doc.text(splitText, 14, finalY + 15);
+                }
+                
+                doc.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
             }
-            if (courseIndex === 0) {
-              row.push({ content: ue, rowSpan: courses.length, styles: { valign: 'middle' } });
-            }
-            row.push(
-              course.module,
-              course.grade,
-              course.creditsToValidate,
-              course.creditsValidated
-            );
-            body.push(row);
-          });
         });
-
-        // Process S2
-        const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
-        Object.entries(s2Grouped).forEach(([ue, courses], ueIndex) => {
-          courses.forEach((course, courseIndex) => {
-            let row: any[] = [];
-            if (ueIndex === 0 && courseIndex === 0) {
-              row.push({ content: 'Semestre 2', rowSpan: semesterResults.s2.courses.length, styles: { valign: 'middle', halign: 'center' } });
-            }
-            if (courseIndex === 0) {
-              row.push({ content: ue, rowSpan: courses.length, styles: { valign: 'middle' } });
-            }
-            row.push(
-              course.module,
-              course.grade,
-              course.creditsToValidate,
-              course.creditsValidated
-            );
-            body.push(row);
-          });
-        });
-        
-        body.push([
-            { content: "Total Année", colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
-            { content: semesterResults.annual.average, styles: { fontStyle: 'bold' } },
-            { content: '60', styles: { fontStyle: 'bold' } },
-            { content: semesterResults.annual.credits.split('/')[0], styles: { fontStyle: 'bold' } }
-        ]);
-
-      } else { // Semester view
-        const semesterKey = semester as 's1' | 's2';
-        const semesterData = semesterResults[semesterKey];
-        const groupedCourses = groupCoursesByUE(semesterData.courses);
-        head = [['UE', 'Module', 'Note', 'Crédits ECTS', 'Crédits validés']];
-        Object.entries(groupedCourses).forEach(([ue, courses]) => {
-            courses.forEach((course, courseIndex) => {
-                 body.push([
-                    courseIndex === 0 ? { content: ue, rowSpan: courses.length, styles: { valign: 'middle' } } : '',
-                    course.module,
-                    course.grade,
-                    course.creditsToValidate,
-                    course.creditsValidated,
-                 ]);
-            });
-        });
-         body.push([
-            { content: `Total Semestre ${semesterKey === 's1' ? 1 : 2}`, colSpan: 2, styles: { halign: 'right', fontStyle: 'bold' } },
-            { content: semesterData.average, styles: { fontStyle: 'bold' } },
-            { content: '30', styles: { fontStyle: 'bold' } },
-            { content: semesterData.credits.split('/')[0], styles: { fontStyle: 'bold' } }
-        ]);
-      }
-    } else { // Course detail view
-        const courseData = coursesResultsData[course];
-        if(courseData) {
-            doc.text(`Matière: ${courseData.name}`, 14, 40);
-            doc.text(`Enseignant: ${courseData.teacher}`, 14, 46);
-
-            head = [['Évaluation', 'Date', 'Note', 'Coefficient']];
-            courseData.details.forEach(d => {
-                body.push([d.name, d.date, d.grade, `x ${d.coef}`]);
-            });
-            body.push([
-                { content: 'Moyenne finale', colSpan: 2, styles: { halign: 'right', fontStyle: 'bold' } },
-                { content: courseData.grade, styles: { fontStyle: 'bold' } },
-                ''
-            ]);
-        }
     }
-
-    (doc as any).autoTable({
-        head: head,
-        body: body,
-        startY: displayType === 'course' && course ? 52 : 40,
-        theme: 'grid',
-        headStyles: { fillColor: [22, 163, 74] },
-        didDrawPage: (data: any) => {
-            // Footer
-            const pageCount = doc.internal.getNumberOfPages();
-            doc.setFontSize(8);
-            doc.setTextColor(150);
-            doc.text(
-                `Généré via UNI-VERX®`,
-                data.settings.margin.left,
-                doc.internal.pageSize.height - 10
-            );
-            doc.text(
-                `Page ${data.pageNumber} sur ${pageCount}`,
-                doc.internal.pageSize.width - data.settings.margin.right,
-                doc.internal.pageSize.height - 10,
-                { align: 'right' }
-            );
-
-            finalY = data.cursor?.y || 0;
-        }
-    });
-    
-
-    if (displayType === 'bulletin' && semester === 'annual') {
-        doc.setFontSize(10);
-        doc.text("Commentaire du jury:", 14, finalY + 10);
-        doc.setFontSize(9);
-        doc.setTextColor(80);
-        const splitText = doc.splitTextToSize(semesterResults.annual.juryComment, doc.internal.pageSize.width - 30);
-        doc.text(splitText, 14, finalY + 15);
-    }
-    
-    doc.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
   }
 
 
@@ -563,6 +591,8 @@ export default function ResultsPage() {
 
   return (
     <div className="space-y-6">
+        {/* Hidden Logo for PDF generation */}
+        <div id="logo-for-pdf" className="hidden"><Logo /></div>
         <Card>
             <CardHeader className="flex-col md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
@@ -638,5 +668,6 @@ export default function ResultsPage() {
     </div>
   );
 }
+
 
 
