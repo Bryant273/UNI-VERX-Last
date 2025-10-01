@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ClipboardList,
   FileText,
@@ -24,6 +24,7 @@ import {
   Download,
   ArrowLeft,
   ArrowRight,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -59,6 +60,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const difficultyColors = {
   Facile: 'text-green-600 dark:text-green-400 bg-green-500',
@@ -80,6 +82,18 @@ const qcmQuestions = Array.from({ length: 20 }, (_, i) => ({
     options: ['Paris', 'Londres', 'Berlin', 'Madrid'],
 }));
 
+const QCM_HISTORY_ITEMS_PER_PAGE = 5;
+
+const allQcmHistory = [
+    { id: 'QCM-032', module: 'Mathématiques Discrètes', date: '10/05/2025', average: '17/20' },
+    { id: 'QCM-031', module: 'Algorithmique Avancée', date: '08/05/2025', average: '14/20' },
+    { id: 'QCM-030', module: 'Programmation Orientée Objet', date: '05/05/2025', average: '19/20' },
+    { id: 'QCM-029', module: 'Développement Web', date: '01/05/2025', average: '16/20' },
+    { id: 'QCM-028', module: 'Bases de Données', date: '28/04/2025', average: '15/20' },
+    { id: 'QCM-027', module: 'Réseaux', date: '25/04/2025', average: '12/20' },
+    { id: 'QCM-026', module: 'Systèmes d\'exploitation', date: '22/04/2025', average: '18/20' },
+];
+
 const QUESTIONS_PER_PAGE = 5;
 const TOTAL_PAGES = Math.ceil(qcmQuestions.length / QUESTIONS_PER_PAGE);
 
@@ -94,6 +108,25 @@ export default function EvaluationsPage() {
     const [qcmCurrentPage, setQcmCurrentPage] = useState(1);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [timeLeft, setTimeLeft] = useState(15 * 60);
+
+    const [qcmHistorySearch, setQcmHistorySearch] = useState('');
+    const [qcmHistoryModule, setQcmHistoryModule] = useState('all');
+    const [qcmHistoryCurrentPage, setQcmHistoryCurrentPage] = useState(1);
+
+    const qcmHistoryModules = useMemo(() => ['all', ...Array.from(new Set(allQcmHistory.map((q) => q.module)))], []);
+
+    const filteredQcmHistory = useMemo(() => {
+        return allQcmHistory
+            .filter((qcm) => qcm.module.toLowerCase().includes(qcmHistorySearch.toLowerCase()) || qcm.id.toLowerCase().includes(qcmHistorySearch.toLowerCase()))
+            .filter((qcm) => qcmHistoryModule === 'all' || qcm.module === qcmHistoryModule);
+    }, [qcmHistorySearch, qcmHistoryModule]);
+
+    const totalQcmHistoryPages = Math.ceil(filteredQcmHistory.length / QCM_HISTORY_ITEMS_PER_PAGE);
+    const paginatedQcmHistory = filteredQcmHistory.slice(
+        (qcmHistoryCurrentPage - 1) * QCM_HISTORY_ITEMS_PER_PAGE,
+        qcmHistoryCurrentPage * QCM_HISTORY_ITEMS_PER_PAGE
+    );
+
 
     useEffect(() => {
         if (qcmStep !== 'test') return;
@@ -128,6 +161,24 @@ export default function EvaluationsPage() {
             setQcmStep('results');
         }
         setQcmModalOpen(open);
+    };
+
+    const renderQcmHistoryPagination = () => {
+        const pages = [];
+        for (let i = 1; i <= totalQcmHistoryPages; i++) {
+            pages.push(
+                <Button
+                    key={i}
+                    variant={qcmHistoryCurrentPage === i ? 'default' : 'outline'}
+                    size="icon"
+                    onClick={() => setQcmHistoryCurrentPage(i)}
+                    className="h-8 w-8"
+                >
+                    {i}
+                </Button>
+            );
+        }
+        return pages;
     };
 
     const renderQcmContent = () => {
@@ -294,6 +345,29 @@ export default function EvaluationsPage() {
               <CardTitle>Historique des QCM</CardTitle>
             </CardHeader>
             <CardContent>
+               <div className="flex flex-col md:flex-row gap-4 mb-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Rechercher un ID ou un module..."
+                            className="pl-10"
+                            value={qcmHistorySearch}
+                            onChange={(e) => setQcmHistorySearch(e.target.value)}
+                        />
+                    </div>
+                    <Select value={qcmHistoryModule} onValueChange={setQcmHistoryModule}>
+                        <SelectTrigger className="w-full md:w-[240px]">
+                            <SelectValue placeholder="Tous les modules" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {qcmHistoryModules.map((module) => (
+                                <SelectItem key={module} value={module}>
+                                    {module === 'all' ? 'Tous les modules' : module}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -306,13 +380,9 @@ export default function EvaluationsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {[
-                        { id: 'QCM-032', module: 'Mathématiques Discrètes', date: '10/05/2025', average: '17/20' },
-                        { id: 'QCM-031', module: 'Algorithmique Avancée', date: '08/05/2025', average: '14/20' },
-                        { id: 'QCM-030', module: 'Programmation Orientée Objet', date: '05/05/2025', average: '19/20' },
-                    ].map((item, index) => (
-                        <TableRow key={index}>
-                            <TableCell className="font-medium">{index + 1}</TableCell>
+                    {paginatedQcmHistory.map((item, index) => (
+                        <TableRow key={index} className="even:bg-muted/40">
+                            <TableCell className="font-medium">{(qcmHistoryCurrentPage - 1) * QCM_HISTORY_ITEMS_PER_PAGE + index + 1}</TableCell>
                             <TableCell>{item.id}</TableCell>
                             <TableCell>{item.module}</TableCell>
                             <TableCell>{item.date}</TableCell>
@@ -327,6 +397,32 @@ export default function EvaluationsPage() {
                 </TableBody>
               </Table>
             </CardContent>
+             <CardFooter className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                    Affichage de {paginatedQcmHistory.length} sur {filteredQcmHistory.length} QCM
+                </p>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setQcmHistoryCurrentPage((p) => Math.max(1, p - 1))}
+                        disabled={qcmHistoryCurrentPage === 1}
+                        className="h-8 w-8"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    {renderQcmHistoryPagination()}
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setQcmHistoryCurrentPage((p) => Math.min(totalQcmHistoryPages, p + 1))}
+                        disabled={qcmHistoryCurrentPage === totalQcmHistoryPages}
+                        className="h-8 w-8"
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            </CardFooter>
           </Card>
         </TabsContent>
 
