@@ -208,12 +208,6 @@ export default function ResultsPage() {
                                     </TableRow>
                                 ))
                             ))}
-                            <TableRow className="bg-muted font-bold">
-                                <TableCell colSpan={3} className="text-right">Total Semestre 1</TableCell>
-                                <TableCell className={cn(getGradeClass(semesterResults.s1.average))}>{semesterResults.s1.average}</TableCell>
-                                <TableCell>30</TableCell>
-                                <TableCell>{semesterResults.s1.credits}</TableCell>
-                            </TableRow>
 
                              {/* Semestre 2 */}
                              {Object.entries(s2Grouped).map(([ue, courses], ueIndex) => (
@@ -238,12 +232,6 @@ export default function ResultsPage() {
                                     </TableRow>
                                 ))
                             ))}
-                             <TableRow className="bg-muted font-bold">
-                                <TableCell colSpan={3} className="text-right">Total Semestre 2</TableCell>
-                                <TableCell className={cn(getGradeClass(semesterResults.s2.average))}>{semesterResults.s2.average}</TableCell>
-                                <TableCell>30</TableCell>
-                                <TableCell>{semesterResults.s2.credits}</TableCell>
-                            </TableRow>
                         </TableBody>
                         <TableFooter>
                             <TableRow className="text-base">
@@ -502,3 +490,5 @@ export default function ResultsPage() {
     </div>
   );
 }
+
+    
