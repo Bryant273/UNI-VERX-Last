@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ClipboardList,
   FileText,
@@ -60,11 +61,39 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { allEvents } from '@/lib/static-data';
 
+// --- Interfaces & Types ---
+interface QcmQuestion {
+    id: string;
+    question: string;
+    options: string[];
+    correctAnswer: string;
+    userAnswer?: string;
+}
+
+interface QcmHistoryItem {
+    id: string;
+    module: string;
+    date: string;
+    average: string;
+    questions: QcmQuestion[];
+}
+
+interface Qcm {
+    title: string;
+    difficulty: 'Facile' | 'Moyenne' | 'Difficile';
+    startTime: Date;
+    endTime: Date;
+    questions: QcmQuestion[];
+}
+
+
+// --- Constants & Mock Data ---
 const difficultyColors = {
-  Facile: 'text-green-600 dark:text-green-400 bg-green-500',
-  Moyenne: 'text-amber-600 dark:text-amber-400 bg-amber-500',
-  Difficile: 'text-red-600 dark:text-red-400 bg-red-500',
+  Facile: { text: 'text-green-600 dark:text-green-400', bg: 'bg-green-500' },
+  Moyenne: { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500' },
+  Difficile: { text: 'text-red-600 dark:text-red-400', bg: 'bg-red-500' },
 };
 
 const statusColors: { [key: string]: string } = {
@@ -75,105 +104,212 @@ const statusColors: { [key: string]: string } = {
   'En cours d\'évaluation': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
 };
 
-const qcmQuestions = Array.from({ length: 20 }, (_, i) => ({
-    id: `q${i + 1}`,
-    question: `Quelle est la capitale de la France ? Question ${i + 1}`,
-    options: ['Paris', 'Londres', 'Berlin', 'Madrid'],
-    correctAnswer: 'Paris',
-}));
 
-const QCM_HISTORY_ITEMS_PER_PAGE = 5;
-
-const generateQuestions = (topic: string, count: number) => {
+const generateQuestions = (topic: string, count: number): QcmQuestion[] => {
     return Array.from({ length: count }, (_, i) => ({
         id: `q${i+1}`,
         question: `Question ${i+1} sur ${topic}`,
         options: ['Option A', 'Option B', 'Option C', 'Option D'],
-        userAnswer: ['Option A', 'Option B', 'Option C', 'Option D'][Math.floor(Math.random() * 4)],
-        correctAnswer: ['Option A', 'Option B'][Math.floor(Math.random() * 2)],
+        correctAnswer: ['Option A', 'Option B', 'Option C', 'Option D'][Math.floor(Math.random() * 4)],
     }));
 };
 
-const allQcmHistory = [
+const initialQcmHistory: QcmHistoryItem[] = [
     { 
         id: 'QCM-032', 
         module: 'Mathématiques Discrètes', 
         date: '10/05/2025', 
         average: '17/20',
-        questions: generateQuestions('les graphes', 20),
+        questions: generateQuestions('les graphes', 20).map(q => ({...q, userAnswer: q.options[Math.floor(Math.random()*4)]})),
     },
     { 
         id: 'QCM-031', 
         module: 'Algorithmique Avancée', 
         date: '08/05/2025', 
         average: '14/20',
-        questions: generateQuestions('la complexité', 20),
-    },
-    { 
-        id: 'QCM-030', 
-        module: 'Programmation Orientée Objet', 
-        date: '05/05/2025', 
-        average: '19/20',
-        questions: generateQuestions('le polymorphisme', 20),
-    },
-    { 
-        id: 'QCM-029', 
-        module: 'Développement Web', 
-        date: '01/05/2025', 
-        average: '16/20',
-        questions: generateQuestions('les API REST', 20),
-    },
-    { 
-        id: 'QCM-028', 
-        module: 'Bases de Données', 
-        date: '28/04/2025', 
-        average: '15/20',
-        questions: generateQuestions('le SQL', 20),
-    },
-    { 
-        id: 'QCM-027', 
-        module: 'Réseaux', 
-        date: '25/04/2025', 
-        average: '12/20',
-        questions: generateQuestions('le modèle OSI', 20),
-    },
-    { 
-        id: 'QCM-026', 
-        module: 'Systèmes d\'exploitation', 
-        date: '22/04/2025', 
-        average: '18/20',
-        questions: generateQuestions('la gestion de la mémoire', 20),
+        questions: generateQuestions('la complexité', 20).map(q => ({...q, userAnswer: q.options[Math.floor(Math.random()*4)]})),
     },
 ];
 
 const QUESTIONS_PER_PAGE = 5;
-const TOTAL_PAGES = Math.ceil(qcmQuestions.length / QUESTIONS_PER_PAGE);
+const QCM_HISTORY_ITEMS_PER_PAGE = 5;
+const QCM_DURATION_MINUTES = 15;
 
 
+// --- Helper Functions ---
+const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+};
+
+const getDailyQcms = (): Qcm[] => {
+    const now = new Date();
+    const studentEvents = allEvents['student'];
+    const todayEvents = studentEvents.filter(event => {
+        // This is a mock-up. In a real app, you would parse event dates properly.
+        // For now, we assume all events in `allEvents` are for today for demonstration.
+        return event.type === 'cours' || event.type === 'td' || event.type === 'tp';
+    });
+
+    return todayEvents.map(event => {
+        const [startHours, startMinutes] = event.time.split(' - ')[0].split(':').map(Number);
+        const startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHours, startMinutes);
+        const endTime = new Date(startTime.getTime() + 15 * 60 * 1000); // 15 minutes window
+
+        let difficulty: 'Facile' | 'Moyenne' | 'Difficile' = 'Moyenne';
+        if (event.course.includes('Avancé')) difficulty = 'Difficile';
+        if (event.course.includes('Introduction')) difficulty = 'Facile';
+
+        return {
+            title: event.course,
+            difficulty: difficulty,
+            startTime,
+            endTime,
+            questions: generateQuestions(event.course, 20),
+        };
+    });
+};
+
+
+// --- Sub-components for QCM Modal ---
+const QcmStart: React.FC<{ onStart: () => void, onClose: () => void }> = ({ onStart, onClose }) => (
+    <div>
+        <DialogDescription className="mb-6">
+            Vous êtes sur le point de commencer l'interrogation. Une fois démarré, vous disposez de {QCM_DURATION_MINUTES} minutes pour terminer le QCM.
+        </DialogDescription>
+        <DialogFooter>
+            <Button variant="ghost" onClick={onClose}>Annuler</Button>
+            <Button onClick={onStart}>Commencer</Button>
+        </DialogFooter>
+    </div>
+);
+
+const QcmTest: React.FC<{
+    qcm: Qcm;
+    timeLeft: number;
+    currentPage: number;
+    answers: Record<string, string>;
+    onAnswer: (questionId: string, answer: string) => void;
+    onPageChange: (page: number) => void;
+    onSubmit: () => void;
+}> = ({ qcm, timeLeft, currentPage, answers, onAnswer, onPageChange, onSubmit }) => {
+    const totalPages = Math.ceil(qcm.questions.length / QUESTIONS_PER_PAGE);
+    const startIndex = (currentPage - 1) * QUESTIONS_PER_PAGE;
+    const endIndex = startIndex + QUESTIONS_PER_PAGE;
+    const currentQuestions = qcm.questions.slice(startIndex, endIndex);
+
+    return (
+        <div className='flex flex-col h-full'>
+            <div className="bg-muted/50 p-3 rounded-lg mb-4">
+                <div className="flex justify-between items-center text-sm font-semibold">
+                   <span>{qcm.title}</span>
+                   <div className='flex items-center gap-2'>
+                     <Clock className="h-4 w-4" />
+                     <span>Temps restant : {formatTime(timeLeft)}</span>
+                   </div>
+                   <span>Page {currentPage}/{totalPages}</span>
+                </div>
+            </div>
+            
+            <div className="space-y-6 flex-grow overflow-auto pr-2">
+                {currentQuestions.map((q, index) => (
+                    <div key={q.id}>
+                        <p className="font-medium mb-3">{startIndex + index + 1}. {q.question}</p>
+                        <RadioGroup 
+                            value={answers[q.id]}
+                            onValueChange={(value) => onAnswer(q.id, value)}
+                            className="grid grid-cols-2 gap-3"
+                        >
+                            {q.options.map((opt, optIndex) => (
+                                <Label key={optIndex} htmlFor={`${q.id}-${optIndex}`} className="flex items-center p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer has-[input:checked]:bg-primary/10 has-[input:checked]:border-primary">
+                                    <RadioGroupItem value={opt} id={`${q.id}-${optIndex}`} className="mr-3"/>
+                                    <span>{opt}</span>
+                                </Label>
+                            ))}
+                        </RadioGroup>
+                    </div>
+                ))}
+            </div>
+
+            <DialogFooter className="mt-8 pt-4 border-t">
+                <Button variant="outline" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}><ArrowLeft className="mr-2"/> Précédent</Button>
+                {currentPage < totalPages ? (
+                    <Button onClick={() => onPageChange(currentPage + 1)}>Suivant <ArrowRight className="ml-2"/></Button>
+                ) : (
+                    <Button onClick={onSubmit} className="bg-green-600 hover:bg-green-700">Soumettre les réponses <Check className="ml-2" /></Button>
+                )}
+            </DialogFooter>
+        </div>
+    );
+};
+
+const QcmResults: React.FC<{
+    score: number;
+    totalQuestions: number;
+    timeLeft: number;
+    onClose: () => void;
+}> = ({ score, totalQuestions, timeLeft, onClose }) => (
+    <div className="text-center">
+        <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 text-primary mb-4">
+            <CheckCircle className="h-10 w-10" />
+        </div>
+        <h3 className="text-xl font-bold">QCM terminé !</h3>
+        <p className="text-muted-foreground mt-2">Vous avez obtenu :</p>
+        <div className="text-4xl font-bold text-primary mt-2 mb-4">
+            {score}/{totalQuestions}
+        </div>
+        <Card className="text-left p-4">
+            <CardContent className="p-0">
+              <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">Bonnes réponses :</span>
+                  <span className="text-sm font-bold text-green-600">{score}/{totalQuestions}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Temps utilisé :</span>
+                  <span className="text-sm font-bold">{formatTime((QCM_DURATION_MINUTES * 60) - timeLeft)}</span>
+              </div>
+            </CardContent>
+        </Card>
+        <DialogFooter className="mt-6">
+            <Button onClick={onClose} className="w-full">Fermer</Button>
+        </DialogFooter>
+    </div>
+);
+
+
+// --- Main Component ---
 export default function EvaluationsPage() {
+    // --- State ---
+    const [now, setNow] = useState(new Date());
     const [isSubjectModalOpen, setSubjectModalOpen] = useState(false);
     const [isUploadModalOpen, setUploadModalOpen] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isQcmModalOpen, setQcmModalOpen] = useState(false);
     const [isQcmHistoryModalOpen, setQcmHistoryModalOpen] = useState(false);
-    const [selectedQcmHistory, setSelectedQcmHistory] = useState<(typeof allQcmHistory)[0] | null>(null);
-    const [qcmStep, setQcmStep] = useState('start'); // 'start', 'test', 'results'
+    
+    const [selectedQcm, setSelectedQcm] = useState<Qcm | null>(null);
+    const [selectedQcmHistory, setSelectedQcmHistory] = useState<QcmHistoryItem | null>(null);
+    const [qcmStep, setQcmStep] = useState<'start' | 'test' | 'results'>('start');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [qcmCurrentPage, setQcmCurrentPage] = useState(1);
     const [answers, setAnswers] = useState<Record<string, string>>({});
-    const [timeLeft, setTimeLeft] = useState(15 * 60);
+    const [timeLeft, setTimeLeft] = useState(QCM_DURATION_MINUTES * 60);
 
+    const [allQcmHistory, setAllQcmHistory] = useState<QcmHistoryItem[]>(initialQcmHistory);
     const [qcmHistorySearch, setQcmHistorySearch] = useState('');
     const [qcmHistoryModule, setQcmHistoryModule] = useState('all');
     const [qcmHistoryCurrentPage, setQcmHistoryCurrentPage] = useState(1);
-
-    const qcmHistoryModules = useMemo(() => ['all', ...Array.from(new Set(allQcmHistory.map((q) => q.module)))], []);
+    
+    // --- Memos & Derived State ---
+    const dailyQcms = useMemo(getDailyQcms, [now]);
+    const qcmHistoryModules = useMemo(() => ['all', ...Array.from(new Set(allQcmHistory.map((q) => q.module)))], [allQcmHistory]);
 
     const filteredQcmHistory = useMemo(() => {
         return allQcmHistory
             .filter((qcm) => qcm.module.toLowerCase().includes(qcmHistorySearch.toLowerCase()) || qcm.id.toLowerCase().includes(qcmHistorySearch.toLowerCase()))
             .filter((qcm) => qcmHistoryModule === 'all' || qcm.module === qcmHistoryModule);
-    }, [qcmHistorySearch, qcmHistoryModule]);
+    }, [qcmHistorySearch, qcmHistoryModule, allQcmHistory]);
 
     const totalQcmHistoryPages = Math.ceil(filteredQcmHistory.length / QCM_HISTORY_ITEMS_PER_PAGE);
     const paginatedQcmHistory = filteredQcmHistory.slice(
@@ -181,12 +317,17 @@ export default function EvaluationsPage() {
         qcmHistoryCurrentPage * QCM_HISTORY_ITEMS_PER_PAGE
     );
 
+    // --- Effects ---
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 60 * 1000); // Update every minute
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
-        if (qcmStep !== 'test') return;
+        if (qcmStep !== 'test' || !isQcmModalOpen) return;
 
         if (timeLeft <= 0) {
-            setQcmStep('results');
+            finishQcm();
             return;
         }
 
@@ -195,13 +336,25 @@ export default function EvaluationsPage() {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [qcmStep, timeLeft]);
+    }, [qcmStep, timeLeft, isQcmModalOpen]);
 
-    const formatTime = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    };
+
+    // --- Callbacks & Handlers ---
+    const finishQcm = useCallback(() => {
+        if (!selectedQcm) return;
+
+        const score = selectedQcm.questions.filter(q => answers[q.id] === q.correctAnswer).length;
+        const newHistoryItem: QcmHistoryItem = {
+            id: `QCM-${Date.now()}`,
+            module: selectedQcm.title,
+            date: new Date().toLocaleDateString('fr-FR'),
+            average: `${score}/${selectedQcm.questions.length}`,
+            questions: selectedQcm.questions.map(q => ({ ...q, userAnswer: answers[q.id] })),
+        };
+
+        setAllQcmHistory(prev => [newHistoryItem, ...prev]);
+        setQcmStep('results');
+    }, [selectedQcm, answers]);
 
     const handleFileChange = (files: FileList | null) => {
         if (files && files.length > 0) {
@@ -210,13 +363,26 @@ export default function EvaluationsPage() {
     };
     
     const handleQcmModalOpenChange = (open: boolean) => {
-        if (!open && qcmStep === 'test') {
-            setQcmStep('results');
+        if (!open) {
+            if (qcmStep === 'test') {
+                finishQcm();
+            }
+            setQcmModalOpen(false);
+            setSelectedQcm(null);
+        } else {
+            setQcmModalOpen(true);
         }
-        setQcmModalOpen(open);
+    };
+    
+    const handleStartQcm = (qcm: Qcm) => {
+        setSelectedQcm(qcm);
+        setQcmCurrentPage(1);
+        setAnswers({});
+        setQcmStep('start');
+        setQcmModalOpen(true);
     };
 
-    const handleHistoryClick = (qcm: (typeof allQcmHistory)[0]) => {
+    const handleHistoryClick = (qcm: QcmHistoryItem) => {
         setSelectedQcmHistory(qcm);
         setQcmHistoryModalOpen(true);
     };
@@ -238,98 +404,77 @@ export default function EvaluationsPage() {
         }
         return pages;
     };
+    
+    const renderQcmButton = (qcm: Qcm) => {
+        const isAvailable = now >= qcm.startTime && now <= qcm.endTime;
 
+        let buttonContent = <Button className="w-full" onClick={() => handleStartQcm(qcm)}>Commencer l'interrogation</Button>;
+        let description = `Disponible jusqu'à ${qcm.endTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+
+        if (!isAvailable) {
+            buttonContent = <Button className="w-full" disabled>Commencer l'interrogation</Button>;
+            if (now < qcm.startTime) {
+                description = `Disponible à partir de ${qcm.startTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+            } else {
+                description = "Ce QCM n'est plus disponible.";
+            }
+        }
+        
+        return (
+            <Card key={qcm.title} className="flex flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg">{qcm.title}</CardTitle>
+                  <CardDescription>
+                    <Clock className="inline-block mr-1 h-3 w-3" />
+                    Durée : {QCM_DURATION_MINUTES} minutes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow space-y-4">
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground">Difficulté</span>
+                      <span className={`font-medium ${difficultyColors[qcm.difficulty].text}`}>{qcm.difficulty}</span>
+                    </div>
+                    <Progress value={qcm.difficulty === 'Facile' ? 25 : qcm.difficulty === 'Moyenne' ? 50 : 75} className={`h-1.5 [&>div]:${difficultyColors[qcm.difficulty].bg}`} />
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Questions :</span> {qcm.questions.length}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2">
+                  {buttonContent}
+                  <p className="text-xs text-muted-foreground self-center">{description}</p>
+                </CardFooter>
+            </Card>
+        );
+    }
+    
     const renderQcmContent = () => {
+        if (!selectedQcm) return null;
+        
+        const score = selectedQcm.questions.filter(q => answers[q.id] === q.correctAnswer).length;
+
         switch (qcmStep) {
             case 'test':
-                const startIndex = (qcmCurrentPage - 1) * QUESTIONS_PER_PAGE;
-                const endIndex = startIndex + QUESTIONS_PER_PAGE;
-                const currentQuestions = qcmQuestions.slice(startIndex, endIndex);
-
-                return (
-                <div className='flex flex-col h-full'>
-                    <div className="bg-muted/50 p-3 rounded-lg mb-4">
-                        <div className="flex justify-between items-center text-sm font-semibold">
-                           <span>Développement Web - QCM N°1</span>
-                           <div className='flex items-center gap-2'>
-                             <Clock className="h-4 w-4" />
-                             <span>Temps restant : {formatTime(timeLeft)}</span>
-                           </div>
-                           <span>Page {qcmCurrentPage}/{TOTAL_PAGES}</span>
-                        </div>
-                    </div>
-                    
-                    <div className="space-y-6 flex-grow overflow-auto pr-2">
-                        {currentQuestions.map((q, index) => (
-                            <div key={q.id}>
-                                <p className="font-medium mb-3">{startIndex + index + 1}. {q.question}</p>
-                                <RadioGroup 
-                                    value={answers[q.id]}
-                                    onValueChange={(value) => setAnswers(prev => ({...prev, [q.id]: value}))}
-                                    className="grid grid-cols-2 gap-3"
-                                >
-                                    {q.options.map((opt, optIndex) => (
-                                        <Label key={optIndex} htmlFor={`${q.id}-${optIndex}`} className="flex items-center p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer has-[input:checked]:bg-primary/10 has-[input:checked]:border-primary">
-                                            <RadioGroupItem value={opt} id={`${q.id}-${optIndex}`} className="mr-3"/>
-                                            <span>{opt}</span>
-                                        </Label>
-                                    ))}
-                                </RadioGroup>
-                            </div>
-                        ))}
-                    </div>
-
-                    <DialogFooter className="mt-8 pt-4 border-t">
-                        <Button variant="outline" onClick={() => setQcmCurrentPage(p => p-1)} disabled={qcmCurrentPage === 1}><ArrowLeft className="mr-2"/> Précédent</Button>
-                        {qcmCurrentPage < TOTAL_PAGES ? (
-                            <Button onClick={() => setQcmCurrentPage(p => p+1)}>Suivant <ArrowRight className="ml-2"/></Button>
-                        ) : (
-                            <Button onClick={() => setQcmStep('results')} className="bg-green-600 hover:bg-green-700">Soumettre les réponses <Check className="ml-2" /></Button>
-                        )}
-                    </DialogFooter>
-                </div>
-                );
+                return <QcmTest 
+                    qcm={selectedQcm}
+                    timeLeft={timeLeft}
+                    currentPage={qcmCurrentPage}
+                    answers={answers}
+                    onAnswer={(questionId, answer) => setAnswers(prev => ({...prev, [questionId]: answer}))}
+                    onPageChange={setQcmCurrentPage}
+                    onSubmit={finishQcm}
+                 />;
             case 'results':
-                return (
-                <div className="text-center">
-                    <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 text-primary mb-4">
-                        <CheckCircle className="h-10 w-10" />
-                    </div>
-                    <h3 className="text-xl font-bold">QCM terminé !</h3>
-                    <p className="text-muted-foreground mt-2">Vous avez obtenu :</p>
-                    <div className="text-4xl font-bold text-primary mt-2 mb-4">
-                        18/20
-                    </div>
-                    <Card className="text-left p-4">
-                        <CardContent className="p-0">
-                          <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm font-medium">Bonnes réponses :</span>
-                              <span className="text-sm font-bold text-green-600">18/20</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                              <span className="text-sm font-medium">Temps utilisé :</span>
-                              <span className="text-sm font-bold">{formatTime((15*60) - timeLeft)}</span>
-                          </div>
-                        </CardContent>
-                    </Card>
-                    <DialogFooter className="mt-6">
-                        <Button onClick={() => setQcmModalOpen(false)} className="w-full">Fermer</Button>
-                    </DialogFooter>
-                </div>
-                );
+                return <QcmResults 
+                    score={score}
+                    totalQuestions={selectedQcm.questions.length}
+                    timeLeft={timeLeft}
+                    onClose={() => handleQcmModalOpenChange(false)}
+                 />;
             case 'start':
             default:
-                return (
-                <div>
-                    <DialogDescription className="mb-6">
-                        Vous êtes sur le point de commencer l'interrogation. Une fois démarré, vous disposez de 15 minutes pour terminer le QCM de 20 questions.
-                    </DialogDescription>
-                    <DialogFooter>
-                        <Button variant="ghost" onClick={() => setQcmModalOpen(false)}>Annuler</Button>
-                        <Button onClick={() => { setTimeLeft(15*60); setQcmStep('test'); }}>Commencer</Button>
-                    </DialogFooter>
-                </div>
-                );
+                return <QcmStart onStart={() => { setTimeLeft(QCM_DURATION_MINUTES * 60); setQcmStep('test'); }} onClose={() => handleQcmModalOpenChange(false)} />;
         }
     };
 
@@ -351,7 +496,7 @@ export default function EvaluationsPage() {
               <CardTitle>QCM du jour</CardTitle>
               <div className="text-sm text-muted-foreground flex items-center gap-2 pt-1">
                 <CalendarDays className="h-4 w-4" />
-                <span>Samedi 17 mai 2025</span>
+                <span>{now.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
               </div>
             </CardHeader>
             <CardContent>
@@ -359,42 +504,11 @@ export default function EvaluationsPage() {
                     <Info className="h-4 w-4 text-blue-500" />
                     <AlertTitle className="text-blue-800 dark:text-blue-300">QCM programmés pour aujourd'hui</AlertTitle>
                     <AlertDescription className="text-blue-700 dark:text-blue-400">
-                        Vous avez 3 interrogations prévues aujourd'hui. Chaque QCM dure 15 minutes et comprend 20 questions.
+                        Vous avez {dailyQcms.length} interrogation{dailyQcms.length > 1 ? 's' : ''} prévue{dailyQcms.length > 1 ? 's' : ''} aujourd'hui. Chaque QCM est disponible pendant les 15 premières minutes du cours.
                     </AlertDescription>
                 </Alert>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {[
-                  { title: 'Développement Web', difficulty: 'Moyenne', dColor: 'amber' },
-                  { title: 'Base de Données Avancées', difficulty: 'Facile', dColor: 'green' },
-                  { title: 'Anglais Technique', difficulty: 'Difficile', dColor: 'red' },
-                ].map((qcm, i) => (
-                  <Card key={i} className="flex flex-col">
-                    <CardHeader>
-                      <CardTitle className="text-lg">{qcm.title}</CardTitle>
-                      <CardDescription>
-                        <Clock className="inline-block mr-1 h-3 w-3" />
-                        Durée : 15 minutes
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow space-y-4">
-                      <div>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-muted-foreground">Difficulté</span>
-                          <span className={`font-medium ${difficultyColors[qcm.difficulty as keyof typeof difficultyColors].replace('bg-', 'text-')}`}>{qcm.difficulty}</span>
-                        </div>
-                        <Progress value={qcm.difficulty === 'Facile' ? 25 : qcm.difficulty === 'Moyenne' ? 50 : 75} className={`h-1.5 [&>div]:bg-${qcm.dColor}-500`} />
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium text-foreground">Questions :</span> 20
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full" onClick={() => { setQcmCurrentPage(1); setAnswers({}); setQcmStep('start'); setQcmModalOpen(true);}}>
-                        Commencer l'interrogation
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                {dailyQcms.length > 0 ? dailyQcms.map(renderQcmButton) : <p className="text-muted-foreground col-span-full text-center">Aucun QCM prévu pour aujourd'hui.</p>}
               </div>
             </CardContent>
           </Card>
@@ -438,8 +552,8 @@ export default function EvaluationsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedQcmHistory.map((item, index) => (
-                        <TableRow key={index} className="even:bg-muted/40">
+                    {paginatedQcmHistory.length > 0 ? paginatedQcmHistory.map((item, index) => (
+                        <TableRow key={item.id} className="even:bg-muted/40">
                             <TableCell className="font-medium">{(qcmHistoryCurrentPage - 1) * QCM_HISTORY_ITEMS_PER_PAGE + index + 1}</TableCell>
                             <TableCell>{item.id}</TableCell>
                             <TableCell>{item.module}</TableCell>
@@ -451,7 +565,11 @@ export default function EvaluationsPage() {
                                 </Button>
                             </TableCell>
                         </TableRow>
-                    ))}
+                    )) : (
+                        <TableRow>
+                            <TableCell colSpan={6} className="text-center text-muted-foreground">Aucun historique de QCM trouvé.</TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -459,27 +577,29 @@ export default function EvaluationsPage() {
                 <p className="text-sm text-muted-foreground">
                     Affichage de {paginatedQcmHistory.length} sur {filteredQcmHistory.length} QCM
                 </p>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setQcmHistoryCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={qcmHistoryCurrentPage === 1}
-                        className="h-8 w-8"
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    {renderQcmHistoryPagination()}
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setQcmHistoryCurrentPage((p) => Math.min(totalQcmHistoryPages, p + 1))}
-                        disabled={qcmHistoryCurrentPage === totalQcmHistoryPages}
-                        className="h-8 w-8"
-                    >
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                </div>
+                {totalQcmHistoryPages > 1 && (
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setQcmHistoryCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={qcmHistoryCurrentPage === 1}
+                            className="h-8 w-8"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        {renderQcmHistoryPagination()}
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setQcmHistoryCurrentPage((p) => Math.min(totalQcmHistoryPages, p + 1))}
+                            disabled={qcmHistoryCurrentPage === totalQcmHistoryPages}
+                            className="h-8 w-8"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
             </CardFooter>
           </Card>
         </TabsContent>
@@ -679,7 +799,7 @@ export default function EvaluationsPage() {
       <Dialog open={isQcmModalOpen} onOpenChange={handleQcmModalOpenChange}>
           <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col">
               <DialogHeader>
-                  <DialogTitle>Interrogation : Développement Web</DialogTitle>
+                  <DialogTitle>Interrogation : {selectedQcm?.title}</DialogTitle>
               </DialogHeader>
               {renderQcmContent()}
           </DialogContent>
@@ -745,3 +865,5 @@ export default function EvaluationsPage() {
     </div>
   );
 }
+
+    
