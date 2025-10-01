@@ -291,35 +291,37 @@ export default function EvaluationsPage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>QCM à venir</CardTitle>
+              <CardTitle>Historique des QCM</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>ID</TableHead>
                     <TableHead>Module</TableHead>
                     <TableHead>Date</TableHead>
-                    <TableHead>Durée</TableHead>
-                    <TableHead>Difficulté</TableHead>
-                    <TableHead>Questions</TableHead>
+                    <TableHead>Moyenne</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                     {[
-                        { module: 'Mathématiques Discrètes', date: 'Lundi 19/05/2025', difficulty: 'Difficile' },
-                        { module: 'Algorithmique Avancée', date: 'Mardi 20/05/2025', difficulty: 'Moyenne' },
-                        { module: 'Programmation Orientée Objet', date: 'Mercredi 21/05/2025', difficulty: 'Facile' },
+                        { id: 'QCM-032', module: 'Mathématiques Discrètes', date: '10/05/2025', average: '17/20' },
+                        { id: 'QCM-031', module: 'Algorithmique Avancée', date: '08/05/2025', average: '14/20' },
+                        { id: 'QCM-030', module: 'Programmation Orientée Objet', date: '05/05/2025', average: '19/20' },
                     ].map((item, index) => (
                         <TableRow key={index}>
-                            <TableCell className="font-medium">{item.module}</TableCell>
+                            <TableCell className="font-medium">{index + 1}</TableCell>
+                            <TableCell>{item.id}</TableCell>
+                            <TableCell>{item.module}</TableCell>
                             <TableCell>{item.date}</TableCell>
-                            <TableCell>15 minutes</TableCell>
-                            <TableCell>
-                               <Badge variant="outline" className={`border-0 ${difficultyColors[item.difficulty as keyof typeof difficultyColors].replace('text-', 'bg-').replace('600', '100').replace('400', '900/30')} ${difficultyColors[item.difficulty as keyof typeof difficultyColors].replace('bg-', 'text-')}`}>
-                                 {item.difficulty}
-                               </Badge>
+                            <TableCell className="font-semibold">{item.average}</TableCell>
+                            <TableCell className="text-right">
+                                <Button variant="ghost" size="icon">
+                                    <Eye className="h-4 w-4"/>
+                                </Button>
                             </TableCell>
-                            <TableCell>20 questions</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -531,7 +533,3 @@ export default function EvaluationsPage() {
     </div>
   );
 }
-
-    
-
-    
