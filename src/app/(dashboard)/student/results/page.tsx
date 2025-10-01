@@ -78,7 +78,7 @@ export default function ResultsPage() {
   const [course, setCourse] = useState('');
 
   const generatePdf = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF('landscape');
     
     // Header
     doc.setFontSize(20);
@@ -192,6 +192,22 @@ export default function ResultsPage() {
         theme: 'grid',
         headStyles: { fillColor: [22, 163, 74] },
         didDrawPage: (data: any) => {
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text(
+                `Généré via UNI-VERX®`,
+                data.settings.margin.left,
+                doc.internal.pageSize.height - 10
+            );
+            doc.text(
+                `Page ${data.pageNumber} sur ${pageCount}`,
+                doc.internal.pageSize.width - data.settings.margin.right,
+                doc.internal.pageSize.height - 10,
+                { align: 'right' }
+            );
+
             finalY = data.cursor?.y || 0;
         }
     });
@@ -202,7 +218,7 @@ export default function ResultsPage() {
         doc.text("Commentaire du jury:", 14, finalY + 10);
         doc.setFontSize(9);
         doc.setTextColor(80);
-        const splitText = doc.splitTextToSize(semesterResults.annual.juryComment, 180);
+        const splitText = doc.splitTextToSize(semesterResults.annual.juryComment, doc.internal.pageSize.width - 30);
         doc.text(splitText, 14, finalY + 15);
     }
     
@@ -622,4 +638,5 @@ export default function ResultsPage() {
     </div>
   );
 }
+
 
