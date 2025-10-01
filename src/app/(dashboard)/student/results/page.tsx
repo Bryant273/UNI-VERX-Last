@@ -1,10 +1,11 @@
 
 
+
 'use client';
 
 import { useState } from 'react';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import 'jspdf-autotable';
 import {
   FileText,
   GraduationCap,
@@ -44,7 +45,7 @@ import { coursesResultsData, semesterResults } from '@/lib/results-data';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import BulletinPDF from '@/components/dashboard/bulletin-pdf';
+import { getLogoSvg } from '@/components/logo';
 
 
 const getGradeClass = (grade: string): string => {
@@ -83,59 +84,147 @@ export default function ResultsPage() {
 
   const generatePdf = async () => {
     setIsGeneratingPdf(true);
-    const pdfContainer = document.getElementById('pdf-container');
-    const pdfContent = pdfContainer?.firstChild as HTMLElement;
+    const doc = new jsPDF('p', 'pt', 'a4');
+    const pageHeight = doc.internal.pageSize.height;
+    const pageWidth = doc.internal.pageSize.width;
+    let y = 20;
 
-    if (!pdfContainer || !pdfContent) {
-      console.error("PDF container or content not found");
-      setIsGeneratingPdf(false);
-      return;
-    }
-
-    // --- Critical fix starts here ---
-    // Make the container and its content visible for rendering, but keep it off-screen.
-    pdfContainer.style.position = 'fixed';
-    pdfContainer.style.left = '0';
-    pdfContainer.style.top = '0';
-    pdfContainer.style.zIndex = '-1'; // Keep it behind everything
-    pdfContainer.style.opacity = '0'; // Keep it invisible
-    pdfContainer.style.display = 'block';
-    pdfContainer.style.width = '8.27in'; // A4 width
-    pdfContainer.style.height = '11.69in'; // A4 height
-
-    // Ensure the content itself has dimensions
-    pdfContent.style.width = '100%';
-    pdfContent.style.height = '100%';
-    // --- Critical fix ends here ---
-
+    // --- Header ---
+    const logoSvgString = getLogoSvg();
+    const parser = new DOMParser();
+    const svgElem = parser.parseFromString(logoSvgString, "image/svg+xml").documentElement;
+    svgElem.setAttribute('width', '80');
+    svgElem.setAttribute('height', '80');
+    
+    // JSPDF SVG plugin is not added by default in all environments
+    // a try-catch will prevent crashes if it fails.
     try {
-        const canvas = await html2canvas(pdfContent, { // Capture the content div, not the container
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            windowWidth: pdfContent.scrollWidth,
-            windowHeight: pdfContent.scrollHeight
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'px',
-            format: [canvas.width, canvas.height],
-        });
-
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
-    } catch (error) {
-        console.error("Erreur lors de la génération du PDF:", error);
-    } finally {
-        // Hide the container again
-        pdfContainer.style.position = 'absolute';
-        pdfContainer.style.left = '-9999px';
-        pdfContainer.style.display = 'none';
-
-        setIsGeneratingPdf(false);
+        await doc.svg(svgElem, { x: 40, y: y });
+    } catch(e) {
+        console.error("Failed to render SVG in PDF", e);
     }
+
+
+    doc.setFontSize(10);
+    doc.text('Année universitaire :', 300, y + 10);
+    doc.setFont(undefined, 'bold');
+    doc.text(studentData.academicYear, 390, y + 10);
+    doc.setFont(undefined, 'normal');
+
+    doc.setFillColor(84, 44, 138); // Purple
+    doc.rect(200, y + 22, 230, 20, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('RELEVE DE NOTES', pageWidth / 2, y + 35, { align: 'center' });
+
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+
+    const rightHeaderTextX = pageWidth - 60;
+    doc.text('REPUBLIQUE "PAYS"', rightHeaderTextX, y + 10, { align: 'right' });
+    doc.text('Devise pays', rightHeaderTextX, y + 25, { align: 'right' });
+    doc.text('Emblême pays', rightHeaderTextX, y + 40, { align: 'right' });
+
+    y += 50;
+    const studentInfoX = 140;
+    doc.text(`Nom: ${studentData.lastName}`, studentInfoX, y);
+    doc.text(`Prénoms: ${studentData.firstName}`, studentInfoX, y + 15);
+    doc.text(`Date & lieu de naissance: ${studentData.birthDate} à ${studentData.birthPlace}`, studentInfoX, y + 30);
+    doc.text(`Genre: ${studentData.gender}`, studentInfoX, y + 45);
+
+    const studentInfoX2 = 340;
+    doc.text(`Niveau: ${studentData.level}`, studentInfoX2, y);
+    doc.text(`UFR: ${studentData.ufr}`, studentInfoX2, y + 15);
+    doc.text(`Spécialité: ${studentData.speciality}`, studentInfoX2, y + 30);
+    doc.text(`Matricule: ${studentData.id}`, studentInfoX2, y + 45);
+
+    y += 60;
+
+    // --- Table ---
+    const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
+    const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
+    const tableBody: any[] = [];
+
+    const addSemesterToBody = (groupedCourses: any, coursesList: any[], semesterName: string) => {
+        Object.entries(groupedCourses).forEach(([ue, courses], ueIndex) => {
+            (courses as any[]).forEach((course: any, courseIndex: number) => {
+                const row = [
+                    courseIndex === 0 && ueIndex === 0 ? { content: '', rowSpan: coursesList.length } : '', // Placeholder for vertical text
+                    courseIndex === 0 ? { content: ue, rowSpan: (courses as any[]).length, styles: { valign: 'middle' } } : '',
+                    course.module,
+                    { content: course.grade, styles: { fontStyle: 'bold' } },
+                    { content: course.creditsToValidate, styles: { halign: 'center' } },
+                    { content: course.creditsValidated, styles: { halign: 'center' } },
+                ];
+                tableBody.push(row);
+            });
+        });
+    };
+
+    addSemesterToBody(s1Grouped, semesterResults.s1.courses, 'SEMESTRE 1');
+    addSemesterToBody(s2Grouped, semesterResults.s2.courses, 'SEMESTRE 2');
+
+    doc.autoTable({
+        startY: y,
+        head: [['SEMESTRE', 'UE', 'MODULE', 'MOYENNE', 'CREDITS A VALIDER', 'CREDITS VALIDES']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [226, 232, 240], // bg-slate-200
+            textColor: [0, 0, 0],
+            fontStyle: 'bold',
+        },
+        styles: {
+            fontSize: 8,
+            cellPadding: 4,
+        },
+        columnStyles: {
+            0: { cellWidth: 50, halign: 'center' },
+            1: { cellWidth: 100 },
+            2: { cellWidth: 'auto' },
+            3: { cellWidth: 60, halign: 'center' },
+            4: { cellWidth: 70, halign: 'center' },
+            5: { cellWidth: 70, halign: 'center' },
+        },
+        didDrawCell: (data) => {
+            if (data.section === 'body' && data.column.index === 0) {
+                 if (data.row.index === 0) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text('S\nE\nM\nE\nS\nT\nR\nE\n\n1', data.cell.x + data.cell.width / 2, data.cell.y + 15, { halign: 'center' });
+                 }
+                 if (data.row.index === semesterResults.s1.courses.length) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text('S\nE\nM\nE\nS\nT\nR\nE\n\n2', data.cell.x + data.cell.width / 2, data.cell.y + 15, { halign: 'center' });
+                 }
+            }
+        },
+        didParseCell: (data) => {
+            if (data.column.index === 3 && data.cell.section === 'body') {
+                const numericGrade = parseFloat(String(data.cell.raw).split('/')[0].replace(',', '.'));
+                if (numericGrade >= 16) data.cell.styles.textColor = [22, 163, 74];
+                else if (numericGrade >= 14) data.cell.styles.textColor = [37, 99, 235];
+                else if (numericGrade >= 10) data.cell.styles.textColor = [202, 138, 4];
+                else data.cell.styles.textColor = [220, 38, 38];
+            }
+        },
+    });
+
+    y = (doc as any).autoTable.previous.finalY + 30;
+
+    // --- Footer ---
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('COMMENTAIRE :', 40, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(semesterResults.annual.juryComment, 40, y + 15, { maxWidth: 350 });
+
+    doc.rect(pageWidth - 160, y, 120, 50);
+    doc.text('CACHET', pageWidth - 100, y + 30, { align: 'center' });
+
+    doc.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
+    setIsGeneratingPdf(false);
   };
 
 
@@ -476,15 +565,6 @@ export default function ResultsPage() {
 
   return (
     <div className="space-y-6">
-        {/* Hidden container for PDF generation */}
-        <div id="pdf-container" style={{ position: 'absolute', left: '-9999px', display: 'none' }}>
-          <BulletinPDF 
-            displayType={displayType} 
-            semester={semester} 
-            courseId={course} 
-          />
-        </div>
-
         <Card>
             <CardHeader className="flex-col md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
