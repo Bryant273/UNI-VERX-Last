@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState } from 'react';
@@ -89,12 +88,12 @@ export default function ResultsPage() {
 
     // --- En-tête ---
     const logoSvgString = getLogoSvg();
-    const img = new Image();
-    const svgBlob = new Blob([logoSvgString], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
     
     const convertSvgToPng = (): Promise<string> => {
         return new Promise((resolve, reject) => {
+            const img = new Image();
+            const svgBlob = new Blob([logoSvgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const desiredWidth = 50; 
@@ -258,12 +257,7 @@ export default function ResultsPage() {
                 }
                  // Color grades
                 if (data.column.index === 3) {
-                    const grade = data.cell.raw;
-                    const numericGrade = parseFloat(String(grade).split('/')[0].replace(',', '.'));
-                    if (numericGrade >= 16) data.cell.styles.textColor = [34, 139, 34]; // ForestGreen
-                    else if (numericGrade >= 14) data.cell.styles.textColor = [0, 0, 255]; // Blue
-                    else if (numericGrade >= 10) data.cell.styles.textColor = [255, 165, 0]; // Orange
-                    else data.cell.styles.textColor = [255, 0, 0]; // Red
+                    data.cell.styles.textColor = [0, 0, 0];
                 }
             }
         }
@@ -479,7 +473,7 @@ export default function ResultsPage() {
                     <Card className="flex flex-col items-center justify-center p-6">
                          <div className="relative h-24 w-24 mb-3">
                             <Progress value={(parseInt(data.credits.split('/')[0]) / 60) * 100} className="absolute w-full h-full rounded-full" />
-                             <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-primary">{Math.round((parseInt(data.credits.split('/')[0]) / 60) * 100)}%</div>
+                             <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-foreground">{Math.round((parseInt(data.credits.split('/')[0]) / 60) * 100)}%</div>
                         </div>
                         <div className="text-center">
                            <CardTitle className="text-base font-medium">Crédits validés</CardTitle>
@@ -720,7 +714,3 @@ export default function ResultsPage() {
     </div>
   );
 }
-
-    
-
-    
