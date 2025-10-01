@@ -61,6 +61,14 @@ const allCoursesForFilter = [
     ...semesterResults.s2.courses.map(c => ({...c, id: c.module.toLowerCase().replace(/ /g, '_') + '_s2', semester: 'Semestre 2'}))
 ];
 
+const groupCoursesByUE = (courses: typeof semesterResults.s1.courses) => {
+    return courses.reduce((acc, course) => {
+        (acc[course.ue] = acc[course.ue] || []).push(course);
+        return acc;
+    }, {} as { [key: string]: typeof semesterResults.s1.courses });
+};
+
+
 export default function ResultsPage() {
   const [displayType, setDisplayType] = useState('bulletin');
   const [semester, setSemester] = useState('annual');
@@ -68,10 +76,7 @@ export default function ResultsPage() {
 
   const renderSemesterTable = (semesterKey: 's1' | 's2') => {
     const data = semesterResults[semesterKey];
-    const groupedCourses: { [key: string]: typeof data.courses } = data.courses.reduce((acc, course) => {
-        (acc[course.ue] = acc[course.ue] || []).push(course);
-        return acc;
-    }, {} as { [key: string]: typeof data.courses });
+    const groupedCourses = groupCoursesByUE(data.courses);
 
     return (
         <Card className="mb-8">
@@ -91,10 +96,10 @@ export default function ResultsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {Object.entries(groupedCourses).map(([ue, courses], index) => (
+                            {Object.entries(groupedCourses).map(([ue, courses]) => (
                                 courses.map((course, courseIndex) => (
                                     <TableRow key={`${ue}-${course.module}`}>
-                                        {courseIndex === 0 && <TableCell rowSpan={courses.length} className="font-medium align-middle text-center">{ue}</TableCell>}
+                                        {courseIndex === 0 && <TableCell rowSpan={courses.length} className="font-medium align-middle text-center bg-muted/30">{ue}</TableCell>}
                                         <TableCell>{course.module}</TableCell>
                                         <TableCell className={cn("font-semibold", getGradeClass(course.grade))}>{course.grade}</TableCell>
                                         <TableCell>{course.creditsToValidate}</TableCell>
@@ -158,13 +163,99 @@ export default function ResultsPage() {
   const renderAnnualView = () => {
     const data = semesterResults.annual;
     const creditsValue = (parseInt(data.credits.split('/')[0]) / parseInt(data.credits.split('/')[1])) * 100;
-    
+    const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
+    const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
+
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Bulletin annuel</CardTitle>
             </CardHeader>
             <CardContent>
+                <div className="overflow-x-auto mb-8">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-20">Semestre</TableHead>
+                                <TableHead>UE</TableHead>
+                                <TableHead>Module</TableHead>
+                                <TableHead>Moyenne</TableHead>
+                                <TableHead>Crédits à valider</TableHead>
+                                <TableHead>Crédits validés</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {/* Semestre 1 */}
+                            {Object.entries(s1Grouped).map(([ue, courses], ueIndex) => (
+                                courses.map((course, courseIndex) => (
+                                    <TableRow key={`s1-${ue}-${course.module}`}>
+                                        {ueIndex === 0 && courseIndex === 0 && (
+                                            <TableCell rowSpan={semesterResults.s1.courses.length} className="font-semibold align-middle text-center bg-muted/30">
+                                                Semestre 1
+                                            </TableCell>
+                                        )}
+                                        {courseIndex === 0 && (
+                                            <TableCell rowSpan={courses.length} className="font-medium align-middle bg-muted/20">{ue}</TableCell>
+                                        )}
+                                        <TableCell>{course.module}</TableCell>
+                                        <TableCell className={cn("font-semibold", getGradeClass(course.grade))}>{course.grade}</TableCell>
+                                        <TableCell>{course.creditsToValidate}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className={`border-0 ${getCreditsClass(course.creditsValidated > 0 ? 'validated' : 'failed')}`}>
+                                                {course.creditsValidated}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ))}
+                            <TableRow className="bg-muted font-bold">
+                                <TableCell colSpan={3} className="text-right">Total Semestre 1</TableCell>
+                                <TableCell className={cn(getGradeClass(semesterResults.s1.average))}>{semesterResults.s1.average}</TableCell>
+                                <TableCell>30</TableCell>
+                                <TableCell>{semesterResults.s1.credits}</TableCell>
+                            </TableRow>
+
+                             {/* Semestre 2 */}
+                             {Object.entries(s2Grouped).map(([ue, courses], ueIndex) => (
+                                courses.map((course, courseIndex) => (
+                                    <TableRow key={`s2-${ue}-${course.module}`}>
+                                        {ueIndex === 0 && courseIndex === 0 && (
+                                            <TableCell rowSpan={semesterResults.s2.courses.length} className="font-semibold align-middle text-center bg-muted/30">
+                                                Semestre 2
+                                            </TableCell>
+                                        )}
+                                        {courseIndex === 0 && (
+                                            <TableCell rowSpan={courses.length} className="font-medium align-middle bg-muted/20">{ue}</TableCell>
+                                        )}
+                                        <TableCell>{course.module}</TableCell>
+                                        <TableCell className={cn("font-semibold", getGradeClass(course.grade))}>{course.grade}</TableCell>
+                                        <TableCell>{course.creditsToValidate}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className={`border-0 ${getCreditsClass(course.creditsValidated > 0 ? 'validated' : 'failed')}`}>
+                                                {course.creditsValidated}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ))}
+                             <TableRow className="bg-muted font-bold">
+                                <TableCell colSpan={3} className="text-right">Total Semestre 2</TableCell>
+                                <TableCell className={cn(getGradeClass(semesterResults.s2.average))}>{semesterResults.s2.average}</TableCell>
+                                <TableCell>30</TableCell>
+                                <TableCell>{semesterResults.s2.credits}</TableCell>
+                            </TableRow>
+                        </TableBody>
+                        <TableFooter>
+                            <TableRow className="text-base">
+                                <TableCell colSpan={3} className="text-right font-extrabold">Total Année</TableCell>
+                                <TableCell className={cn("font-extrabold", getGradeClass(data.average))}>{data.average}</TableCell>
+                                <TableCell className="font-extrabold">60</TableCell>
+                                <TableCell className="font-extrabold">{data.credits}</TableCell>
+                            </TableRow>
+                        </TableFooter>
+                    </Table>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                      <Card className="lg:col-span-1 bg-gradient-to-br from-primary/10 to-secondary/10 flex flex-col items-center justify-center p-6">
                         <div className="text-center">
