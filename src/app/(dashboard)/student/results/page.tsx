@@ -53,16 +53,6 @@ const getGradeClass = (grade: string): string => {
   return 'text-red-600 dark:text-red-400';
 };
 
-const getPdfGradeColor = (grade: string): [number, number, number] => {
-    if (!grade) return [0, 0, 0]; // Black
-    const numericGrade = parseFloat(grade.split('/')[0].replace(',', '.'));
-    if (numericGrade >= 16) return [34, 139, 34]; // ForestGreen
-    if (numericGrade >= 14) return [0, 0, 255]; // Blue
-    if (numericGrade >= 10) return [255, 165, 0]; // Orange
-    return [255, 0, 0]; // Red
-};
-
-
 const getCreditsClass = (status: 'validated' | 'failed' | 'pending') => {
     if (status === 'validated') return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
     if (status === 'failed') return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
@@ -124,14 +114,7 @@ export default function ResultsPage() {
         });
     };
     
-    try {
-        const pngDataUrl = await convertSvgToPng();
-        doc.addImage(pngDataUrl, 'PNG', margin, margin, 40, 40);
-    } catch (e) {
-        console.error("Failed to render SVG to PNG for PDF", e);
-    }
-
-    y = margin + 50;
+    y = margin;
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
@@ -158,12 +141,12 @@ export default function ResultsPage() {
     const infoCol2X = pageWidth / 2 + 20;
     let infoY = y;
 
-    const infoLine = (label: string, value: string, x: number, y: number) => {
+    const infoLine = (label: string, value: string, x: number, yPos: number) => {
         doc.setFont(undefined, 'bold');
-        doc.text(label, x, y);
+        doc.text(label, x, yPos);
         const labelWidth = doc.getTextWidth(label);
         doc.setFont(undefined, 'normal');
-        doc.text(value, x + labelWidth + 5, y);
+        doc.text(value, x + labelWidth + 5, yPos);
     }
     
     infoLine('Nom :', studentData.lastName, infoCol1X, infoY);
@@ -180,6 +163,13 @@ export default function ResultsPage() {
 
     infoLine('Genre :', studentData.gender, infoCol1X, infoY);
     infoLine('Matricule :', studentData.id, infoCol2X, infoY);
+
+    try {
+        const pngDataUrl = await convertSvgToPng();
+        doc.addImage(pngDataUrl, 'PNG', margin, y - 90, 40, 40);
+    } catch (e) {
+        console.error("Failed to render SVG to PNG for PDF", e);
+    }
     
     y = infoY + 30;
 
@@ -206,7 +196,7 @@ export default function ResultsPage() {
             }
             // Other cells
             row.push(course.module);
-            row.push({ content: course.grade, styles: { textColor: getPdfGradeColor(course.grade) } });
+            row.push(course.grade);
             row.push(course.creditsValidated);
             body.push(row);
         });
@@ -227,7 +217,7 @@ export default function ResultsPage() {
             }
             // Other cells
             row.push(course.module);
-            row.push({ content: course.grade, styles: { textColor: getPdfGradeColor(course.grade) } });
+            row.push(course.grade);
             row.push(course.creditsValidated);
             body.push(row);
         });
@@ -237,7 +227,7 @@ export default function ResultsPage() {
     const totalData = semesterResults.annual;
     body.push([
         { content: 'Total Année', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold', fillColor: '#F1F5F9' } },
-        { content: totalData.average, styles: { fontStyle: 'bold', textColor: getPdfGradeColor(totalData.average), fillColor: '#F1F5F9' } },
+        { content: totalData.average, styles: { fontStyle: 'bold', fillColor: '#F1F5F9' } },
         { content: totalData.credits, styles: { fontStyle: 'bold', fillColor: '#F1F5F9' } }
     ]);
 
@@ -721,5 +711,7 @@ export default function ResultsPage() {
     </div>
   );
 }
+
+    
 
     
