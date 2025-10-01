@@ -2,6 +2,8 @@
 'use client';
 
 import { useState } from 'react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import {
   FileText,
   GraduationCap,
@@ -40,6 +42,7 @@ import { coursesResultsData, semesterResults, type CourseResult } from '@/lib/re
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import Logo from '@/components/logo';
 
 
 const getGradeClass = (grade: string): string => {
@@ -73,6 +76,121 @@ export default function ResultsPage() {
   const [displayType, setDisplayType] = useState('bulletin');
   const [semester, setSemester] = useState('annual');
   const [course, setCourse] = useState('');
+
+  const generatePdf = () => {
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(20);
+    doc.text("Bulletin de résultats", 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`${studentData.name} - ${studentData.class}`, 14, 30);
+    
+    // Auto-table
+    let head: string[][] = [];
+    let body: any[] = [];
+    let finalY = 0;
+
+    if(displayType === 'bulletin') {
+      if(semester === 'annual') {
+        head = [['Semestre', 'UE', 'Module', 'Note', 'Crédits ECTS']];
+        const s1Grouped = groupCoursesByUE(semesterResults.s1.courses);
+        Object.entries(s1Grouped).forEach(([ue, courses], ueIndex) => {
+          courses.forEach((course, courseIndex) => {
+            let row = [
+              ueIndex === 0 && courseIndex === 0 ? { content: 'Semestre 1', rowSpan: semesterResults.s1.courses.length } : '',
+              courseIndex === 0 ? { content: ue, rowSpan: courses.length } : '',
+              course.module,
+              course.grade,
+              `${course.creditsValidated}/${course.creditsToValidate}`
+            ];
+            body.push(row);
+          });
+        });
+
+        const s2Grouped = groupCoursesByUE(semesterResults.s2.courses);
+         Object.entries(s2Grouped).forEach(([ue, courses], ueIndex) => {
+          courses.forEach((course, courseIndex) => {
+            let row = [
+              ueIndex === 0 && courseIndex === 0 ? { content: 'Semestre 2', rowSpan: semesterResults.s2.courses.length } : '',
+              courseIndex === 0 ? { content: ue, rowSpan: courses.length } : '',
+              course.module,
+              course.grade,
+              `${course.creditsValidated}/${course.creditsToValidate}`
+            ];
+            body.push(row);
+          });
+        });
+        
+        body.push([
+            { content: "Total Année", colSpan: 2, styles: { halign: 'right', fontStyle: 'bold' } },
+            '',
+            { content: semesterResults.annual.average, styles: { fontStyle: 'bold' } },
+            { content: semesterResults.annual.credits, styles: { fontStyle: 'bold' } }
+        ]);
+
+      } else { // Semester view
+        const semesterKey = semester as 's1' | 's2';
+        const semesterData = semesterResults[semesterKey];
+        const groupedCourses = groupCoursesByUE(semesterData.courses);
+        head = [['UE', 'Module', 'Note', 'Crédits ECTS']];
+        Object.entries(groupedCourses).forEach(([ue, courses]) => {
+            courses.forEach((course, courseIndex) => {
+                 body.push([
+                    courseIndex === 0 ? { content: ue, rowSpan: courses.length } : '',
+                    course.module,
+                    course.grade,
+                    `${course.creditsValidated}/${course.creditsToValidate}`
+                 ]);
+            });
+        });
+         body.push([
+            { content: `Total Semestre ${semesterKey === 's1' ? 1 : 2}`, colSpan: 1, styles: { halign: 'right', fontStyle: 'bold' } },
+            '',
+            { content: semesterData.average, styles: { fontStyle: 'bold' } },
+            { content: semesterData.credits, styles: { fontStyle: 'bold' } }
+        ]);
+      }
+    } else { // Course detail view
+        const courseData = coursesResultsData[course];
+        if(courseData) {
+            doc.text(`Matière: ${courseData.name}`, 14, 40);
+            doc.text(`Enseignant: ${courseData.teacher}`, 14, 46);
+
+            head = [['Évaluation', 'Date', 'Note', 'Coefficient']];
+            courseData.details.forEach(d => {
+                body.push([d.name, d.date, d.grade, `x ${d.coef}`]);
+            });
+            body.push([
+                { content: 'Moyenne finale', colSpan: 2, styles: { halign: 'right', fontStyle: 'bold' } },
+                { content: courseData.grade, styles: { fontStyle: 'bold' } },
+                ''
+            ]);
+        }
+    }
+
+    (doc as any).autoTable({
+        head: head,
+        body: body,
+        startY: displayType === 'course' && course ? 52 : 40,
+        theme: 'grid',
+        didDrawPage: (data: any) => {
+            finalY = data.cursor.y;
+        }
+    });
+
+    if (displayType === 'bulletin' && semester === 'annual') {
+        doc.setFontSize(10);
+        doc.text("Commentaire du jury:", 14, finalY + 10);
+        doc.setFontSize(9);
+        doc.setTextColor(80);
+        const splitText = doc.splitTextToSize(semesterResults.annual.juryComment, 180);
+        doc.text(splitText, 14, finalY + 15);
+    }
+    
+    doc.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
+  }
 
   const renderSemesterTable = (semesterKey: 's1' | 's2') => {
     const data = semesterResults[semesterKey];
@@ -426,7 +544,7 @@ export default function ResultsPage() {
                         <p className="text-sm text-muted-foreground">{studentData.class} • {studentData.id}</p>
                     </div>
                 </div>
-                <Button>
+                <Button onClick={generatePdf}>
                     <Download className="mr-2 h-4 w-4" />
                     Télécharger le bulletin
                 </Button>
@@ -490,5 +608,3 @@ export default function ResultsPage() {
     </div>
   );
 }
-
-    
