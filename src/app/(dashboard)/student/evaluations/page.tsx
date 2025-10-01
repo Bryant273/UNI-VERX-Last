@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -61,6 +59,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 const difficultyColors = {
   Facile: 'text-green-600 dark:text-green-400 bg-green-500',
@@ -80,12 +79,25 @@ const qcmQuestions = Array.from({ length: 20 }, (_, i) => ({
     id: `q${i + 1}`,
     question: `Quelle est la capitale de la France ? Question ${i + 1}`,
     options: ['Paris', 'Londres', 'Berlin', 'Madrid'],
+    correctAnswer: 'Paris',
 }));
 
 const QCM_HISTORY_ITEMS_PER_PAGE = 5;
 
 const allQcmHistory = [
-    { id: 'QCM-032', module: 'Mathématiques Discrètes', date: '10/05/2025', average: '17/20' },
+    { 
+        id: 'QCM-032', 
+        module: 'Mathématiques Discrètes', 
+        date: '10/05/2025', 
+        average: '17/20',
+        questions: Array.from({ length: 20 }, (_, i) => ({
+            id: `q${i+1}`,
+            question: `Question ${i+1} sur les graphes`,
+            options: ['Option A', 'Option B', 'Option C', 'Option D'],
+            userAnswer: i % 2 === 0 ? 'Option A' : 'Option B',
+            correctAnswer: 'Option A'
+        }))
+    },
     { id: 'QCM-031', module: 'Algorithmique Avancée', date: '08/05/2025', average: '14/20' },
     { id: 'QCM-030', module: 'Programmation Orientée Objet', date: '05/05/2025', average: '19/20' },
     { id: 'QCM-029', module: 'Développement Web', date: '01/05/2025', average: '16/20' },
@@ -103,6 +115,8 @@ export default function EvaluationsPage() {
     const [isUploadModalOpen, setUploadModalOpen] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isQcmModalOpen, setQcmModalOpen] = useState(false);
+    const [isQcmHistoryModalOpen, setQcmHistoryModalOpen] = useState(false);
+    const [selectedQcmHistory, setSelectedQcmHistory] = useState<(typeof allQcmHistory)[0] | null>(null);
     const [qcmStep, setQcmStep] = useState('start'); // 'start', 'test', 'results'
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [qcmCurrentPage, setQcmCurrentPage] = useState(1);
@@ -157,10 +171,14 @@ export default function EvaluationsPage() {
     
     const handleQcmModalOpenChange = (open: boolean) => {
         if (!open && qcmStep === 'test') {
-            // If modal is closed during the test, submit automatically.
             setQcmStep('results');
         }
         setQcmModalOpen(open);
+    };
+
+    const handleHistoryClick = (qcm: (typeof allQcmHistory)[0]) => {
+        setSelectedQcmHistory(qcm);
+        setQcmHistoryModalOpen(true);
     };
 
     const renderQcmHistoryPagination = () => {
@@ -388,7 +406,7 @@ export default function EvaluationsPage() {
                             <TableCell>{item.date}</TableCell>
                             <TableCell className="font-semibold">{item.average}</TableCell>
                             <TableCell className="text-right">
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" size="icon" onClick={() => handleHistoryClick(item)}>
                                     <Eye className="h-4 w-4"/>
                                 </Button>
                             </TableCell>
@@ -626,6 +644,66 @@ export default function EvaluationsPage() {
               {renderQcmContent()}
           </DialogContent>
       </Dialog>
+
+      <Dialog open={isQcmHistoryModalOpen} onOpenChange={setQcmHistoryModalOpen}>
+          <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col">
+              <DialogHeader>
+                  <DialogTitle>Détails du QCM: {selectedQcmHistory?.id}</DialogTitle>
+                  {selectedQcmHistory && (
+                    <DialogDescription>
+                        Module: {selectedQcmHistory.module} | Date: {selectedQcmHistory.date} | Note: <span className="font-bold">{selectedQcmHistory.average}</span>
+                    </DialogDescription>
+                  )}
+              </DialogHeader>
+              <div className="flex-grow overflow-auto pr-4 space-y-6">
+                {selectedQcmHistory?.questions?.map((q, index) => (
+                    <div key={q.id}>
+                        <p className="font-medium mb-3">{index + 1}. {q.question}</p>
+                        <div className="space-y-2">
+                            {q.options.map((option, optIndex) => {
+                                const isUserAnswer = q.userAnswer === option;
+                                const isCorrectAnswer = q.correctAnswer === option;
+                                const isIncorrectUserAnswer = isUserAnswer && !isCorrectAnswer;
+
+                                return (
+                                    <div 
+                                        key={optIndex}
+                                        className={cn(
+                                            "flex items-center p-3 rounded-lg border text-sm",
+                                            isCorrectAnswer && "bg-green-500/10 border-green-500/30",
+                                            isIncorrectUserAnswer && "bg-red-500/10 border-red-500/30",
+                                        )}
+                                    >
+                                        {isCorrectAnswer && <Check className="h-4 w-4 mr-3 text-green-600"/>}
+                                        {isIncorrectUserAnswer && <XCircle className="h-4 w-4 mr-3 text-red-600"/>}
+                                        {!isCorrectAnswer && !isIncorrectUserAnswer && (
+                                            isUserAnswer ? <CheckCircle className="h-4 w-4 mr-3 text-muted-foreground" /> : <div className="w-4 h-4 mr-3" />
+                                        )}
+                                        <span className={cn(
+                                            isCorrectAnswer && "font-semibold text-green-800 dark:text-green-200",
+                                            isIncorrectUserAnswer && "line-through text-red-800 dark:text-red-300"
+                                        )}>
+                                            {option}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ))}
+                {!selectedQcmHistory?.questions && (
+                    <div className="text-center text-muted-foreground py-8">
+                        Les détails pour ce QCM ne sont pas disponibles.
+                    </div>
+                )}
+              </div>
+               <DialogFooter className="mt-4 pt-4 border-t">
+                  <Button onClick={() => setQcmHistoryModalOpen(false)}>Fermer</Button>
+               </DialogFooter>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+    
