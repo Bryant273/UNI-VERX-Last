@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -83,51 +84,59 @@ export default function ResultsPage() {
   const generatePdf = async () => {
     setIsGeneratingPdf(true);
     const pdfContainer = document.getElementById('pdf-container');
-    if (!pdfContainer) {
+    const pdfContent = pdfContainer?.firstChild as HTMLElement;
+
+    if (!pdfContainer || !pdfContent) {
+      console.error("PDF container or content not found");
       setIsGeneratingPdf(false);
       return;
     }
 
+    // --- Critical fix starts here ---
+    // Make the container and its content visible for rendering, but keep it off-screen.
+    pdfContainer.style.position = 'fixed';
+    pdfContainer.style.left = '0';
+    pdfContainer.style.top = '0';
+    pdfContainer.style.zIndex = '-1'; // Keep it behind everything
+    pdfContainer.style.opacity = '0'; // Keep it invisible
+    pdfContainer.style.display = 'block';
+    pdfContainer.style.width = '8.27in'; // A4 width
+    pdfContainer.style.height = '11.69in'; // A4 height
+
+    // Ensure the content itself has dimensions
+    pdfContent.style.width = '100%';
+    pdfContent.style.height = '100%';
+    // --- Critical fix ends here ---
+
     try {
-      // Temporarily make the container visible for rendering
-      pdfContainer.style.position = 'fixed';
-      pdfContainer.style.left = '0';
-      pdfContainer.style.top = '0';
-      pdfContainer.style.zIndex = '1000';
-      pdfContainer.style.opacity = '0';
+        const canvas = await html2canvas(pdfContent, { // Capture the content div, not the container
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            windowWidth: pdfContent.scrollWidth,
+            windowHeight: pdfContent.scrollHeight
+        });
 
-      const canvas = await html2canvas(pdfContainer, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        width: pdfContainer.offsetWidth,
-        height: pdfContainer.offsetHeight,
-      });
-      
-      // Hide the container again
-      pdfContainer.style.position = 'absolute';
-      pdfContainer.style.left = '-9999px';
-      pdfContainer.style.top = '0';
-      pdfContainer.style.zIndex = '-10';
-      pdfContainer.style.opacity = '1';
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'px',
+            format: [canvas.width, canvas.height],
+        });
 
-
-      const imgData = canvas.toDataURL('image/png');
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height],
-      });
-
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`bulletin_${studentData.name.replace(' ', '_')}_${semester}.pdf`);
     } catch (error) {
-      console.error("Erreur lors de la génération du PDF:", error);
+        console.error("Erreur lors de la génération du PDF:", error);
     } finally {
-      setIsGeneratingPdf(false);
+        // Hide the container again
+        pdfContainer.style.position = 'absolute';
+        pdfContainer.style.left = '-9999px';
+        pdfContainer.style.display = 'none';
+
+        setIsGeneratingPdf(false);
     }
-  }
+  };
 
 
   const renderSemesterTable = (semesterKey: 's1' | 's2') => {
@@ -468,7 +477,7 @@ export default function ResultsPage() {
   return (
     <div className="space-y-6">
         {/* Hidden container for PDF generation */}
-        <div id="pdf-container" style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+        <div id="pdf-container" style={{ position: 'absolute', left: '-9999px', display: 'none' }}>
           <BulletinPDF 
             displayType={displayType} 
             semester={semester} 
