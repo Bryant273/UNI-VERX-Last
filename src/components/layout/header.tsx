@@ -48,7 +48,7 @@ export default function Header() {
           size="icon"
           variant="ghost"
           onClick={toggleSidebar}
-          className="md:flex"
+          className="md:hidden"
         >
           <PanelLeft className="h-5 w-5" />
           <span className="sr-only">Ouvrir/Fermer le menu</span>
@@ -56,10 +56,8 @@ export default function Header() {
         <DateTime />
       </div>
       
-      <div className="flex-1" />
-
-      <div className="flex items-center gap-4 md:gap-2 lg:gap-4">
-        <div className="relative flex-1 md:grow-0">
+      <div className="flex w-full flex-1 items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <div className="relative ml-auto flex-1 md:grow-0">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"

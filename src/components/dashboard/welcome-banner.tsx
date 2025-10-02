@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,7 +21,7 @@ export default function WelcomeBanner({ name, role }: { name: string, role: stri
       <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
         {greeting ? `${greeting}, ${name} !` : `Bienvenue, ${name} !`}
       </h1>
-      <p className="text-muted-foreground">
+      <p className="text-muted-foreground mt-1">
         Bienvenue sur votre tableau de bord.
       </p>
     </div>

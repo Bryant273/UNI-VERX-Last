@@ -22,7 +22,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 const ComingSoonCard = ({ title, icon: Icon }: { title: string, icon: React.ElementType }) => (
   <Card className="lg:col-span-3">
     <CardHeader>
-      <CardTitle className="flex items-center gap-2">
+      <CardTitle className="flex items-center gap-2 text-xl">
         <Icon className="h-6 w-6 text-muted-foreground" />
         {title}
       </CardTitle>
@@ -44,15 +44,15 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
   const user = userData[role];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <WelcomeBanner name={user.name} role={role} />
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {/* Tableau de bord Étudiant */}
         {role === 'student' && (
           <>
             <AverageCard />
             <AiReportCard />
-            <div className="flex justify-center lg:justify-start">
+            <div className="flex justify-center sm:justify-start">
               <CurrentEventCard role="student" />
             </div>
           </>
@@ -62,7 +62,9 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {role === 'professor' && (
           <>
             <AiReportCard />
-            <CurrentEventCard role="professor" />
+            <div className="flex justify-center sm:justify-start">
+              <CurrentEventCard role="professor" />
+            </div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Présence des étudiants</CardTitle>
@@ -130,7 +132,9 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
                 </p>
               </CardContent>
             </Card>
-            <CurrentEventCard role="admin" />
+            <div className="flex justify-center sm:justify-start">
+             <CurrentEventCard role="admin" />
+            </div>
             <AiReportCard />
           </>
         )}
