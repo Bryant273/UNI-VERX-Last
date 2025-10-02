@@ -166,21 +166,22 @@ const formatTime = (seconds: number) => {
 
 const getDailyQcms = (): Qcm[] => {
     const now = new Date();
-    const todayDay = now.toLocaleString('fr-FR', { weekday: 'long' });
-    const studentEvents = allEvents['student'];
+    const todayDay = now.toLocaleString('fr-FR', { weekday: 'long' }).toLowerCase();
     
-    // In a real app, date comparison would be more robust. Here we simplify.
-    const todayEvents = studentEvents.filter(event => {
-        // Simplified: check if event is today based on a mock "day" property
-        const eventDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Mock event date
-        return (event.type === 'cours' || event.type === 'td' || event.type === 'tp') && 
-               now.toDateString() === eventDate.toDateString();
-    });
+    // In a real app, this would come from a proper API call with the student's schedule
+    const userTimetableToday = [
+      { day: 'lundi', time: '09:00 - 11:00', course: 'Calcul Avancé', id: 1, type: 'cours' },
+      { day: 'lundi', time: '13:00 - 15:00', course: 'Physique Quantique', id: 2, type: 'tp' },
+    ];
+
+    const todayEvents = userTimetableToday.filter(event => 
+        event.day === todayDay && (event.type === 'cours' || event.type === 'td' || event.type === 'tp')
+    );
 
     return todayEvents.map(event => {
         const [startHours, startMinutes] = event.time.split(' - ')[0].split(':').map(Number);
         const startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHours, startMinutes);
-        const endTime = new Date(startTime.getTime() + 15 * 60 * 1000); // 15 minutes window
+        const endTime = new Date(startTime.getTime() + QCM_DURATION_MINUTES * 60 * 1000);
 
         let difficulty: 'Facile' | 'Moyenne' | 'Difficile' = 'Moyenne';
         if (event.course.includes('Avancé')) difficulty = 'Difficile';
@@ -365,24 +366,26 @@ export default function EvaluationsPage() {
 
     // --- Effects ---
     useEffect(() => {
-        const timer = setInterval(() => setNow(new Date()), 60 * 1000); // Update every minute
-        return () => clearInterval(timer);
-    }, []);
-
-    useEffect(() => {
-        if (qcmStep !== 'test' || !isQcmModalOpen) return;
-
-        if (timeLeft <= 0) {
-            finishQcm();
-            return;
+        // This effect updates the current time every second, but only when the QCM modal is open and in the 'test' step.
+        // This is more efficient than a global timer.
+        if (qcmStep === 'test' && isQcmModalOpen) {
+          const timer = setInterval(() => {
+            setNow(new Date());
+            if (timeLeft > 0) {
+              setTimeLeft(prevTime => prevTime - 1);
+            } else {
+              finishQcm();
+            }
+          }, 1000);
+          return () => clearInterval(timer);
         }
-
-        const timer = setInterval(() => {
-            setTimeLeft((prevTime) => prevTime - 1);
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [qcmStep, timeLeft, isQcmModalOpen]);
+    
+        // This timer updates the date for the "QCM du jour" card title every minute if the modal is not open.
+        if (!isQcmModalOpen) {
+          const timer = setInterval(() => setNow(new Date()), 60000);
+          return () => clearInterval(timer);
+        }
+    }, [qcmStep, isQcmModalOpen, timeLeft]);
 
 
     // --- Callbacks & Handlers ---
@@ -391,7 +394,6 @@ export default function EvaluationsPage() {
 
         const score = selectedQcm.questions.filter(q => answers[q.id] === q.correctAnswer).length;
         
-        // If it's a rattrapage, update the existing history item
         if (selectedQcm.isRattrapage) {
             setAllQcmHistory(prev => 
                 prev.map(h => 
@@ -409,7 +411,7 @@ export default function EvaluationsPage() {
                 questions: selectedQcm.questions.map(q => ({ ...q, userAnswer: answers[q.id] })),
                 status: 'Effectué',
             };
-            setAllQcmHistory(prev => [newHistoryItem, ...prev]);
+            setAllQcmHistory(prev => [newHistoryItem, ...prev].sort((a, b) => new Date(b.date.split('/').reverse().join('-')).getTime() - new Date(a.date.split('/').reverse().join('-')).getTime()));
         }
         
         setQcmStep('results');
@@ -428,6 +430,7 @@ export default function EvaluationsPage() {
             }
             setQcmModalOpen(false);
             setSelectedQcm(null);
+            setQcmStep('start');
         } else {
             setQcmModalOpen(true);
         }
@@ -449,6 +452,7 @@ export default function EvaluationsPage() {
 
     const renderQcmHistoryPagination = () => {
         const pages = [];
+        if (totalQcmHistoryPages <= 1) return null;
         for (let i = 1; i <= totalQcmHistoryPages; i++) {
             pages.push(
                 <Button
@@ -555,7 +559,7 @@ export default function EvaluationsPage() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="interrogations" className="space-y-6 mt-6">
-            {role === 'admin' && (
+            {['admin', 'academic-advisor'].includes(role) && (
                 <Card>
                     <CardHeader>
                         <CardTitle>Zone Administrateur</CardTitle>
@@ -565,7 +569,7 @@ export default function EvaluationsPage() {
                             <History className="mr-2" />
                             {rattrapageActive ? "Désactiver" : "Activer"} la session de rattrapage (48h)
                         </Button>
-                        {rattrapageActive && <p className="text-sm text-green-600 mt-2">La session de rattrapage est active.</p>}
+                        {rattrapageActive && <p className="text-sm text-green-600 mt-2">La session de rattrapage est active pour tous les étudiants.</p>}
                     </CardContent>
                 </Card>
             )}
@@ -580,7 +584,7 @@ export default function EvaluationsPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {missedQcmsForRattrapage.length > 0 ? missedQcmsForRattrapage.map(qcm => renderQcmButton(qcm)) : <p className="text-muted-foreground col-span-full text-center">Vous n'avez aucun QCM à rattraper. Bravo !</p>}
+                        {missedQcmsForRattrapage.length > 0 ? missedQcmsForRattrapage.map(qcm => renderQcmButton(qcm)) : <p className="text-muted-foreground col-span-full text-center py-4">Vous n'avez aucun QCM à rattraper. Bravo !</p>}
                       </div>
                     </CardContent>
                 </Card>
@@ -599,11 +603,11 @@ export default function EvaluationsPage() {
                     <Info className="h-4 w-4 text-blue-500" />
                     <AlertTitle className="text-blue-800 dark:text-blue-300">QCM programmés pour aujourd'hui</AlertTitle>
                     <AlertDescription className="text-blue-700 dark:text-blue-400">
-                        {`Vous avez ${dailyQcms.length} interrogation(s) prévue(s) aujourd'hui, correspondant à votre emploi du temps. Chaque QCM est disponible pendant les 15 premières minutes du cours.`}
+                        Les interrogations sont liées à votre emploi du temps. Chaque QCM est disponible pendant les 15 premières minutes du cours correspondant.
                     </AlertDescription>
                 </Alert>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {dailyQcms.length > 0 ? dailyQcms.map(renderQcmButton) : <p className="text-muted-foreground col-span-full text-center">Aucun QCM prévu pour aujourd'hui dans votre emploi du temps.</p>}
+                {dailyQcms.length > 0 ? dailyQcms.map(renderQcmButton) : <p className="text-muted-foreground col-span-full text-center py-4">Aucun QCM prévu pour aujourd'hui dans votre emploi du temps.</p>}
               </div>
             </CardContent>
           </Card>
@@ -638,6 +642,7 @@ export default function EvaluationsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>#</TableHead>
                     <TableHead>ID</TableHead>
                     <TableHead>Module</TableHead>
                     <TableHead>Date</TableHead>
@@ -647,8 +652,9 @@ export default function EvaluationsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedQcmHistory.length > 0 ? paginatedQcmHistory.map((item) => (
+                    {paginatedQcmHistory.length > 0 ? paginatedQcmHistory.map((item, index) => (
                         <TableRow key={item.id} className="even:bg-muted/40">
+                            <TableCell>{(qcmHistoryCurrentPage - 1) * QCM_HISTORY_ITEMS_PER_PAGE + index + 1}</TableCell>
                             <TableCell>{item.id}</TableCell>
                             <TableCell>{item.module}</TableCell>
                             <TableCell>{item.date}</TableCell>
@@ -662,7 +668,7 @@ export default function EvaluationsPage() {
                         </TableRow>
                     )) : (
                         <TableRow>
-                            <TableCell colSpan={6} className="text-center text-muted-foreground">Aucun historique de QCM trouvé.</TableCell>
+                            <TableCell colSpan={7} className="text-center text-muted-foreground h-24">Aucun historique de QCM trouvé.</TableCell>
                         </TableRow>
                     )}
                 </TableBody>
@@ -708,6 +714,7 @@ export default function EvaluationsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>#</TableHead>
                                 <TableHead>Module</TableHead>
                                 <TableHead>Devoir</TableHead>
                                 <TableHead>Date limite</TableHead>
@@ -722,7 +729,8 @@ export default function EvaluationsPage() {
                                 { module: 'Anglais Technique', prof: 'Prof. Smith', devoir: 'Rédaction technique en anglais', deadline: '25/05/2025 à 18:30', deadlineInfo: 'Dans 8 jours', status: 'En attente', deadlineColor: '' },
                                 { module: 'Architecture des Ordinateurs', prof: 'Prof. Lefevre', devoir: 'TP sur les architectures RISC', deadline: '30/05/2025 à 23:59', deadlineInfo: 'Dans 13 jours', status: 'Rendu confirmé', deadlineColor: '' },
                             ].map((item, index) => (
-                                <TableRow key={index}>
+                                <TableRow key={index} className="even:bg-muted/40">
+                                    <TableCell>{index + 1}</TableCell>
                                     <TableCell>
                                         <div className="font-medium">{item.module}</div>
                                         <div className="text-xs text-muted-foreground">{item.prof}</div>
@@ -753,6 +761,7 @@ export default function EvaluationsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>#</TableHead>
                                 <TableHead>Module</TableHead>
                                 <TableHead>Devoir</TableHead>
                                 <TableHead>Date rendu</TableHead>
@@ -766,7 +775,8 @@ export default function EvaluationsPage() {
                                 { module: 'Bases de Données', prof: 'Prof. Leclerc', devoir: 'Normalisation et conception de BDD', date: '02/05/2025 à 10:12', note: '15/20', status: 'Noté' },
                                 { module: 'Développement Web', prof: 'Prof. Girard', devoir: 'Création d\'une API REST', date: '27/04/2025 à 23:50', note: 'En attente', status: 'En cours d\'évaluation' },
                             ].map((item, index) => (
-                                <TableRow key={index}>
+                                <TableRow key={index} className="even:bg-muted/40">
+                                    <TableCell>{index + 1}</TableCell>
                                     <TableCell>
                                         <div className="font-medium">{item.module}</div>
                                         <div className="text-xs text-muted-foreground">{item.prof}</div>
@@ -960,5 +970,3 @@ export default function EvaluationsPage() {
     </div>
   );
 }
-
-    
