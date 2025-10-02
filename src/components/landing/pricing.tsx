@@ -5,22 +5,24 @@ const pricingPlans = [
   {
     name: 'Starter',
     description: 'Pour les petites écoles',
-    price: '32 000 FCFA',
+    price: '75 000 FCFA',
     period: 'par mois / jusqu\'à 500 étudiants',
     features: ['Gestion des étudiants', 'Planification de base', 'Support email', 'Stockage 10GB'],
     isPopular: false,
     buttonText: 'Commencer',
-    buttonVariant: 'ghost' as const
+    buttonVariant: 'ghost' as const,
+    badgeText: ''
   },
   {
-    name: 'Professional',
+    name: 'PREMIUM',
     description: 'Pour les universités moyennes',
-    price: '97 500 FCFA',
+    price: '250 000 FCFA',
     period: 'par mois / jusqu\'à 5000 étudiants',
     features: ['Toutes les fonctions Starter', 'Analytics IA avancées', 'Gestion financière complète', 'Support prioritaire 24/7', 'Stockage 100GB'],
     isPopular: true,
     buttonText: 'Commencer',
-    buttonVariant: 'default' as const
+    buttonVariant: 'default' as const,
+    badgeText: 'RECOMMANDÉ'
   },
   {
     name: 'Enterprise',
@@ -30,7 +32,8 @@ const pricingPlans = [
     features: ['Toutes les fonctions Professional', 'Personnalisation complète', 'Intégrations sur mesure', 'Gestionnaire de compte dédié', 'Stockage illimité'],
     isPopular: false,
     buttonText: 'Nous contacter',
-    buttonVariant: 'ghost' as const
+    buttonVariant: 'ghost' as const,
+    badgeText: ''
   }
 ];
 
@@ -49,7 +52,7 @@ export default function Pricing() {
             <div key={plan.name} className={`bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all flex flex-col ${plan.isPopular ? 'border-2 border-primary relative' : ''}`}>
               {plan.isPopular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">
-                  Populaire
+                  {plan.badgeText}
                 </div>
               )}
               <div className="text-center mb-8">
@@ -72,7 +75,7 @@ export default function Pricing() {
         </div>
         <div className="text-center mt-12 text-sm text-gray-500 dark:text-gray-400">
           <p>Les prix sont affichés en francs CFA (FCFA).</p>
-          <p>Conversion approximative : 32 000 FCFA ≈ 49 EUR / 52 USD. | 97 500 FCFA ≈ 149 EUR / 158 USD.</p>
+          <p>Conversion approximative : 75 000 FCFA ≈ 115 EUR / 125 USD. | 250 000 FCFA ≈ 380 EUR / 415 USD.</p>
         </div>
       </div>
     </section>
