@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   List,
   Users,
@@ -14,6 +14,7 @@ import {
   Edit,
   UploadCloud,
   X,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +25,21 @@ import {
   CardDescription,
   CardFooter,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
@@ -266,7 +282,7 @@ const TaskCard = ({ task, currentUserId }: { task: Task, currentUserId: string }
     );
 };
 
-const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dispatch<React.SetStateAction<any[]>>, currentUserId: string }) => {
+const TdWorkspace = ({ td, setTds, currentUserId, onAddTask }: { td: any, setTds: React.Dispatch<React.SetStateAction<any[]>>, currentUserId: string, onAddTask: () => void }) => {
     const isGroupLeader = currentUserId === 'sarah-dupont'; 
     const allFiles = td.tasks.flatMap((task: Task) => task.files);
 
@@ -295,11 +311,11 @@ const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dis
             </TabsList>
         </div>
         
-        <TabsContent value="tasks" className="flex-1 flex flex-col overflow-hidden">
+        <TabsContent value="tasks" className="flex-1 flex flex-col overflow-hidden data-[state=inactive]:hidden">
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
                 {isGroupLeader && (
                     <div className="flex justify-end">
-                        <Button>
+                        <Button onClick={onAddTask}>
                             <Plus className="mr-2 h-4 w-4" />
                             Ajouter une tâche
                         </Button>
@@ -312,7 +328,7 @@ const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dis
             </div>
         </TabsContent>
 
-        <TabsContent value="discussion" className="flex-1 flex flex-col overflow-hidden">
+        <TabsContent value="discussion" className="flex-1 flex flex-col overflow-hidden data-[state=inactive]:hidden">
             <div className="flex-1 space-y-4 p-6 overflow-y-auto">
                 {td.messages.map((msg: any) => (
                     <div key={msg.id} className="flex items-start gap-3">
@@ -338,14 +354,14 @@ const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dis
             </div>
         </TabsContent>
 
-        <TabsContent value="files" className="flex-1 flex flex-col overflow-hidden">
+        <TabsContent value="files" className="flex-1 flex flex-col overflow-hidden data-[state=inactive]:hidden">
             <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-muted/20">
                  {Object.keys(filesByTask).length > 0 ? (
                     Object.entries(filesByTask).map(([taskTitle, files]) => (
                         <div key={taskTitle}>
                             <h4 className="font-semibold mb-2">{taskTitle}</h4>
                             <div className="space-y-2">
-                                {files.map((file: TaskFile) => {
+                                {(files as TaskFile[]).map((file: TaskFile) => {
                                      const submitter = teamMembers[file.submittedBy as keyof typeof teamMembers];
                                      return (
                                         <div key={file.id} className="flex items-center justify-between bg-background p-3 rounded-lg border">
@@ -379,7 +395,7 @@ const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dis
             </div>
         </TabsContent>
         
-        <TabsContent value="submit" className="flex-1 flex flex-col overflow-hidden">
+        <TabsContent value="submit" className="flex-1 flex flex-col overflow-hidden data-[state=inactive]:hidden">
              <div className="flex-1 overflow-y-auto p-6 text-center">
                 <CardTitle className="mb-2">Soumission du devoir</CardTitle>
                 <CardDescription className="mb-4">
@@ -429,11 +445,137 @@ const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dis
   );
 };
 
+const AddTaskModal = ({
+    isOpen,
+    onClose,
+    onSubmit,
+    team,
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (task: Omit<Task, 'id' | 'status' | 'files'>) => void;
+    team: { id: string; name: string }[];
+  }) => {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [assigneeId, setAssigneeId] = useState('');
+    const [dueDate, setDueDate] = useState<Date | undefined>();
+  
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!title || !assigneeId || !dueDate) {
+        alert('Veuillez remplir tous les champs obligatoires.');
+        return;
+      }
+      onSubmit({
+        title,
+        description,
+        assigneeId,
+        dueDate: format(dueDate, 'dd/MM/yyyy'),
+      });
+      onClose();
+    };
+  
+    useEffect(() => {
+      if (!isOpen) {
+        setTitle('');
+        setDescription('');
+        setAssigneeId('');
+        setDueDate(undefined);
+      }
+    }, [isOpen]);
+  
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter une nouvelle tâche</DialogTitle>
+            <DialogDescription>
+              Définissez une nouvelle tâche et assignez-la à un membre de l'équipe.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="task-title">Titre de la tâche</Label>
+              <Input
+                id="task-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ex: Réaliser les maquettes"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="task-description">Description</Label>
+              <Textarea
+                id="task-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Décrire la tâche en détail..."
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="task-assignee">Assigner à</Label>
+                <Select value={assigneeId} onValueChange={setAssigneeId}>
+                  <SelectTrigger id="task-assignee">
+                    <SelectValue placeholder="Choisir un membre" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {team.map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-due-date">Date d'échéance</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="task-due-date"
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !dueDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dueDate ? format(dueDate, 'PPP', { locale: fr }) : <span>Choisir une date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={dueDate}
+                      onSelect={setDueDate}
+                      initialFocus
+                      locale={fr}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <DialogFooter className="pt-4">
+              <Button variant="ghost" type="button" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button type="submit">Ajouter la tâche</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
 
 export default function GroupWorkPage() {
   const [tds, setTds] = useState(initialTds);
   const [selectedTd, setSelectedTd] = useState<any>(tds.find(t => t.status === 'En cours') || null);
   const [filter, setFilter] = useState('all');
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   
   // For demo purposes, we hardcode the current user ID. In a real app, this would come from an auth context.
   const currentUserId = 'sarah-dupont';
@@ -442,6 +584,33 @@ export default function GroupWorkPage() {
     if (filter === 'all') return tds;
     return tds.filter(td => td.status.toLowerCase().replace('é', 'e').replace('s','') === filter);
   }, [tds, filter]);
+
+  const handleAddTask = (task: Omit<Task, 'id' | 'status' | 'files'>) => {
+    if (!selectedTd) return;
+
+    const newTask: Task = {
+        ...task,
+        id: `task-${Date.now()}`,
+        status: 'todo',
+        files: [],
+    };
+
+    setTds(prevTds => 
+        prevTds.map(td => 
+            td.id === selectedTd.id 
+            ? { ...td, tasks: [...td.tasks, newTask] }
+            : td
+        )
+    );
+  };
+
+  const teamForModal = useMemo(() => {
+    if (!selectedTd) return [];
+    return selectedTd.team.map((id: string) => ({
+      id,
+      name: teamMembers[id as keyof typeof teamMembers].name,
+    }));
+  }, [selectedTd]);
 
   return (
     <div className="flex h-full gap-6 flex-col md:flex-row">
@@ -479,7 +648,12 @@ export default function GroupWorkPage() {
 
       <div className="w-full md:w-2/3 xl:w-3/4 flex">
         {selectedTd ? (
-          <TdWorkspace td={selectedTd} setTds={setTds} currentUserId={currentUserId} />
+          <TdWorkspace 
+            td={selectedTd} 
+            setTds={setTds} 
+            currentUserId={currentUserId}
+            onAddTask={() => setIsAddTaskModalOpen(true)}
+         />
         ) : (
           <Card className="flex-1 flex items-center justify-center border-2 border-dashed bg-muted/20">
             <div className="text-center p-6">
@@ -490,6 +664,15 @@ export default function GroupWorkPage() {
           </Card>
         )}
       </div>
+
+      <AddTaskModal 
+        isOpen={isAddTaskModalOpen}
+        onClose={() => setIsAddTaskModalOpen(false)}
+        onSubmit={handleAddTask}
+        team={teamForModal}
+      />
     </div>
   );
 }
+
+    
