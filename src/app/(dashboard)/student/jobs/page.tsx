@@ -9,16 +9,15 @@ import {
   Clock,
   Filter,
   SlidersHorizontal,
-  X,
   Star,
   GraduationCap,
   ClipboardCheck,
   FileText,
-  Pen,
-  Upload,
   Eye,
   Paperclip,
   CheckCircle,
+  MoreHorizontal,
+  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,75 +44,28 @@ import {
   DialogFooter,
   DialogDescription
 } from '@/components/ui/dialog';
-import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { jobOffers, type JobOffer, jobFilters } from '@/lib/jobs-data';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-
-
-const JobCard = ({ offer, onSelect, onApply, onToggleFavorite }: { offer: JobOffer, onSelect: () => void, onApply: (e: React.MouseEvent) => void, onToggleFavorite: (e: React.MouseEvent) => void }) => {
-  return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onSelect}>
-      <CardContent className="p-5">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex items-center">
-            <Avatar className="h-12 w-12 rounded-lg">
-              <AvatarImage src={offer.companyLogo} alt={`${offer.company} logo`} className="object-contain" />
-              <AvatarFallback>{offer.company.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="ml-3">
-              <h4 className="text-base font-semibold">{offer.title}</h4>
-              <p className="text-sm text-muted-foreground">{offer.company}</p>
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={onToggleFavorite}>
-            <Star className={offer.isFavorite ? "text-yellow-500 fill-yellow-400" : "text-gray-400"} />
-          </Button>
-        </div>
-
-        <div className="space-y-2 mb-4 text-sm text-muted-foreground">
-          <div className="flex items-center"><MapPin className="w-4 mr-2" />{offer.location}</div>
-          <div className="flex items-center"><Clock className="w-4 mr-2" />{offer.contractType} - {offer.duration}</div>
-          {offer.salary && <div className="flex items-center text-green-600 font-medium"><Briefcase className="w-4 mr-2" />{offer.salary}</div>}
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          {offer.skills.slice(0, 3).map(skill => <Badge key={skill} variant="secondary">{skill}</Badge>)}
-        </div>
-
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{offer.description}</p>
-
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">{offer.postedDate}</span>
-          <Button size="sm" onClick={onApply}>Postuler</Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { applications, ApplicationStatus, statusConfig } from '@/lib/applications-data';
 
 export default function JobsPage() {
   const [offers, setOffers] = useState(jobOffers);
   const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+  const [activeTab, setActiveTab] = useState('offers');
 
   const filteredOffers = useMemo(() => {
-    return offers.filter(offer => {
-      const searchTermMatch = offer.title.toLowerCase().includes(search.toLowerCase()) || offer.company.toLowerCase().includes(search.toLowerCase());
-      if (!searchTermMatch) return false;
-
-      return Object.entries(activeFilters).every(([key, values]) => {
-        if (values.length === 0) return true;
-        // @ts-ignore
-        return values.includes(offer[key]);
-      });
-    });
-  }, [offers, search, activeFilters]);
+    return offers.filter(offer => 
+      offer.title.toLowerCase().includes(search.toLowerCase()) || 
+      offer.company.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [offers, search]);
 
   const toggleFavorite = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -126,80 +78,167 @@ export default function JobsPage() {
     setIsApplyModalOpen(true);
   }
 
+  const getStatusBadge = (status: ApplicationStatus) => {
+    const { text, icon: Icon, color } = statusConfig[status];
+    return (
+      <Badge variant="outline" className={`border-0 ${color}`}>
+        <Icon className="h-3 w-3 mr-1" />
+        {text}
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Espace Carrière</CardTitle>
-          <CardDescription>Trouvez votre prochain stage, alternance ou premier emploi.</CardDescription>
+          <CardDescription>Gérez votre avenir professionnel, de la recherche d'offres au suivi de vos candidatures.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-center space-x-4">
-              <GraduationCap className="h-10 w-10 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Profil Candidat</p>
-                <p className="font-semibold">Complété à 85%</p>
-              </div>
-            </div>
-             <div className="flex items-center space-x-4">
-              <ClipboardCheck className="h-10 w-10 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Candidatures</p>
-                <p className="font-semibold">4 actives</p>
-              </div>
-            </div>
-             <div className="flex items-center space-x-4">
-              <FileText className="h-10 w-10 text-indigo-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Documents</p>
-                <p className="font-semibold">CV & Lettre de motivation</p>
-              </div>
-            </div>
-          </div>
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button variant="outline" size="lg" className="justify-start h-auto py-3">
+                <GraduationCap className="h-6 w-6 mr-3 text-primary"/>
+                <div className="text-left">
+                    <p className="font-semibold">Compléter mon profil</p>
+                    <p className="text-xs text-muted-foreground">Profil complété à 85%</p>
+                </div>
+            </Button>
+            <Button variant="outline" size="lg" className="justify-start h-auto py-3" onClick={() => setActiveTab('applications')}>
+                <ClipboardCheck className="h-6 w-6 mr-3 text-green-500"/>
+                 <div className="text-left">
+                    <p className="font-semibold">Mes candidatures</p>
+                    <p className="text-xs text-muted-foreground">{applications.length} candidatures en cours</p>
+                </div>
+            </Button>
+            <Button variant="outline" size="lg" className="justify-start h-auto py-3">
+                <FileText className="h-6 w-6 mr-3 text-indigo-500"/>
+                 <div className="text-left">
+                    <p className="font-semibold">Gérer mes documents</p>
+                    <p className="text-xs text-muted-foreground">CV, lettres de motivation...</p>
+                </div>
+            </Button>
         </CardContent>
       </Card>
       
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Rechercher une offre, une entreprise..." className="pl-10" value={search} onChange={e => setSearch(e.target.value)} />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {jobFilters.map(filter => (
-                 <Select key={filter.id}>
-                    <SelectTrigger className="w-full md:w-[150px]">
-                      <div className="flex items-center gap-2">
-                        {React.createElement(filter.icon, {className: "h-4 w-4"})}
-                        <SelectValue placeholder={filter.name} />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filter.options.map(option => (
-                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-              ))}
-              <Button variant="outline"><SlidersHorizontal className="mr-2 h-4 w-4" />Plus de filtres</Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+       <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="offers">
+            <Search className="mr-2" /> Parcourir les offres
+          </TabsTrigger>
+          <TabsTrigger value="applications">
+            <ClipboardCheck className="mr-2" /> Mes candidatures
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="offers" className="space-y-6 mt-6">
+             <Card>
+                <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Rechercher une offre, une entreprise..." className="pl-10" value={search} onChange={e => setSearch(e.target.value)} />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                    {jobFilters.map(filter => (
+                        <Select key={filter.id}>
+                            <SelectTrigger className="w-full md:w-[150px]">
+                            <div className="flex items-center gap-2">
+                                {React.createElement(filter.icon, {className: "h-4 w-4"})}
+                                <SelectValue placeholder={filter.name} />
+                            </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                            {filter.options.map(option => (
+                                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                    ))}
+                    <Button variant="outline"><SlidersHorizontal className="mr-2 h-4 w-4" />Plus de filtres</Button>
+                    </div>
+                </div>
+                </CardContent>
+            </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredOffers.map(offer => (
-          <JobCard 
-            key={offer.id} 
-            offer={offer} 
-            onSelect={() => setSelectedOffer(offer)}
-            onApply={(e) => openApplyModal(e, offer)}
-            onToggleFavorite={(e) => toggleFavorite(e, offer.id)}
-          />
-        ))}
-      </div>
+            <Card>
+                <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Entreprise</TableHead>
+                            <TableHead>Poste</TableHead>
+                            <TableHead>Localisation</TableHead>
+                            <TableHead>Contrat</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {filteredOffers.map(offer => (
+                        <TableRow key={offer.id} className="cursor-pointer" onClick={() => setSelectedOffer(offer)}>
+                            <TableCell>
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-10 w-10 rounded-md">
+                                        <AvatarImage src={offer.companyLogo} alt={`${offer.company} logo`} className="object-contain" />
+                                        <AvatarFallback>{offer.company.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-medium">{offer.company}</span>
+                                </div>
+                            </TableCell>
+                            <TableCell>{offer.title}</TableCell>
+                            <TableCell>{offer.location}</TableCell>
+                            <TableCell>{offer.contractType}</TableCell>
+                            <TableCell>{offer.postedDate}</TableCell>
+                            <TableCell className="text-right">
+                                <Button variant="ghost" size="icon" onClick={(e) => toggleFavorite(e, offer.id)}>
+                                    <Star className={offer.isFavorite ? "text-yellow-500 fill-yellow-400" : "text-gray-400"} />
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={() => setSelectedOffer(offer)}>
+                                    <Eye />
+                                </Button>
+                                <Button size="sm" onClick={(e) => openApplyModal(e, offer)}>Postuler</Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                </div>
+            </Card>
+        </TabsContent>
+        <TabsContent value="applications" className="space-y-6 mt-6">
+            <Card>
+                 <CardHeader>
+                    <CardTitle>Suivi de vos candidatures</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Entreprise</TableHead>
+                                <TableHead>Poste</TableHead>
+                                <TableHead>Date de candidature</TableHead>
+                                <TableHead>Statut</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {applications.map((app) => (
+                                <TableRow key={app.id}>
+                                    <TableCell className="font-medium">{app.company}</TableCell>
+                                    <TableCell>{app.jobTitle}</TableCell>
+                                    <TableCell>{app.date}</TableCell>
+                                    <TableCell>{getStatusBadge(app.status)}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
+
 
       {selectedOffer && !isApplyModalOpen && (
         <Dialog open={!!selectedOffer} onOpenChange={(open) => !open && setSelectedOffer(null)}>
@@ -256,57 +295,49 @@ export default function JobsPage() {
                     <DialogDescription>{selectedOffer.title} chez {selectedOffer.company}</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                    <div>
-                        <Label>Documents à joindre</Label>
-                        <div className="space-y-2 mt-2">
-                            <Card className="p-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <FileText className="h-6 w-6 text-primary"/>
-                                        <div>
-                                            <p className="font-medium">CV_Sarah_Dupont.pdf</p>
-                                            <p className="text-xs text-muted-foreground">Mis à jour il y a 2 jours</p>
-                                        </div>
+                    <div className="space-y-2">
+                        <Label>CV (automatiquement joint)</Label>
+                        <Card className="p-3 bg-muted/50">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <FileText className="h-6 w-6 text-primary"/>
+                                    <div>
+                                        <p className="font-medium">CV_Sarah_Dupont.pdf</p>
+                                        <p className="text-xs text-muted-foreground">Mis à jour il y a 2 jours</p>
                                     </div>
-                                    <Checkbox defaultChecked />
                                 </div>
-                            </Card>
-                            <Card className="p-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <FileText className="h-6 w-6 text-primary"/>
-                                        <div>
-                                            <p className="font-medium">Lettre_Motivation_Tech.pdf</p>
-                                            <p className="text-xs text-muted-foreground">Mis à jour il y a 1 semaine</p>
-                                        </div>
-                                    </div>
-                                    <Checkbox defaultChecked />
-                                </div>
-                            </Card>
-                        </div>
+                                <CheckCircle className="h-5 w-5 text-green-500" />
+                            </div>
+                        </Card>
+                    </div>
+                     <div>
+                        <Label htmlFor="cover-letter-select">Lettre de motivation (optionnel)</Label>
+                         <Select>
+                            <SelectTrigger id="cover-letter-select">
+                                <SelectValue placeholder="Choisir une lettre de motivation..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">Ne pas joindre de lettre</SelectItem>
+                                <SelectItem value="ldm-tech">Lettre_Motivation_Tech.pdf</SelectItem>
+                                <SelectItem value="ldm-marketing">Lettre_Motivation_Marketing.pdf</SelectItem>
+                                <SelectItem value="new">Rédiger une nouvelle lettre</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                      <div>
                         <Label htmlFor="cover-letter">Note personnalisée (optionnel)</Label>
                         <Textarea id="cover-letter" placeholder="Ajoutez un message pour le recruteur..." className="mt-2"/>
-                    </div>
-                     <div className="flex items-start space-x-2">
-                        <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                        <p className="text-sm text-muted-foreground">
-                            En postulant, vous confirmez que votre profil est à jour et que vous êtes disponible pour les dates indiquées.
-                        </p>
                     </div>
                 </div>
                 <DialogFooter>
                     <Button variant="ghost" onClick={() => setIsApplyModalOpen(false)}>Annuler</Button>
                     <Button onClick={() => {
                         setIsApplyModalOpen(false);
-                        // In a real app, you would show a toast or confirmation here.
                     }}>Envoyer ma candidature</Button>
                 </DialogFooter>
             </DialogContent>
           </Dialog>
       )}
-
     </div>
   );
 }
