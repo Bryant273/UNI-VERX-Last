@@ -14,6 +14,7 @@ import {
   Info,
   Smile,
   ArrowLeft,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,8 +30,9 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-const conversationsData = [
+const initialConversationsData = [
   {
     id: 'group-1',
     type: 'group',
@@ -95,6 +97,10 @@ const messagesData: Record<string, any[]> = {
     { id: 3, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', content: 'Merci pour l\'info ! Le planning des salles est dispo ?', time: '10:45', isMe: false },
     { id: 4, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Bonne question !', time: '10:46', isMe: true },
   ],
+  'group-2': [
+    { id: 1, sender: 'Lucas', avatar: 'https://i.pravatar.cc/100?img=11', content: 'Est-ce que quelqu\'un a les corrigés des derniers TP d\'algorithmique ?', time: 'Hier', isMe: false },
+    { id: 2, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Je ne les ai pas, mais on peut chercher ensemble si tu veux.', time: 'Hier', isMe: true },
+  ],
   'student-1': [
       { id: 1, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', content: 'Salut Sarah ! Tu as avancé sur le rapport ?', time: '08:45', isMe: false },
       { id: 2, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Hey ! Oui, j\'ai fait la première partie. Et toi ?', time: '08:50', isMe: true },
@@ -106,17 +112,20 @@ const messagesData: Record<string, any[]> = {
         { id: 3, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Concernant la question 3, je ne suis pas sûre de bien comprendre ce qui est attendu pour l\'optimisation.', time: '10:32', isMe: true },
         { id: 4, sender: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', content: 'Pensez à utiliser les index. Je vous envoie un document qui pourrait vous aider.', time: '11:22', isMe: false },
   ],
-  'group-2': [
-    { id: 1, sender: 'Lucas', avatar: 'https://i.pravatar.cc/100?img=11', content: 'Est-ce que quelqu\'un a les corrigés des derniers TP d\'algorithmique ?', time: 'Hier', isMe: false },
-    { id: 2, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Je ne les ai pas, mais on peut chercher ensemble si tu veux.', time: 'Hier', isMe: true },
-  ],
   'student-2': [
     { id: 1, sender: 'Thomas Mercier', avatar: 'https://i.pravatar.cc/100?img=59', content: 'D\'accord, je t\'envoie ça ce soir.', time: 'Hier', isMe: false },
   ],
 };
 
+const emojiCategories = {
+  'Sourires & Émotions': ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵'],
+  'Personnes & Gestes': ['👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄', '👶', '🧒', '👦', '👧', '🧑', '👱', '👨', '🧔', '👩', '🧓', '👴', '👵', '🙍', '🙎', '🙅', '🙆', '💁', '🙋', '🧏', '🙇', '🤦', '🤷'],
+  'Animaux & Nature': ['🙈', '🙉', '🙊', '🐒', '🐶', '🐕', '🦮', '🐕‍🦺', '🐩', '🐺', '🦊', '🦝', '🐱', '🐈', '🐈‍⬛', '🦁', '🐯', '🐅', '🐆', '🐴', '🦄', '🦓', '🦌', '🦬', '🐮', '🐂', '🐃', '🐄', '🐷', '🐖', '🐗', '🐽', '🐏', '🐑', '🐐', '🐪', '🐫', '🦙', '🦒', '🐘', '🦣', '🦏', '🦛', '🐭', '🐁', '🐀', '🐹', '🐰', '🐇', '🐿️', '🦫', '🦔', '🦇', '🐻', '🐻‍❄️', '🐨', '🐼', '🦥', '🦦', '🦨', '🦘', '🦡', '🐾', '🦃', '🐔', '🐓', '🐣', '🐤', '🐥', '🐦', '🐧', '🕊️', '🦅', '🦆', '🦢', '🦉', '🦤', '🪶', '🐸', '🐊', '🐢', '🦎', '🐍', '🐲', '🐉', '🦕', '🦖', '🐳', '🐋', '🐬', '🦭', '🐟', '🐠', '🐡', '🦈', '🐙', '🐚', '🐌', '🦋', '🐛', '🐜', '🐝', '🪲', '🐞', '🦗', '🕷️', '🕸️', '🦂', '🦟', '🪰', '🪱', '🦠'],
+  'Nourriture & Boissons': ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌶️', '🫑', '🌽', '🥕', '🫒', '🧄', '🧅', '🥔', '🍠', '🥐', '🥯', '🍞', '🥖', '🥨', '🧀', '🥚', '🍳', '🧈', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖', '🦴', '🌭', '🍔', '🍟', '🍕', '🫓', '🥪', '🥙', '🧆', '🌮', '🌯', '🫔', '🥗', '🥘', '🫕', '🥫', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🦪', '🍤', '🍙', '🍚', '🍘', '🍥', '🥠', '🥮', '🍢', '🍡', '🍧', '🍨', '🍦', '🥧', '🧁', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩', '🍪', '🌰', '🥜', '🍯', '🥛', '🍼', '☕', '🫖', '🍵', '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤', '🧋', '🧃', '🧉', '🧊', '🥢', '🍽️', '🍴', '🥄', '🔪'],
+};
 
-const ConversationList = ({ conversations, onSelect, selectedId }: { conversations: typeof conversationsData, onSelect: (id: string) => void, selectedId: string | null }) => {
+
+const ConversationList = ({ conversations, onSelect, selectedId }: { conversations: typeof initialConversationsData, onSelect: (id: string) => void, selectedId: string | null }) => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -192,12 +201,25 @@ const ConversationList = ({ conversations, onSelect, selectedId }: { conversatio
 
 const ChatView = ({ conversationId, onBack }: { conversationId: string | null, onBack: () => void }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const conversation = conversationId ? conversationsData.find(c => c.id === conversationId) : null;
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [attachments, setAttachments] = useState<File[]>([]);
+    
+    const conversation = conversationId ? initialConversationsData.find(c => c.id === conversationId) : null;
     const messages = (conversationId ? messagesData[conversationId] : []) || [];
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setAttachments(prev => [...prev, ...Array.from(event.target.files!)]);
+        }
+    };
+    
+    const removeAttachment = (index: number) => {
+        setAttachments(prev => prev.filter((_, i) => i !== index));
+    };
 
     if (!conversation) {
         return (
@@ -234,7 +256,7 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
                 </div>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-6">
-                {messages.map((msg: any) => (
+                {(messages || []).map((msg: any) => (
                     <div key={msg.id} className={cn("flex items-end gap-2", msg.isMe ? "justify-end" : "justify-start")}>
                         {!msg.isMe && (
                             <Avatar className="h-8 w-8">
@@ -257,11 +279,50 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
                 <div ref={messagesEndRef} />
             </CardContent>
             <div className="p-4 border-t">
+                 {attachments.length > 0 && (
+                    <div className="mb-2 p-2 border rounded-lg bg-muted/50">
+                        <div className="flex flex-wrap gap-2">
+                            {attachments.map((file, index) => (
+                                <div key={index} className="relative group">
+                                    <div className="h-14 w-14 rounded-md bg-background border flex items-center justify-center">
+                                        <Paperclip className="h-6 w-6 text-muted-foreground"/>
+                                    </div>
+                                    <button onClick={() => removeAttachment(index)} className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full h-4 w-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                    <p className="text-xs text-center w-14 truncate mt-1">{file.name}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                 )}
                 <div className="relative">
-                    <Textarea placeholder="Écrivez un message..." className="pr-20" />
+                    <Textarea placeholder="Écrivez un message..." className="pr-28" />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                        <Button variant="ghost" size="icon"><Smile className="h-5 w-5" /></Button>
-                        <Button variant="ghost" size="icon"><Paperclip className="h-5 w-5" /></Button>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="ghost" size="icon"><Smile className="h-5 w-5" /></Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-2">
+                                <div className="h-64 overflow-y-auto">
+                                {Object.entries(emojiCategories).map(([category, emojis]) => (
+                                    <div key={category}>
+                                        <h4 className="text-sm font-semibold text-muted-foreground px-2 py-1">{category}</h4>
+                                        <div className="grid grid-cols-8 gap-1">
+                                            {emojis.map((emoji) => (
+                                                <Button key={emoji} variant="ghost" size="icon" className="text-lg">
+                                                    {emoji}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+                        
+                        <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}><Paperclip className="h-5 w-5" /></Button>
+                        <input type="file" ref={fileInputRef} className="hidden" multiple onChange={handleFileChange} />
                         <Button size="icon"><Send className="h-5 w-5" /></Button>
                     </div>
                 </div>
@@ -272,14 +333,24 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
 
 
 export default function MessagesPage() {
+    const [conversations, setConversations] = useState(initialConversationsData);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>('group-1');
+
+    const handleSelectConversation = (id: string) => {
+        setSelectedConversationId(id);
+        setConversations(prev => 
+            prev.map(c => 
+                c.id === id ? { ...c, unread: 0 } : c
+            )
+        );
+    };
 
     return (
         <div className="h-full flex gap-6">
             <div className={cn("w-full md:w-1/3 xl:w-1/4 flex-shrink-0", selectedConversationId && 'hidden md:block')}>
               <ConversationList
-                conversations={conversationsData}
-                onSelect={setSelectedConversationId}
+                conversations={conversations}
+                onSelect={handleSelectConversation}
                 selectedId={selectedConversationId}
               />
             </div>
