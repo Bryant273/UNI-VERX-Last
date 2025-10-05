@@ -30,7 +30,7 @@ export interface Document {
 }
 
 export interface ActivityLogItem {
-    icon: string; // Changed to string
+    icon: string;
     iconColor: string;
     title: string;
     date: string;
@@ -58,7 +58,7 @@ export interface EnterpriseData {
     missionStatus: {
         [key: string]: {
             status: 'completed' | 'in-progress' | 'pending';
-            icon: string; // Changed to string
+            icon: string;
             color: string;
             text: string;
         }
