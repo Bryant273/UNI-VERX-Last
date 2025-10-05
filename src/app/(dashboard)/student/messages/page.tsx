@@ -88,7 +88,7 @@ const conversationsData = [
   },
 ];
 
-const messagesData = {
+const messagesData: Record<string, any[]> = {
   'group-1': [
     { id: 1, sender: 'Admin Université', avatar: 'https://i.pravatar.cc/100?img=68', content: 'Bonjour à tous ! Voici un rappel des dates importantes pour les examens du premier semestre.', time: '10:30', isMe: false },
     { id: 2, sender: 'Admin Université', avatar: 'https://i.pravatar.cc/100?img=68', content: 'Algorithmique : 15 jan, BDD : 17 jan, Web : 20 jan.', time: '10:31', isMe: false },
@@ -105,6 +105,13 @@ const messagesData = {
         { id: 2, sender: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', content: 'Bonjour Sarah, je vous écoute.', time: '10:30', isMe: false },
         { id: 3, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Concernant la question 3, je ne suis pas sûre de bien comprendre ce qui est attendu pour l\'optimisation.', time: '10:32', isMe: true },
         { id: 4, sender: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', content: 'Pensez à utiliser les index. Je vous envoie un document qui pourrait vous aider.', time: '11:22', isMe: false },
+  ],
+  'group-2': [
+    { id: 1, sender: 'Lucas', avatar: 'https://i.pravatar.cc/100?img=11', content: 'Est-ce que quelqu\'un a les corrigés des derniers TP d\'algorithmique ?', time: 'Hier', isMe: false },
+    { id: 2, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Je ne les ai pas, mais on peut chercher ensemble si tu veux.', time: 'Hier', isMe: true },
+  ],
+  'student-2': [
+    { id: 1, sender: 'Thomas Mercier', avatar: 'https://i.pravatar.cc/100?img=59', content: 'D\'accord, je t\'envoie ça ce soir.', time: 'Hier', isMe: false },
   ],
 };
 
@@ -185,10 +192,8 @@ const ConversationList = ({ conversations, onSelect, selectedId }: { conversatio
 
 const ChatView = ({ conversationId, onBack }: { conversationId: string | null, onBack: () => void }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    // @ts-ignore
     const conversation = conversationId ? conversationsData.find(c => c.id === conversationId) : null;
-    // @ts-ignore
-    const messages = conversationId ? messagesData[conversationId] : [];
+    const messages = (conversationId ? messagesData[conversationId] : []) || [];
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
