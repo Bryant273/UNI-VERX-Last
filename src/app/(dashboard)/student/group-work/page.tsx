@@ -15,6 +15,8 @@ import {
   UploadCloud,
   X,
   Calendar as CalendarIcon,
+  Download,
+  Paperclip,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -64,6 +66,7 @@ interface TaskFile {
     name: string;
     size: string;
     submittedBy: string; // memberId
+    url: string;
 }
 
 interface Task {
@@ -87,8 +90,8 @@ const initialTds = [
     status: 'En cours',
     team: ['sarah-dupont', 'thomas-mercier', 'laura-garcia'],
     tasks: [
-      { id: 'task-1', title: 'Maquettes UI/UX', description: "Créer les maquettes pour mobile et desktop sur Figma.", status: 'done', assigneeId: 'laura-garcia', dueDate: '10/05/2025', files: [{id: 'file-1', name: 'maquettes-v1.fig', size: '2.3 MB', submittedBy: 'laura-garcia'}] },
-      { id: 'task-2', title: 'Structurer le HTML', description: "Mettre en place la structure sémantique HTML pour toutes les pages.", status: 'done', assigneeId: 'thomas-mercier', dueDate: '11/05/2025', files: [{id: 'file-2', name: 'index.html', size: '4 KB', submittedBy: 'thomas-mercier'}] },
+      { id: 'task-1', title: 'Maquettes UI/UX', description: "Créer les maquettes pour mobile et desktop sur Figma.", status: 'done', assigneeId: 'laura-garcia', dueDate: '10/05/2025', files: [{id: 'file-1', name: 'maquettes-v1.fig', size: '2.3 MB', submittedBy: 'laura-garcia', url: '#'}] },
+      { id: 'task-2', title: 'Structurer le HTML', description: "Mettre en place la structure sémantique HTML pour toutes les pages.", status: 'done', assigneeId: 'thomas-mercier', dueDate: '11/05/2025', files: [{id: 'file-2', name: 'index.html', size: '4 KB', submittedBy: 'thomas-mercier', url: '#'}] },
       { id: 'task-3', title: 'Styliser avec CSS Flexbox/Grid', description: "Intégrer le design en utilisant Flexbox et Grid pour le layout principal.", status: 'in-progress', assigneeId: 'sarah-dupont', dueDate: '13/05/2025', files: [] },
       { id: 'task-4', title: 'Ajouter les media queries', description: "Rendre le site responsive pour les tablettes et mobiles.", status: 'todo', assigneeId: 'thomas-mercier', dueDate: '14/05/2025', files: [] },
       { id: 'task-5', title: 'Tester la responsivité', description: "Tester sur différents navigateurs et appareils pour corriger les bugs d'affichage.", status: 'todo', assigneeId: 'laura-garcia', dueDate: '15/05/2025', files: [] },
@@ -124,7 +127,7 @@ const initialTds = [
     module: 'Programmation Orientée Objet',
     deadline: '08/05/2025',
     progress: 100,
-    priority: 'Basse',
+    priority: 'Achevé',
     status: 'Achevé',
     team: ['sarah-dupont', 'laura-garcia', 'julien-petit'],
     tasks: [],
@@ -251,17 +254,21 @@ const TaskCard = ({ task, currentUserId }: { task: Task, currentUserId: string }
                     {task.files.length > 0 ? task.files.map(file => {
                         const canDelete = currentUserId === file.submittedBy;
                         return (
-                            <div key={file.id} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                             <div key={file.id} className="flex items-center justify-between bg-muted/50 p-2 rounded">
                                 <div className="flex items-center gap-2 overflow-hidden">
                                     <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0"/>
                                     <span className="text-sm truncate" title={file.name}>{file.name}</span>
                                     <span className="text-xs text-muted-foreground flex-shrink-0">({file.size})</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs text-muted-foreground hidden sm:inline">par {teamMembers[file.submittedBy as keyof typeof teamMembers].name.split(' ')[0]}</span>
+                                <div className="flex items-center gap-1">
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                                        <a href={file.url} download>
+                                            <Download className="h-4 w-4" />
+                                        </a>
+                                    </Button>
                                   {canDelete && (
-                                     <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:bg-red-500/10">
-                                         <X className="h-3 w-3" />
+                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:bg-red-500/10">
+                                         <X className="h-4 w-4" />
                                      </Button>
                                   )}
                                 </div>
@@ -285,8 +292,11 @@ const TaskCard = ({ task, currentUserId }: { task: Task, currentUserId: string }
 const TdWorkspace = ({ td, setTds, currentUserId, onAddTask }: { td: any, setTds: React.Dispatch<React.SetStateAction<any[]>>, currentUserId: string, onAddTask: () => void }) => {
     const isGroupLeader = currentUserId === 'sarah-dupont'; 
     const allFiles = td.tasks.flatMap((task: Task) => task.files);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [attachedFile, setAttachedFile] = useState<File | null>(null);
 
     const filesByTask = useMemo(() => {
+        if (!td.tasks) return {};
         return td.tasks.reduce((acc: { [key: string]: TaskFile[] }, task: Task) => {
             if (task.files.length > 0) {
                 acc[task.title] = task.files;
@@ -294,6 +304,18 @@ const TdWorkspace = ({ td, setTds, currentUserId, onAddTask }: { td: any, setTds
             return acc;
         }, {});
     }, [td.tasks]);
+
+    const handleFileAttach = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setAttachedFile(file);
+        }
+    };
+
 
   return (
     <Card className="flex-1 flex flex-col h-full">
@@ -321,10 +343,10 @@ const TdWorkspace = ({ td, setTds, currentUserId, onAddTask }: { td: any, setTds
                         </Button>
                     </div>
                 )}
-                {td.tasks.map((task: Task) => (
+                {td.tasks?.map((task: Task) => (
                     <TaskCard key={task.id} task={task} currentUserId={currentUserId} />
                 ))}
-                {td.tasks.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune tâche pour ce TD.</p>}
+                {(!td.tasks || td.tasks.length === 0) && <p className="text-center text-muted-foreground py-8">Aucune tâche pour ce TD.</p>}
             </div>
         </TabsContent>
 
@@ -348,9 +370,29 @@ const TdWorkspace = ({ td, setTds, currentUserId, onAddTask }: { td: any, setTds
                     </div>
                 ))}
             </div>
-            <div className="flex items-center gap-2 p-4 border-t">
-                <Textarea placeholder="Écrire un message..." className="flex-1" />
-                <Button><Send className="h-4 w-4"/></Button>
+            <div className="p-4 border-t bg-background">
+                <div className="relative">
+                    <Textarea placeholder="Écrire un message..." className="pr-24"/>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <Button variant="ghost" size="icon" onClick={handleFileAttach}>
+                            <Paperclip className="h-5 w-5"/>
+                        </Button>
+                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                        <Button size="icon"><Send className="h-5 w-5"/></Button>
+                    </div>
+                </div>
+                {attachedFile && (
+                    <div className="mt-2 flex items-center justify-between p-2 rounded-md bg-muted/50 text-sm">
+                        <div className="flex items-center gap-2">
+                           <FileText className="h-4 w-4 text-muted-foreground"/>
+                           <span>{attachedFile.name}</span>
+                           <span className="text-xs text-muted-foreground">({(attachedFile.size/1024).toFixed(1)} KB)</span>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500" onClick={() => setAttachedFile(null)}>
+                            <X className="h-4 w-4"/>
+                        </Button>
+                    </div>
+                )}
             </div>
         </TabsContent>
 
@@ -372,12 +414,17 @@ const TdWorkspace = ({ td, setTds, currentUserId, onAddTask }: { td: any, setTds
                                                     <p className="text-xs text-muted-foreground">{file.size}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <span>Soumis par {submitter.name.split(' ')[0]}</span>
-                                                <Avatar className="h-6 w-6">
-                                                    <AvatarImage src={submitter.avatar} />
-                                                    <AvatarFallback>{submitter.name.charAt(0)}</AvatarFallback>
-                                                </Avatar>
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-right text-xs text-muted-foreground hidden sm:block">
+                                                    <p>Soumis par</p>
+                                                    <p className="font-medium text-foreground">{submitter.name.split(' ')[0]}</p>
+                                                </div>
+                                                 <Button asChild>
+                                                    <a href={file.url} download>
+                                                        <Download className="mr-2 h-4 w-4"/>
+                                                        Télécharger
+                                                    </a>
+                                                 </Button>
                                             </div>
                                         </div>
                                      );
@@ -386,7 +433,7 @@ const TdWorkspace = ({ td, setTds, currentUserId, onAddTask }: { td: any, setTds
                         </div>
                     ))
                  ) : (
-                    <div className="text-center text-muted-foreground py-8">
+                    <div className="text-center text-muted-foreground py-8 flex flex-col items-center justify-center h-full">
                         <FileText className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
                         <h3 className="text-lg font-medium">Aucun fichier soumis</h3>
                         <p className="text-sm">Les fichiers de votre équipe apparaîtront ici.</p>
@@ -396,7 +443,7 @@ const TdWorkspace = ({ td, setTds, currentUserId, onAddTask }: { td: any, setTds
         </TabsContent>
         
         <TabsContent value="submit" className="flex-1 flex flex-col overflow-hidden data-[state=inactive]:hidden">
-             <div className="flex-1 overflow-y-auto p-6 text-center">
+             <div className="flex-1 overflow-y-auto p-6 text-center flex flex-col justify-center">
                 <CardTitle className="mb-2">Soumission du devoir</CardTitle>
                 <CardDescription className="mb-4">
                     {isGroupLeader 
@@ -595,14 +642,17 @@ export default function GroupWorkPage() {
         files: [],
     };
 
-    setTds(prevTds => 
-        prevTds.map(td => 
-            td.id === selectedTd.id 
-            ? { ...td, tasks: [...td.tasks, newTask] }
-            : td
-        )
-    );
+    const updatedTds = tds.map(td => {
+      if (td.id === selectedTd.id) {
+        return { ...td, tasks: [...(td.tasks || []), newTask] };
+      }
+      return td;
+    });
+
+    setTds(updatedTds);
+    setSelectedTd(updatedTds.find(td => td.id === selectedTd.id));
   };
+
 
   const teamForModal = useMemo(() => {
     if (!selectedTd) return [];
@@ -674,5 +724,7 @@ export default function GroupWorkPage() {
     </div>
   );
 }
+
+    
 
     
