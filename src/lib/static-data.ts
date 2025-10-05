@@ -170,28 +170,6 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
   },
 };
 
-export const allUsers: DemoUser[] = [
-  { id: 'student-sarah-dupont', name: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', role: 'Étudiant(e)', online: true },
-  { id: 'student-thomas-mercier', name: 'Thomas Mercier', avatar: 'https://i.pravatar.cc/100?img=59', role: 'Étudiant(e)', online: false },
-  { id: 'student-emma-bernard', name: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', role: 'Étudiant(e)', online: true },
-  { id: 'prof-martin', name: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', role: 'Professeur', online: true },
-  { id: 'prof-dubois', name: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', role: 'Professeur', online: false },
-  { id: 'admin-univ', name: 'Admin Université', avatar: 'https://i.pravatar.cc/100?img=68', role: 'Administration', online: true },
-];
-
-export const courses = {
-  student: [
-    { id: 1, title: 'Calcul Avancé', code: 'MATH301', instructor: 'Dr. Alan Turing', thumbnailId: 'course-thumb-1' },
-    { id: 2, title: 'Physique Quantique', code: 'PHY305', instructor: 'Dr. Marie Curie', thumbnailId: 'course-thumb-2' },
-    { id: 3, title: 'Histoire du 20ème Siècle', code: 'HIST210', instructor: 'Dr. Indiana Jones', thumbnailId: 'course-thumb-3' },
-  ],
-  professor: [
-    { id: 1, title: 'Calcul Avancé', code: 'MATH301', students: 45, thumbnailId: 'course-thumb-1' },
-    { id: 4, title: 'Théorie Littéraire', code: 'LIT402', students: 30, thumbnailId: 'course-thumb-4' },
-  ],
-};
-
-
 export const allEvents: Record<UserRole, TimetableEvent[]> = {
   student: [
     { 

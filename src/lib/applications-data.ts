@@ -4,12 +4,19 @@ import type { LucideIcon } from 'lucide-react';
 
 export type ApplicationStatus = 'sent' | 'viewed' | 'interview' | 'accepted' | 'rejected';
 
+export interface ApplicationResponse {
+    date: string;
+    message: string;
+    details?: string;
+}
+
 export interface Application {
     id: string;
     company: string;
     jobTitle: string;
     date: string;
     status: ApplicationStatus;
+    response: ApplicationResponse;
 }
 
 export const statusConfig: Record<ApplicationStatus, { text: string, icon: LucideIcon, color: string }> = {
@@ -27,6 +34,11 @@ export const applications: Application[] = [
     jobTitle: 'Développeur Frontend',
     date: '12/05/2025',
     status: 'interview',
+    response: {
+        date: '15/05/2025',
+        message: "Bonjour Sarah, nous avons été impressionnés par votre profil et aimerions vous rencontrer. Nous vous proposons un entretien avec notre équipe technique.",
+        details: "Entretien visio planifié pour le 20/05/2025 à 14h30."
+    }
   },
   {
     id: 'app-2',
@@ -34,6 +46,10 @@ export const applications: Application[] = [
     jobTitle: 'Ingénieur DevOps',
     date: '10/05/2025',
     status: 'viewed',
+    response: {
+        date: '13/05/2025',
+        message: "Votre candidature a bien été reçue et consultée par notre équipe de recrutement. Nous revenons vers vous prochainement."
+    }
   },
   {
     id: 'app-3',
@@ -41,6 +57,10 @@ export const applications: Application[] = [
     jobTitle: 'Développeur Full Stack',
     date: '08/05/2025',
     status: 'sent',
+    response: {
+        date: '08/05/2025',
+        message: "Votre candidature a bien été envoyée. Vous recevrez une notification lorsque le recruteur l'aura consultée."
+    }
   },
     {
     id: 'app-4',
@@ -48,5 +68,9 @@ export const applications: Application[] = [
     jobTitle: 'Data Scientist Junior',
     date: '05/05/2025',
     status: 'rejected',
+    response: {
+        date: '10/05/2025',
+        message: "Nous vous remercions de l'intérêt que vous portez à DataViz. Malheureusement, nous avons décidé de ne pas donner suite à votre candidature pour le moment. Nous vous encourageons à postuler à nouveau à l'avenir."
+    }
   },
 ];
