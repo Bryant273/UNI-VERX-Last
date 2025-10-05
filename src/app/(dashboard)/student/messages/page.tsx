@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -127,7 +128,7 @@ const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: st
     const [attachments, setAttachments] = useState<File[]>([]);
     const [message, setMessage] = useState('');
     
-    const conversation = conversationId ? initialConversationsData.find(c => c.id === conversationId) : null;
+    const conversation = conversationId ? initialConversationsData.find(c => c.id === conversationId) || conversations.find(c => c.id === conversationId) : null;
     const currentMessages = (conversationId ? messagesData[conversationId] : []) || [];
 
     useEffect(() => {
@@ -138,6 +139,10 @@ const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: st
         // Clear message and attachments when conversation changes
         setMessage('');
         setAttachments([]);
+        // Focus on textarea when a new conversation is selected
+        if (conversationId && textareaRef.current) {
+            setTimeout(() => textareaRef.current?.focus(), 0);
+        }
     }, [conversationId]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -457,15 +462,23 @@ const NewConversationModal = ({ isOpen, onClose, onCreate }: { isOpen: boolean, 
     );
 };
 
+// This is a new global variable to hold dynamically added conversations.
+// In a real app, this would be part of a global state management solution (like Zustand, Redux, or React Context).
+let conversations: Conversation[] = [];
 
 export default function MessagesPage() {
-    const [conversations, setConversations] = useState<Conversation[]>(initialConversationsData);
+    const [localConversations, setLocalConversations] = useState<Conversation[]>(initialConversationsData);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [isNewConversationModalOpen, setIsNewConversationModalOpen] = useState(false);
 
+    useEffect(() => {
+      // Combine initial data with dynamically added conversations
+      setLocalConversations([...conversations, ...initialConversationsData].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i));
+    }, []);
+
     const handleSelectConversation = (id: string) => {
         setSelectedConversationId(id);
-        setConversations(prev => 
+        setLocalConversations(prev => 
             prev.map(c => 
                 c.id === id ? { ...c, unread: 0 } : c
             )
@@ -478,9 +491,9 @@ export default function MessagesPage() {
         } else {
             messagesData[convId] = [message];
         }
-        setConversations(prev =>
+        setLocalConversations(prev =>
             prev.map(c => 
-                c.id === convId ? { ...c, lastMessage: message.content, time: message.time } : c
+                c.id === convId ? { ...c, lastMessage: message.content || 'Fichier joint', time: message.time } : c
             )
         );
         // This is to force re-render of ChatView with new message
@@ -489,15 +502,15 @@ export default function MessagesPage() {
     };
     
     const handleCreateConversation = (newConversation: Conversation) => {
-        // Add to messagesData if it doesn't exist
         if (!messagesData[newConversation.id]) {
             messagesData[newConversation.id] = [];
         }
         
         // Add to conversations list
-        setConversations(prev => [newConversation, ...prev.filter(c => c.id !== newConversation.id)]);
+        const updatedConversations = [newConversation, ...localConversations.filter(c => c.id !== newConversation.id)];
+        setLocalConversations(updatedConversations);
+        conversations = [newConversation, ...conversations.filter(c => c.id !== newConversation.id)]; // update global var
         
-        // Select it
         handleSelectConversation(newConversation.id);
     };
 
@@ -505,7 +518,7 @@ export default function MessagesPage() {
         <div className="h-full flex gap-6">
             <div className={cn("w-full md:w-1/3 xl:w-1/4 flex-shrink-0", selectedConversationId && 'hidden md:block')}>
               <ConversationList
-                conversations={conversations}
+                conversations={localConversations}
                 onSelect={handleSelectConversation}
                 selectedId={selectedConversationId}
                 onNewConversation={() => setIsNewConversationModalOpen(true)}
@@ -526,3 +539,6 @@ export default function MessagesPage() {
         </div>
     );
 }
+
+
+    
