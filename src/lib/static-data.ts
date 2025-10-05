@@ -1,5 +1,3 @@
-
-
 import {
   LayoutDashboard,
   BookOpen,
@@ -69,6 +67,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   professor: [
     { href: '/professor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/professor/courses', label: 'Mes cours', icon: BookOpen },
+    { href: '/professor/group-work', label: 'TD de groupe', icon: Users },
     { href: '#', label: 'Étudiants', icon: Users },
     { href: '#', label: 'Évaluations', icon: ClipboardCheck },
     { href: '/professor/timetable', label: 'Emploi du temps', icon: Calendar },
