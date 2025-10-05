@@ -23,6 +23,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -210,6 +211,7 @@ export default function ApplicationsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>#</TableHead>
                                 <TableHead>Entreprise</TableHead>
                                 <TableHead>Poste</TableHead>
                                 <TableHead>Date de candidature</TableHead>
@@ -218,8 +220,9 @@ export default function ApplicationsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedApplications.map((app) => (
+                            {paginatedApplications.map((app, index) => (
                                 <TableRow key={app.id} className="even:bg-muted/40">
+                                    <TableCell className="font-medium">{(currentPage - 1) * APPLICATIONS_PER_PAGE + index + 1}</TableCell>
                                     <TableCell className="font-medium">{app.company}</TableCell>
                                     <TableCell>{app.jobTitle}</TableCell>
                                     <TableCell>{app.date}</TableCell>
@@ -237,7 +240,7 @@ export default function ApplicationsPage() {
                 </div>
             </CardContent>
             {totalPages > 1 && (
-                 <CardContent className="p-4 border-t flex items-center justify-between">
+                 <CardFooter className="p-4 border-t flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">
                         Affichage de {paginatedApplications.length} sur {filteredApplications.length} candidatures
                     </p>
@@ -261,7 +264,7 @@ export default function ApplicationsPage() {
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
-                </CardContent>
+                </CardFooter>
             )}
         </Card>
         
