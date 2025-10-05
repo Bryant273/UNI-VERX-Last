@@ -18,6 +18,8 @@ import {
   CheckCircle,
   MoreHorizontal,
   ArrowRight,
+  Upload,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,12 +48,12 @@ import {
 } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { jobOffers, type JobOffer, jobFilters } from '@/lib/jobs-data';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { applications, ApplicationStatus, statusConfig } from '@/lib/applications-data';
+import Link from 'next/link';
 
 export default function JobsPage() {
   const [offers, setOffers] = useState(jobOffers);
@@ -59,6 +61,9 @@ export default function JobsPage() {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('offers');
+
+  const [cvFile, setCvFile] = useState<File | { name: string, date: string } | null>({ name: 'CV_Sarah_Dupont.pdf', date: 'il y a 2 jours' });
+  const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
 
   const filteredOffers = useMemo(() => {
     return offers.filter(offer => 
@@ -72,20 +77,35 @@ export default function JobsPage() {
     setOffers(offers.map(offer => offer.id === id ? { ...offer, isFavorite: !offer.isFavorite } : offer));
   }
 
-  const openApplyModal = (e: React.MouseEvent, offer: JobOffer) => {
-    e.stopPropagation();
+  const openApplyModal = (e: React.MouseEvent | null, offer: JobOffer) => {
+    e?.stopPropagation();
     setSelectedOffer(offer);
     setIsApplyModalOpen(true);
+    // Reset files on open
+    setCvFile({ name: 'CV_Sarah_Dupont.pdf', date: 'il y a 2 jours' });
+    setCoverLetterFile(null);
   }
 
   const getStatusBadge = (status: ApplicationStatus) => {
-    const { text, icon: Icon, color } = statusConfig[status];
+    const config = statusConfig[status];
+    if (!config) return <Badge>Inconnu</Badge>;
+    const { text, icon: Icon, color } = config;
     return (
       <Badge variant="outline" className={`border-0 ${color}`}>
         <Icon className="h-3 w-3 mr-1" />
         {text}
       </Badge>
     );
+  };
+  
+  const handleFileSelect = (fileList: FileList | null, type: 'cv' | 'coverLetter') => {
+      if (fileList && fileList.length > 0) {
+          if (type === 'cv') {
+              setCvFile(fileList[0]);
+          } else {
+              setCoverLetterFile(fileList[0]);
+          }
+      }
   };
 
   return (
@@ -96,12 +116,14 @@ export default function JobsPage() {
           <CardDescription>Gérez votre avenir professionnel, de la recherche d'offres au suivi de vos candidatures.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" size="lg" className="justify-start h-auto py-3">
-                <GraduationCap className="h-6 w-6 mr-3 text-primary"/>
-                <div className="text-left">
-                    <p className="font-semibold">Compléter mon profil</p>
-                    <p className="text-xs text-muted-foreground">Profil complété à 85%</p>
-                </div>
+            <Button variant="outline" size="lg" className="justify-start h-auto py-3" asChild>
+                <Link href="#">
+                    <GraduationCap className="h-6 w-6 mr-3 text-primary"/>
+                    <div className="text-left">
+                        <p className="font-semibold">Compléter mon profil</p>
+                        <p className="text-xs text-muted-foreground">Profil complété à 85%</p>
+                    </div>
+                </Link>
             </Button>
             <Button variant="outline" size="lg" className="justify-start h-auto py-3" onClick={() => setActiveTab('applications')}>
                 <ClipboardCheck className="h-6 w-6 mr-3 text-green-500"/>
@@ -110,12 +132,14 @@ export default function JobsPage() {
                     <p className="text-xs text-muted-foreground">{applications.length} candidatures en cours</p>
                 </div>
             </Button>
-            <Button variant="outline" size="lg" className="justify-start h-auto py-3">
-                <FileText className="h-6 w-6 mr-3 text-indigo-500"/>
-                 <div className="text-left">
-                    <p className="font-semibold">Gérer mes documents</p>
-                    <p className="text-xs text-muted-foreground">CV, lettres de motivation...</p>
-                </div>
+            <Button variant="outline" size="lg" className="justify-start h-auto py-3" asChild>
+                <Link href="#">
+                    <FileText className="h-6 w-6 mr-3 text-indigo-500"/>
+                    <div className="text-left">
+                        <p className="font-semibold">Gérer mes documents</p>
+                        <p className="text-xs text-muted-foreground">CV, lettres de motivation...</p>
+                    </div>
+                </Link>
             </Button>
         </CardContent>
       </Card>
@@ -281,7 +305,7 @@ export default function JobsPage() {
             </div>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setSelectedOffer(null)}>Fermer</Button>
-              <Button onClick={() => { setSelectedOffer(null); openApplyModal({} as React.MouseEvent, selectedOffer); }}>Postuler</Button>
+              <Button onClick={() => { openApplyModal(null, selectedOffer); }}>Postuler</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -294,36 +318,46 @@ export default function JobsPage() {
                     <DialogTitle>Postuler à l'offre</DialogTitle>
                     <DialogDescription>{selectedOffer.title} chez {selectedOffer.company}</DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
+                <div className="space-y-6 py-4">
+                    
                     <div className="space-y-2">
-                        <Label>CV (automatiquement joint)</Label>
+                        <Label>CV</Label>
                         <Card className="p-3 bg-muted/50">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <FileText className="h-6 w-6 text-primary"/>
                                     <div>
-                                        <p className="font-medium">CV_Sarah_Dupont.pdf</p>
-                                        <p className="text-xs text-muted-foreground">Mis à jour il y a 2 jours</p>
+                                        <p className="font-medium">{cvFile?.name}</p>
+                                        {'date' in (cvFile || {}) && <p className="text-xs text-muted-foreground">Mis à jour { 'date' in cvFile ? cvFile.date : ''}</p>}
                                     </div>
                                 </div>
-                                <CheckCircle className="h-5 w-5 text-green-500" />
+                                <Button variant="outline" size="sm" onClick={() => document.getElementById('cv-upload')?.click()}>Changer</Button>
+                                <Input id="cv-upload" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => handleFileSelect(e.target.files, 'cv')} />
                             </div>
                         </Card>
                     </div>
-                     <div>
-                        <Label htmlFor="cover-letter-select">Lettre de motivation (optionnel)</Label>
-                         <Select>
-                            <SelectTrigger id="cover-letter-select">
-                                <SelectValue placeholder="Choisir une lettre de motivation..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="none">Ne pas joindre de lettre</SelectItem>
-                                <SelectItem value="ldm-tech">Lettre_Motivation_Tech.pdf</SelectItem>
-                                <SelectItem value="ldm-marketing">Lettre_Motivation_Marketing.pdf</SelectItem>
-                                <SelectItem value="new">Rédiger une nouvelle lettre</SelectItem>
-                            </SelectContent>
-                        </Select>
+
+                     <div className="space-y-2">
+                        <Label htmlFor="cover-letter-upload">Lettre de motivation (optionnel)</Label>
+                        {coverLetterFile ? (
+                             <Card className="p-3 bg-muted/50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <FileText className="h-6 w-6 text-primary"/>
+                                        <p className="font-medium">{coverLetterFile.name}</p>
+                                    </div>
+                                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => setCoverLetterFile(null)}><X className="h-4 w-4" /></Button>
+                                </div>
+                            </Card>
+                        ) : (
+                            <Button variant="outline" className="w-full" onClick={() => document.getElementById('cover-letter-upload')?.click()}>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Télécharger une lettre de motivation
+                            </Button>
+                        )}
+                        <Input id="cover-letter-upload" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => handleFileSelect(e.target.files, 'coverLetter')} />
                     </div>
+
                      <div>
                         <Label htmlFor="cover-letter">Note personnalisée (optionnel)</Label>
                         <Textarea id="cover-letter" placeholder="Ajoutez un message pour le recruteur..." className="mt-2"/>
@@ -341,3 +375,4 @@ export default function JobsPage() {
     </div>
   );
 }
+
