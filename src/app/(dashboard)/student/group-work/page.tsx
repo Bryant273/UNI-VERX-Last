@@ -28,9 +28,9 @@ export default function GroupWorkPage() {
         <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <Tabs defaultValue="all">
             <TabsList>
-              <TabsTrigger value="all">Tous les projets</TabsTrigger>
-              <TabsTrigger value="active">Actifs</TabsTrigger>
-              <TabsTrigger value="completed">Complétés</TabsTrigger>
+              <TabsTrigger value="all">Tous les TDs</TabsTrigger>
+              <TabsTrigger value="active">En cours</TabsTrigger>
+              <TabsTrigger value="completed">Achevés</TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -48,7 +48,7 @@ export default function GroupWorkPage() {
             </Select>
             <Button>
               <Plus className="mr-2" />
-              Nouveau projet
+              Nouveau TD
             </Button>
           </div>
         </CardContent>
