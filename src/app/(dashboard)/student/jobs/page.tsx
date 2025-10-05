@@ -20,6 +20,8 @@ import {
   ArrowRight,
   Upload,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +30,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -54,6 +57,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { applications, ApplicationStatus, statusConfig } from '@/lib/applications-data';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
+
+const JOBS_PER_PAGE = 5;
 
 export default function JobsPage() {
   const [offers, setOffers] = useState(jobOffers);
@@ -61,6 +67,7 @@ export default function JobsPage() {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('offers');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [cvFile, setCvFile] = useState<File | { name: string, date: string } | null>({ name: 'CV_Sarah_Dupont.pdf', date: 'il y a 2 jours' });
   const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
@@ -71,6 +78,12 @@ export default function JobsPage() {
       offer.company.toLowerCase().includes(search.toLowerCase())
     );
   }, [offers, search]);
+  
+  const totalPages = Math.ceil(filteredOffers.length / JOBS_PER_PAGE);
+  const paginatedOffers = filteredOffers.slice(
+    (currentPage - 1) * JOBS_PER_PAGE,
+    currentPage * JOBS_PER_PAGE
+  );
 
   const toggleFavorite = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -106,6 +119,24 @@ export default function JobsPage() {
               setCoverLetterFile(fileList[0]);
           }
       }
+  };
+  
+  const renderPagination = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+        pages.push(
+            <Button
+                key={i}
+                variant={currentPage === i ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setCurrentPage(i)}
+                className="h-8 w-8"
+            >
+                {i}
+            </Button>
+        );
+    }
+    return pages;
   };
 
   return (
@@ -188,6 +219,7 @@ export default function JobsPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>#</TableHead>
                             <TableHead>Entreprise</TableHead>
                             <TableHead>Poste</TableHead>
                             <TableHead>Localisation</TableHead>
@@ -197,8 +229,9 @@ export default function JobsPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {filteredOffers.map(offer => (
-                        <TableRow key={offer.id} className="cursor-pointer" onClick={() => setSelectedOffer(offer)}>
+                    {paginatedOffers.map((offer, index) => (
+                        <TableRow key={offer.id} className="cursor-pointer even:bg-muted/40" onClick={() => setSelectedOffer(offer)}>
+                             <TableCell className="font-medium">{(currentPage - 1) * JOBS_PER_PAGE + index + 1}</TableCell>
                             <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar className="h-10 w-10 rounded-md">
@@ -214,7 +247,7 @@ export default function JobsPage() {
                             <TableCell>{offer.postedDate}</TableCell>
                             <TableCell className="text-right">
                                 <Button variant="ghost" size="icon" onClick={(e) => toggleFavorite(e, offer.id)}>
-                                    <Star className={offer.isFavorite ? "text-yellow-500 fill-yellow-400" : "text-gray-400"} />
+                                    <Star className={cn(offer.isFavorite ? "text-yellow-500 fill-yellow-400" : "text-gray-400")} />
                                 </Button>
                                 <Button variant="ghost" size="icon" onClick={() => setSelectedOffer(offer)}>
                                     <Eye />
@@ -226,6 +259,32 @@ export default function JobsPage() {
                     </TableBody>
                 </Table>
                 </div>
+                 <CardFooter className="p-4 flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                        Affichage de {paginatedOffers.length} sur {filteredOffers.length} offres
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="h-8 w-8"
+                        >
+                        <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        {renderPagination()}
+                        <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="h-8 w-8"
+                        >
+                        <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </CardFooter>
             </Card>
         </TabsContent>
         <TabsContent value="applications" className="space-y-6 mt-6">
@@ -375,4 +434,3 @@ export default function JobsPage() {
     </div>
   );
 }
-
