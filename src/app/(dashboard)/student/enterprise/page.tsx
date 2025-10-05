@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -12,12 +13,15 @@ import {
   Download,
   FileText,
   Flag,
+  HardHat,
   HelpCircle,
+  Lightbulb,
   Mail,
   MoreVertical,
   Star,
   Upload,
   Users,
+  Clock,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -31,23 +35,36 @@ import { enterpriseData, type Mission } from '@/lib/enterprise-data';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
+const icons: { [key: string]: React.ElementType } = {
+  Briefcase,
+  Star,
+  Flag,
+  CheckCircle,
+  Clock,
+  HardHat,
+  Lightbulb,
+};
 
-const StatCard = ({ icon: Icon, title, value, subtext }: { icon: React.ElementType, title: string, value: React.ReactNode, subtext?: string }) => (
-    <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-            {subtext && <p className="text-xs text-muted-foreground">{subtext}</p>}
-        </CardContent>
-    </Card>
-);
+const StatCard = ({ icon, title, value, subtext }: { icon: string, title: string, value: React.ReactNode, subtext?: string }) => {
+    const Icon = icons[icon];
+    return (
+        <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+                {subtext && <p className="text-xs text-muted-foreground">{subtext}</p>}
+            </CardContent>
+        </Card>
+    );
+};
 
 const MissionItem = ({ mission }: { mission: Mission }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const { status, icon: StatusIcon, color: statusColor, text: statusText } = enterpriseData.missionStatus[mission.status];
+    const { status, icon: iconName, color: statusColor, text: statusText } = enterpriseData.missionStatus[mission.status];
+    const StatusIcon = icons[iconName];
     const completedTasks = mission.tasks.filter(t => t.completed).length;
     const totalTasks = mission.tasks.length;
 
@@ -56,9 +73,9 @@ const MissionItem = ({ mission }: { mission: Mission }) => {
             <div className="border rounded-lg">
                 <CollapsibleTrigger className="w-full p-4 flex justify-between items-center cursor-pointer hover:bg-muted/50 rounded-t-lg">
                     <div className="flex items-center gap-3">
-                        <StatusIcon className={`h-5 w-5 ${statusColor}`} />
+                        {StatusIcon && <StatusIcon className={cn(`h-5 w-5`, statusColor)} />}
                         <span className="font-semibold">{mission.title}</span>
-                         <Badge variant="outline" className={`border-0 ${statusColor.replace('text','bg').replace('-600', '-100').replace('-400', '/30')}`}>{statusText}</Badge>
+                         <Badge variant="outline" className={cn('border-0', statusColor.replace('text','bg').replace('-600', '-100').replace('-400', '/30'))}>{statusText}</Badge>
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="text-sm text-muted-foreground">{completedTasks}/{totalTasks} tâches</span>
@@ -93,13 +110,14 @@ const MissionItem = ({ mission }: { mission: Mission }) => {
     );
 };
 
-const TimelineItem = ({ item }: { item: { icon: React.ElementType, title: string, date: string, description: string, iconColor: string } }) => {
-    const { icon: Icon, title, date, description, iconColor } = item;
+const TimelineItem = ({ item }: { item: { icon: string, title: string, date: string, description: string, iconColor: string } }) => {
+    const { icon: iconName, title, date, description, iconColor } = item;
+    const Icon = icons[iconName];
     return (
         <div className="flex gap-4">
             <div className="flex flex-col items-center">
                 <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", iconColor.replace('text-', 'bg-').replace('-500', '-100 dark:bg-blue-900/30'))}>
-                    <Icon className={cn("h-5 w-5", iconColor)} />
+                    {Icon && <Icon className={cn("h-5 w-5", iconColor)} />}
                 </div>
                 <div className="flex-1 w-px bg-border -mb-6"></div>
             </div>
@@ -169,11 +187,11 @@ export default function EnterpriseAccessPage() {
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <StatCard icon={Briefcase} title="Progression du stage" value={`${data.stats.progress}%`}>
+                <StatCard icon='Briefcase' title="Progression du stage" value={`${data.stats.progress}%`}>
                     <Progress value={data.stats.progress} className="mt-2 h-2" />
                 </StatCard>
-                <StatCard icon={Star} title="Évaluation actuelle" value={data.stats.currentEvaluation} subtext={`Prochaine évaluation le ${data.stats.nextEvaluationDate}`} />
-                <StatCard icon={Flag} title="Missions terminées" value={`${data.stats.completedMissions} / ${data.stats.totalMissions}`} subtext={`${data.stats.inProgressMissions} en cours`}/>
+                <StatCard icon='Star' title="Évaluation actuelle" value={data.stats.currentEvaluation} subtext={`Prochaine évaluation le ${data.stats.nextEvaluationDate}`} />
+                <StatCard icon='Flag' title="Missions terminées" value={`${data.stats.completedMissions} / ${data.stats.totalMissions}`} subtext={`${data.stats.inProgressMissions} en cours`}/>
             </div>
             
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

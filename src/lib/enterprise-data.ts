@@ -1,4 +1,5 @@
-import { CheckCircle, Clock, Flag, HardHat, Lightbulb, Zap } from 'lucide-react';
+
+import type { LucideIcon } from 'lucide-react';
 
 export interface Task {
     id: string;
@@ -29,7 +30,7 @@ export interface Document {
 }
 
 export interface ActivityLogItem {
-    icon: React.ElementType;
+    icon: string; // Changed to string
     iconColor: string;
     title: string;
     date: string;
@@ -57,7 +58,7 @@ export interface EnterpriseData {
     missionStatus: {
         [key: string]: {
             status: 'completed' | 'in-progress' | 'pending';
-            icon: React.ElementType;
+            icon: string; // Changed to string
             color: string;
             text: string;
         }
@@ -132,15 +133,15 @@ export const enterpriseData: EnterpriseData = {
         }
     ],
     missionStatus: {
-        completed: { status: 'completed', icon: CheckCircle, color: 'text-green-600', text: 'Terminée' },
-        'in-progress': { status: 'in-progress', icon: Clock, color: 'text-yellow-600', text: 'En cours' },
-        pending: { status: 'pending', icon: Flag, color: 'text-blue-600', text: 'À venir' },
+        completed: { status: 'completed', icon: 'CheckCircle', color: 'text-green-600', text: 'Terminée' },
+        'in-progress': { status: 'in-progress', icon: 'Clock', color: 'text-yellow-600', text: 'En cours' },
+        pending: { status: 'pending', icon: 'Flag', color: 'text-blue-600', text: 'À venir' },
     },
     activityLog: [
-        { icon: Star, iconColor: 'text-yellow-500', title: 'Évaluation mensuelle complétée', date: '15 mai 2025', description: 'Évaluation de mi-stage complétée par votre tuteur Jean Martin. Note obtenue: 15/20.' },
-        { icon: HardHat, iconColor: 'text-blue-500', title: 'Nouvelle mission assignée', date: '1 mai 2025', description: 'Vous avez été assigné à la mission "Intégration API REST" par Marie Dupont.' },
-        { icon: CheckCircle, iconColor: 'text-green-500', title: 'Mission terminée: Refonte UI', date: '30 avril 2025', description: 'Vous avez terminé la mission "Refonte de l\'interface utilisateur" avec succès.' },
-        { icon: Lightbulb, iconColor: 'text-purple-500', title: 'Début du stage', date: '1 avril 2025', description: 'Premier jour chez TechSolutions. Accueil et intégration dans l\'équipe.' },
+        { icon: 'Star', iconColor: 'text-yellow-500', title: 'Évaluation mensuelle complétée', date: '15 mai 2025', description: 'Évaluation de mi-stage complétée par votre tuteur Jean Martin. Note obtenue: 15/20.' },
+        { icon: 'HardHat', iconColor: 'text-blue-500', title: 'Nouvelle mission assignée', date: '1 mai 2025', description: 'Vous avez été assigné à la mission "Intégration API REST" par Marie Dupont.' },
+        { icon: 'CheckCircle', iconColor: 'text-green-500', title: 'Mission terminée: Refonte UI', date: '30 avril 2025', description: 'Vous avez terminé la mission "Refonte de l\'interface utilisateur" avec succès.' },
+        { icon: 'Lightbulb', iconColor: 'text-purple-500', title: 'Début du stage', date: '1 avril 2025', description: 'Premier jour chez TechSolutions. Accueil et intégration dans l\'équipe.' },
     ],
     supervisors: [
         { name: 'Jean Martin', role: 'Lead Developer - Tuteur entreprise', avatar: 'https://i.pravatar.cc/100?img=60' },
