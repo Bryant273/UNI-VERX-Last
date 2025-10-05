@@ -45,10 +45,10 @@ const icons: { [key: string]: React.ElementType } = {
   Lightbulb,
 };
 
-const StatCard = ({ icon, title, value, subtext }: { icon: string, title: string, value: React.ReactNode, subtext?: string }) => {
+const StatCard = ({ icon, title, value, subtext, children }: { icon: string, title: string, value: React.ReactNode, subtext?: string, children?: React.ReactNode }) => {
     const Icon = icons[icon];
     return (
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
                 {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
@@ -56,6 +56,7 @@ const StatCard = ({ icon, title, value, subtext }: { icon: string, title: string
             <CardContent>
                 <div className="text-2xl font-bold">{value}</div>
                 {subtext && <p className="text-xs text-muted-foreground">{subtext}</p>}
+                {children}
             </CardContent>
         </Card>
     );
@@ -70,12 +71,12 @@ const MissionItem = ({ mission }: { mission: Mission }) => {
 
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <div className="border rounded-lg">
+            <div className="border rounded-lg transition-all hover:border-primary/50">
                 <CollapsibleTrigger className="w-full p-4 flex justify-between items-center cursor-pointer hover:bg-muted/50 rounded-t-lg">
                     <div className="flex items-center gap-3 text-left">
                         {StatusIcon && <StatusIcon className={cn(`h-5 w-5`, statusColor)} />}
                         <span className="font-semibold">{mission.title}</span>
-                         <Badge variant="outline" className={cn('border-0', statusColor.replace('text','bg').replace('-600', '-100').replace('-400', '/30'))}>{statusText}</Badge>
+                         <Badge variant="outline" className={cn('border-0', statusColor.replace('text','bg').replace('-600', '-100 dark:bg-opacity-20'))}>{statusText}</Badge>
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="text-sm text-muted-foreground">{completedTasks}/{totalTasks} tâches</span>
@@ -85,13 +86,13 @@ const MissionItem = ({ mission }: { mission: Mission }) => {
                     </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    <div className="p-4 border-t">
+                    <div className="p-4 border-t bg-background">
                         <p className="text-sm text-muted-foreground mb-4">{mission.description}</p>
                         <div className="space-y-3 mb-4">
                             {mission.tasks.map(task => (
-                                <div key={task.id} className="flex items-center space-x-2">
+                                <div key={task.id} className="flex items-center space-x-3 p-2 rounded-md bg-muted/30">
                                     <Checkbox id={`task-${task.id}`} checked={task.completed} />
-                                    <label htmlFor={`task-${task.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <label htmlFor={`task-${task.id}`} className={cn("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70", task.completed && "line-through text-muted-foreground")}>
                                         {task.description}
                                     </label>
                                 </div>
@@ -110,18 +111,18 @@ const MissionItem = ({ mission }: { mission: Mission }) => {
     );
 };
 
-const TimelineItem = ({ item }: { item: { icon: string, title: string, date: string, description: string, iconColor: string } }) => {
+const TimelineItem = ({ item, isLast }: { item: { icon: string, title: string, date: string, description: string, iconColor: string }, isLast: boolean }) => {
     const { icon: iconName, title, date, description, iconColor } = item;
     const Icon = icons[iconName];
     return (
         <div className="flex gap-4">
             <div className="flex flex-col items-center">
-                <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", iconColor.replace('text-', 'bg-').replace('-500', '-100 dark:bg-blue-900/30'))}>
+                <div className={cn("h-10 w-10 rounded-full flex items-center justify-center border-4", iconColor.replace('text-', 'bg-').replace('-500', '-100 dark:bg-opacity-20').replace('-600', '-100 dark:bg-opacity-20'), iconColor.replace('text-', 'border-').replace('-500', '-200 dark:border-opacity-30').replace('-600', '-200 dark:border-opacity-30'))}>
                     {Icon && <Icon className={cn("h-5 w-5", iconColor)} />}
                 </div>
-                <div className="flex-1 w-px bg-border -mb-6"></div>
+                {!isLast && <div className="flex-1 w-px bg-border -mb-6"></div>}
             </div>
-            <div className="pb-6 w-full">
+            <div className="pb-8 w-full">
                 <div className="flex items-center justify-between">
                     <p className="font-semibold">{title}</p>
                     <p className="text-xs text-muted-foreground">{date}</p>
@@ -141,15 +142,15 @@ const DocumentItem = ({ doc }: { doc: { name: string, type: 'pdf' | 'word' | 'ex
     const { icon: Icon, color } = iconConfig[doc.type];
 
     return (
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-3">
-                <Icon className={cn("h-6 w-6", color)} />
-                <div>
-                    <p className="text-sm font-medium">{doc.name}</p>
+        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
+            <div className="flex items-center gap-3 overflow-hidden">
+                <Icon className={cn("h-6 w-6 flex-shrink-0", color)} />
+                <div className="truncate">
+                    <p className="text-sm font-medium truncate" title={doc.name}>{doc.name}</p>
                     <p className="text-xs text-muted-foreground">{doc.info}</p>
                 </div>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
                 <Download className="h-4 w-4" />
             </Button>
         </div>
@@ -162,35 +163,37 @@ export default function EnterpriseAccessPage() {
 
     return (
         <div className="space-y-6">
-            <Card className="overflow-hidden">
-                <div className="bg-gradient-to-r from-primary to-secondary h-36 relative">
-                     <div className="absolute bottom-0 left-6 translate-y-1/2 flex items-end gap-4">
-                        <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
-                            <AvatarImage src={data.company.logo} alt={data.company.name} className="object-contain" />
+            <Card className="overflow-hidden shadow-lg">
+                <div className="bg-gradient-to-r from-primary to-secondary h-24 relative" />
+                <CardContent className="pt-0">
+                     <div className="flex items-end gap-4 -mt-12">
+                        <Avatar className="h-28 w-28 border-4 border-background shadow-lg">
+                            <AvatarImage src={data.company.logo} alt={data.company.name} className="object-contain p-2" />
                             <AvatarFallback>{data.company.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <div>
-                            <h1 className="text-2xl font-bold text-white shadow-sm">{data.company.name}</h1>
-                            <p className="text-sm text-primary-foreground/80">{data.internship.title}</p>
+                        <div className='pb-4 flex-grow'>
+                            <h1 className="text-2xl font-bold">{data.company.name}</h1>
+                            <p className="text-sm text-muted-foreground">{data.internship.title}</p>
+                        </div>
+                         <div className="pb-4">
+                            <Button onClick={() => setLoginModalOpen(true)} className="shadow-md">
+                                <Building className="mr-2 h-4 w-4" />
+                                Accéder au portail
+                            </Button>
                         </div>
                     </div>
-                </div>
-                <CardContent className="pt-16 flex justify-between items-center">
-                    <p className="text-sm text-muted-foreground">
+                     <Separator className="my-4"/>
+                      <p className="text-sm text-muted-foreground">
                         {data.internship.period}
                     </p>
-                    <Button onClick={() => setLoginModalOpen(true)}>
-                        <Building className="mr-2 h-4 w-4" />
-                        Accéder au portail
-                    </Button>
                 </CardContent>
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <StatCard icon='Briefcase' title="Progression du stage" value={`${data.stats.progress}%`}>
+                 <StatCard icon='Briefcase' title="Progression du stage" value={`${data.stats.progress}%`}>
                     <Progress value={data.stats.progress} className="mt-2 h-2" />
                 </StatCard>
-                <StatCard icon='Star' title="Évaluation actuelle" value={data.stats.currentEvaluation} subtext={`Prochaine évaluation le ${data.stats.nextEvaluationDate}`} />
+                <StatCard icon='Star' title="Évaluation actuelle" value={data.stats.currentEvaluation} subtext={`Prochaine éval.: ${data.stats.nextEvaluationDate}`} />
                 <StatCard icon='Flag' title="Missions terminées" value={`${data.stats.completedMissions} / ${data.stats.totalMissions}`} subtext={`${data.stats.inProgressMissions} en cours`}/>
             </div>
             
@@ -199,6 +202,7 @@ export default function EnterpriseAccessPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Missions et Tâches</CardTitle>
+                             <CardDescription>Suivez l'avancement de vos missions et des tâches associées.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {data.missions.map(mission => <MissionItem key={mission.id} mission={mission} />)}
@@ -209,9 +213,9 @@ export default function EnterpriseAccessPage() {
                         <CardHeader>
                             <CardTitle>Journal d'activité</CardTitle>
                         </CardHeader>
-                        <CardContent className="relative">
-                            <div className="absolute left-4 top-4 bottom-4 w-px bg-border"></div>
-                            {data.activityLog.map((item, index) => <TimelineItem key={index} item={item} />)}
+                        <CardContent className="relative px-6">
+                            <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-border -translate-x-1/2"></div>
+                            {data.activityLog.map((item, index) => <TimelineItem key={index} item={item} isLast={index === data.activityLog.length -1} />)}
                         </CardContent>
                     </Card>
                 </div>
