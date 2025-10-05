@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   BookOpen,
@@ -19,7 +20,8 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
-import type { UserRole, NavItem, TimetableEvent, TimetableEventType, PresenceStatus } from './data';
+import type { UserRole, NavItem, TimetableEvent } from './data';
+import type { DemoUser } from './messages-data';
 
 export const VALID_ROLES: UserRole[] = [
   'student', 
@@ -71,7 +73,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '#', label: 'Étudiants', icon: Users },
     { href: '#', label: 'Évaluations', icon: ClipboardCheck },
     { href: '/professor/timetable', label: 'Emploi du temps', icon: Calendar },
-    { href: '#', label: 'Messages', icon: MessageSquare },
+    { href: '/professor/messages', label: 'Messages', icon: MessageSquare },
   ],
   admin: [
     { href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -168,6 +170,15 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
   },
 };
 
+export const allUsers: DemoUser[] = [
+  { id: 'student-sarah-dupont', name: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', role: 'Étudiant(e)', online: true },
+  { id: 'student-thomas-mercier', name: 'Thomas Mercier', avatar: 'https://i.pravatar.cc/100?img=59', role: 'Étudiant(e)', online: false },
+  { id: 'student-emma-bernard', name: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', role: 'Étudiant(e)', online: true },
+  { id: 'prof-martin', name: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', role: 'Professeur', online: true },
+  { id: 'prof-dubois', name: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', role: 'Professeur', online: false },
+  { id: 'admin-univ', name: 'Admin Université', avatar: 'https://i.pravatar.cc/100?img=68', role: 'Administration', online: true },
+];
+
 export const courses = {
   student: [
     { id: 1, title: 'Calcul Avancé', code: 'MATH301', instructor: 'Dr. Alan Turing', thumbnailId: 'course-thumb-1' },
@@ -218,39 +229,47 @@ export const allEvents: Record<UserRole, TimetableEvent[]> = {
     { 
       id: 7, 
       time: '16:00 - 18:00', 
-      course: 'Club de débat', 
-      location: 'Salle commune', 
-      type: 'activité',
-      presenceStatus: 'na',
-    },
-     { 
-      id: 9, 
-      time: '08:00 - 10:00', 
-      course: 'Histoire Ancienne', 
-      location: 'Amphi C', 
+      course: 'Histoire', 
+      location: 'Salle 202', 
       type: 'cours',
       instructor: 'Dr. Indiana Jones',
-      presenceStatus: 'absent',
+      presenceStatus: 'pending',
       isPast: true,
-    },
+    }
   ],
   professor: [
-    { id: 1, time: '09:00 - 11:00', course: 'Calcul Avancé', location: 'Amphi A', type: 'cours' },
-    { id: 3, time: '11:00 - 12:00', course: 'Heures de bureau', location: 'Bureau 101', type: 'activité' },
-    { id: 8, time: '14:00 - 16:00', course: 'Examen de mi-semestre', location: 'Amphi B', type: 'examen' },
+    { 
+      id: 3, 
+      time: '09:00 - 11:00', 
+      course: 'Calcul Avancé', 
+      location: 'Amphi A', 
+      type: 'cours',
+      instructor: 'Dr. Alan Turing',
+      presenceStatus: 'na',
+    },
+    { 
+      id: 4, 
+      time: '11:00 - 12:00', 
+      course: 'Réunion Pédagogique', 
+      location: 'Salle des profs', 
+      type: 'activité',
+      instructor: 'Direction',
+      presenceStatus: 'na',
+    }
   ],
   admin: [
-    { id: 4, time: '10:00 - 11:00', course: 'Réunion du corps professoral', location: 'Salle de conférence 1', type: 'activité' },
-    { id: 5, time: '14:00 - 15:00', course: 'Revue budgétaire', location: 'Bâtiment administratif', type: 'activité' },
+     { 
+      id: 5, 
+      time: '10:00 - 11:00', 
+      course: 'Conseil d\'administration', 
+      location: 'Salle du conseil', 
+      type: 'activité',
+      instructor: 'Le Recteur',
+      presenceStatus: 'na',
+    }
   ],
   'academic-advisor': [],
   secretariat: [],
   rectorate: [],
   'erp-provider': [],
 };
-
-export const messages = [
-  { id: 1, sender: 'Dr. Évelyne Dubois', subject: 'Résultats de mi-semestre', time: '10:42' },
-  { id: 2, sender: 'Administration', subject: 'Avis de coupure de courant sur le campus', time: 'Hier' },
-  { id: 3, sender: 'Alex Dupont', subject: 'Question sur le devoir 3', time: 'Il y a 2 jours' },
-];

@@ -15,6 +15,8 @@ import {
   Smile,
   ArrowLeft,
   X,
+  User,
+  UserPlus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,101 +33,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
-const initialConversationsData = [
-  {
-    id: 'group-1',
-    type: 'group',
-    name: 'Groupe Universitaire',
-    avatar: '',
-    initials: 'UNI',
-    lastMessage: 'Admin: Rappel des dates d\'examens...',
-    time: '10:42',
-    unread: 3,
-    online: true,
-  },
-  {
-    id: 'group-2',
-    type: 'group',
-    name: 'L3 Informatique',
-    avatar: '',
-    initials: 'L3I',
-    lastMessage: 'Lucas: Est-ce que quelqu\'un a les corrigés...',
-    time: 'Hier',
-    unread: 1,
-    online: true,
-  },
-    {
-    id: 'student-1',
-    type: 'user',
-    name: 'Emma Bernard',
-    avatar: 'https://i.pravatar.cc/100?img=32',
-    initials: 'EB',
-    lastMessage: 'Tu as avancé sur le rapport ?',
-    time: '08:45',
-    unread: 1,
-    online: true,
-  },
-  {
-    id: 'professor-1',
-    type: 'user',
-    name: 'Prof. Martin',
-    avatar: 'https://i.pravatar.cc/100?img=60',
-    initials: 'PM',
-    lastMessage: 'Concernant votre demande de délai...',
-    time: '11:22',
-    unread: 1,
-    online: true,
-  },
-  {
-    id: 'student-2',
-    type: 'user',
-    name: 'Thomas Mercier',
-    avatar: 'https://i.pravatar.cc/100?img=59',
-    initials: 'TM',
-    lastMessage: 'D\'accord, je t\'envoie ça ce soir.',
-    time: 'Hier',
-    unread: 0,
-    online: false,
-  },
-];
-
-const messagesData: Record<string, any[]> = {
-  'group-1': [
-    { id: 1, sender: 'Admin Université', avatar: 'https://i.pravatar.cc/100?img=68', content: 'Bonjour à tous ! Voici un rappel des dates importantes pour les examens du premier semestre.', time: '10:30', isMe: false },
-    { id: 2, sender: 'Admin Université', avatar: 'https://i.pravatar.cc/100?img=68', content: 'Algorithmique : 15 jan, BDD : 17 jan, Web : 20 jan.', time: '10:31', isMe: false },
-    { id: 3, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', content: 'Merci pour l\'info ! Le planning des salles est dispo ?', time: '10:45', isMe: false },
-    { id: 4, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Bonne question !', time: '10:46', isMe: true },
-  ],
-  'group-2': [
-    { id: 1, sender: 'Lucas', avatar: 'https://i.pravatar.cc/100?img=11', content: 'Est-ce que quelqu\'un a les corrigés des derniers TP d\'algorithmique ?', time: 'Hier', isMe: false },
-    { id: 2, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Je ne les ai pas, mais on peut chercher ensemble si tu veux.', time: 'Hier', isMe: true },
-  ],
-  'student-1': [
-      { id: 1, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', content: 'Salut Sarah ! Tu as avancé sur le rapport ?', time: '08:45', isMe: false },
-      { id: 2, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Hey ! Oui, j\'ai fait la première partie. Et toi ?', time: '08:50', isMe: true },
-      { id: 3, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', content: 'Super ! On peut se retrouver à la BU pour mettre en commun ?', time: '08:52', isMe: false },
-  ],
-  'professor-1': [
-        { id: 1, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Bonjour Professeur, j\'ai une question sur le dernier TP.', time: '09:15', isMe: true },
-        { id: 2, sender: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', content: 'Bonjour Sarah, je vous écoute.', time: '10:30', isMe: false },
-        { id: 3, sender: 'Sarah Dupont', avatar: 'https://i.pravatar.cc/100?img=5', content: 'Concernant la question 3, je ne suis pas sûre de bien comprendre ce qui est attendu pour l\'optimisation.', time: '10:32', isMe: true },
-        { id: 4, sender: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', content: 'Pensez à utiliser les index. Je vous envoie un document qui pourrait vous aider.', time: '11:22', isMe: false },
-  ],
-  'student-2': [
-    { id: 1, sender: 'Thomas Mercier', avatar: 'https://i.pravatar.cc/100?img=59', content: 'D\'accord, je t\'envoie ça ce soir.', time: 'Hier', isMe: false },
-  ],
-};
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { initialConversationsData, messagesData, allUsers, type DemoUser, type Conversation, getInitials } from '@/lib/messages-data';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
 
 const emojiCategories = {
   'Sourires & Émotions': ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵'],
   'Personnes & Gestes': ['👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄', '👶', '🧒', '👦', '👧', '🧑', '👱', '👨', '🧔', '👩', '🧓', '👴', '👵', '🙍', '🙎', '🙅', '🙆', '💁', '🙋', '🧏', '🙇', '🤦', '🤷'],
   'Animaux & Nature': ['🙈', '🙉', '🙊', '🐒', '🐶', '🐕', '🦮', '🐕‍🦺', '🐩', '🐺', '🦊', '🦝', '🐱', '🐈', '🐈‍⬛', '🦁', '🐯', '🐅', '🐆', '🐴', '🦄', '🦓', '🦌', '🦬', '🐮', '🐂', '🐃', '🐄', '🐷', '🐖', '🐗', '🐽', '🐏', '🐑', '🐐', '🐪', '🐫', '🦙', '🦒', '🐘', '🦣', '🦏', '🦛', '🐭', '🐁', '🐀', '🐹', '🐰', '🐇', '🐿️', '🦫', '🦔', '🦇', '🐻', '🐻‍❄️', '🐨', '🐼', '🦥', '🦦', '🦨', '🦘', '🦡', '🐾', '🦃', '🐔', '🐓', '🐣', '🐤', '🐥', '🐦', '🐧', '🕊️', '🦅', '🦆', '🦢', '🦉', '🦤', '🪶', '🐸', '🐊', '🐢', '🦎', '🐍', '🐲', '🐉', '🦕', '🦖', '🐳', '🐋', '🐬', '🦭', '🐟', '🐠', '🐡', '🦈', '🐙', '🐚', '🐌', '🦋', '🐛', '🐜', '🐝', '🪲', '🐞', '🦗', '🕷️', '🕸️', '🦂', '🦟', '🪰', '🪱', '🦠'],
-  'Nourriture & Boissons': ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌶️', '🫑', '🌽', '🥕', '🫒', '🧄', '🧅', '🥔', '🍠', '🥐', '🥯', '🍞', '🥖', '🥨', '🧀', '🥚', '🍳', '🧈', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖', '🦴', '🌭', '🍔', '🍟', '🍕', '🫓', '🥪', '🥙', '🧆', '🌮', '🌯', '🫔', '🥗', '🥘', '🫕', '🥫', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🦪', '🍤', '🍙', '🍚', '🍘', '🍥', '🥠', '🥮', '🍢', '🍡', '🍧', '🍨', '🍦', '🥧', '🧁', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩', '🍪', '🌰', '🥜', '🍯', '🥛', '🍼', '☕', '🫖', '🍵', '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤', '🧋', '🧃', '🧉', '🧊', '🥢', '🍽️', '🍴', '🥄', '🔪'],
+  'Nourriture & Boissons': ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌶️', '🫑', '🌽', '🥕', '🫒', '🧄', '🧅', '🥔', '🍠', '🥐', '🥯', '🍞', '🥖', '🥨', '🧀', '🥚', '🍳', '🧈', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖', '🦴', '🌭', '🍔', '🍟', '🍕', '🫓', '🥪', '🥙', '🧆', '🌮', '🌯', '🫔', '🥗', '🥘', '🫕', '🥫', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🦪', '🍤', '🍙', '🍚', '🍘', '🍥', '🥠', '🥮', '🍢', '🍡', '🍧', '🍨', '🍦', '🥧', '🧁', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩', '🍪', '🌰', '🥜', '🍯', '🥛', '🍼', '☕', '𫖚', '🍵', '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤', '🧋', '🧃', '🧉', '🧊', '🥢', '🍽️', '🍴', '🥄', '🔪'],
 };
 
 
-const ConversationList = ({ conversations, onSelect, selectedId }: { conversations: typeof initialConversationsData, onSelect: (id: string) => void, selectedId: string | null }) => {
+const ConversationList = ({ conversations, onSelect, selectedId, onNewConversation }: { conversations: Conversation[], onSelect: (id: string) => void, selectedId: string | null, onNewConversation: () => void }) => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -159,7 +80,7 @@ const ConversationList = ({ conversations, onSelect, selectedId }: { conversatio
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon"><Plus className="h-4 w-4"/></Button>
+                        <Button variant="ghost" size="icon" onClick={onNewConversation}><Plus className="h-4 w-4"/></Button>
                     </TooltipTrigger>
                     <TooltipContent><p>Nouvelle discussion</p></TooltipContent>
                 </Tooltip>
@@ -212,6 +133,12 @@ const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: st
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [currentMessages, conversationId]);
+    
+    useEffect(() => {
+        // Clear message and attachments when conversation changes
+        setMessage('');
+        setAttachments([]);
+    }, [conversationId]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -232,7 +159,6 @@ const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: st
             const newText = text.substring(0, start) + emoji + text.substring(end);
             setMessage(newText);
             
-            // Move cursor after inserted emoji
             setTimeout(() => {
                 textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
                 textarea.focus();
@@ -297,7 +223,7 @@ const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: st
                         {!msg.isMe && (
                             <Avatar className="h-8 w-8">
                                 <AvatarImage src={msg.avatar} />
-                                <AvatarFallback>{msg.sender.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{getInitials(msg.sender)}</AvatarFallback>
                             </Avatar>
                         )}
                         <div className={cn("max-w-[70%] p-3 rounded-2xl", msg.isMe ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted rounded-bl-none")}>
@@ -351,11 +277,12 @@ const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: st
                             <PopoverTrigger asChild>
                                 <Button variant="ghost" size="icon"><Smile className="h-5 w-5" /></Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-80 p-2">
-                                <div className="h-64 overflow-y-auto">
+                            <PopoverContent className="w-80 p-0">
+                                <ScrollArea className="h-72">
+                                <div className='p-2'>
                                 {Object.entries(emojiCategories).map(([category, emojis]) => (
                                     <div key={category}>
-                                        <h4 className="text-sm font-semibold text-muted-foreground px-2 py-1">{category}</h4>
+                                        <h4 className="text-sm font-semibold text-muted-foreground px-2 py-1 sticky top-0 bg-popover/95 backdrop-blur-sm">{category}</h4>
                                         <div className="grid grid-cols-8 gap-1">
                                             {emojis.map((emoji) => (
                                                 <Button key={emoji} variant="ghost" size="icon" className="text-lg" onClick={() => handleEmojiClick(emoji)}>
@@ -366,6 +293,7 @@ const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: st
                                     </div>
                                 ))}
                                 </div>
+                                </ScrollArea>
                             </PopoverContent>
                         </Popover>
                         
@@ -379,10 +307,161 @@ const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: st
     );
 };
 
+const NewConversationModal = ({ isOpen, onClose, onCreate }: { isOpen: boolean, onClose: () => void, onCreate: (newConversation: Conversation) => void }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedUsers, setSelectedUsers] = useState<DemoUser[]>([]);
+    const [groupName, setGroupName] = useState('');
+
+    const isGroup = selectedUsers.length > 1;
+
+    const searchResults = useMemo(() => {
+        if (!searchTerm) return [];
+        return allUsers.filter(user => 
+            user.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+            !selectedUsers.some(su => su.id === user.id)
+        );
+    }, [searchTerm, selectedUsers]);
+
+    const handleSelectUser = (user: DemoUser) => {
+        if (selectedUsers.some(su => su.id === user.id)) return;
+
+        if (!isGroup && selectedUsers.length === 1) {
+            // Create individual chat
+            handleCreate();
+        } else {
+             setSelectedUsers(prev => [...prev, user]);
+             setSearchTerm('');
+        }
+    };
+    
+    const handleRemoveUser = (userId: string) => {
+        setSelectedUsers(prev => prev.filter(u => u.id !== userId));
+    };
+    
+    const handleCreate = () => {
+        let newConversation: Conversation;
+        if (isGroup) {
+            if (!groupName) {
+                alert('Veuillez donner un nom au groupe.');
+                return;
+            }
+            newConversation = {
+                id: `group-${Date.now()}`,
+                type: 'group',
+                name: groupName,
+                avatar: '',
+                initials: getInitials(groupName),
+                lastMessage: 'Vous avez créé ce groupe.',
+                time: 'Maintenant',
+                unread: 0,
+                online: true,
+                members: [ ...selectedUsers, allUsers.find(u => u.id === 'student-sarah-dupont')! ],
+            };
+        } else {
+            const user = selectedUsers[0];
+            newConversation = {
+                id: user.id,
+                type: 'user',
+                name: user.name,
+                avatar: user.avatar,
+                initials: getInitials(user.name),
+                lastMessage: 'Vous avez démarré la conversation.',
+                time: 'Maintenant',
+                unread: 0,
+                online: user.online || false,
+            };
+        }
+        
+        onCreate(newConversation);
+        resetState();
+    };
+
+    const resetState = () => {
+        setSearchTerm('');
+        setSelectedUsers([]);
+        setGroupName('');
+        onClose();
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>Nouvelle Conversation</DialogTitle>
+                    <DialogDescription>
+                        Recherchez des personnes ou créez un groupe de discussion.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    {selectedUsers.length > 0 && (
+                         <div className="p-2 border rounded-lg">
+                            <Label>À :</Label>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {selectedUsers.map(user => (
+                                    <Badge key={user.id} variant="secondary" className="pl-1">
+                                        <Avatar className="h-5 w-5 mr-1">
+                                            <AvatarImage src={user.avatar} />
+                                            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                                        </Avatar>
+                                        {user.name}
+                                        <button onClick={() => handleRemoveUser(user.id)} className="ml-1 rounded-full hover:bg-destructive/20 p-0.5">
+                                            <X className="h-3 w-3"/>
+                                        </button>
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Rechercher un contact..." 
+                            className="pl-10"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        {searchResults.length > 0 && (
+                            <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
+                                <CardContent className="p-2">
+                                    {searchResults.map(user => (
+                                        <div key={user.id} onClick={() => handleSelectUser(user)} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted cursor-pointer">
+                                            <Avatar>
+                                                <AvatarImage src={user.avatar}/>
+                                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-semibold">{user.name}</p>
+                                                <p className="text-xs text-muted-foreground">{user.role}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                    {isGroup && (
+                        <div className="space-y-2 pt-2">
+                            <Label htmlFor="group-name">Nom du groupe</Label>
+                            <Input id="group-name" placeholder="Ex: Projet BDD" value={groupName} onChange={(e) => setGroupName(e.target.value)} />
+                        </div>
+                    )}
+                </div>
+                <DialogFooter>
+                    <Button variant="ghost" onClick={resetState}>Annuler</Button>
+                    <Button onClick={handleCreate} disabled={selectedUsers.length === 0 || (isGroup && !groupName)}>
+                        {isGroup ? 'Créer le groupe' : 'Démarrer la discussion'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default function MessagesPage() {
-    const [conversations, setConversations] = useState(initialConversationsData);
+    const [conversations, setConversations] = useState<Conversation[]>(initialConversationsData);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+    const [isNewConversationModalOpen, setIsNewConversationModalOpen] = useState(false);
 
     const handleSelectConversation = (id: string) => {
         setSelectedConversationId(id);
@@ -394,15 +473,32 @@ export default function MessagesPage() {
     };
 
     const handleNewMessage = (convId: string, message: any) => {
-        // In a real app, this would update a central state store or send to a server.
-        // Here, we just update the messagesData mock.
         if (messagesData[convId]) {
             messagesData[convId].push(message);
         } else {
             messagesData[convId] = [message];
         }
-        // Force a re-render by creating a new object reference.
-        setSelectedConversationId(convId);
+        setConversations(prev =>
+            prev.map(c => 
+                c.id === convId ? { ...c, lastMessage: message.content, time: message.time } : c
+            )
+        );
+        // This is to force re-render of ChatView with new message
+        setSelectedConversationId('');
+        setTimeout(() => setSelectedConversationId(convId), 0);
+    };
+    
+    const handleCreateConversation = (newConversation: Conversation) => {
+        // Add to messagesData if it doesn't exist
+        if (!messagesData[newConversation.id]) {
+            messagesData[newConversation.id] = [];
+        }
+        
+        // Add to conversations list
+        setConversations(prev => [newConversation, ...prev.filter(c => c.id !== newConversation.id)]);
+        
+        // Select it
+        handleSelectConversation(newConversation.id);
     };
 
     return (
@@ -412,6 +508,7 @@ export default function MessagesPage() {
                 conversations={conversations}
                 onSelect={handleSelectConversation}
                 selectedId={selectedConversationId}
+                onNewConversation={() => setIsNewConversationModalOpen(true)}
               />
             </div>
             <div className={cn("flex-1", !selectedConversationId && 'hidden md:block')}>
@@ -421,6 +518,11 @@ export default function MessagesPage() {
                 onNewMessage={handleNewMessage}
               />
             </div>
+            <NewConversationModal 
+                isOpen={isNewConversationModalOpen}
+                onClose={() => setIsNewConversationModalOpen(false)}
+                onCreate={handleCreateConversation}
+            />
         </div>
     );
 }
