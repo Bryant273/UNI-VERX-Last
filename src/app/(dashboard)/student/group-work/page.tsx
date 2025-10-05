@@ -17,6 +17,7 @@ import {
   Calendar as CalendarIcon,
   Download,
   Paperclip,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -143,7 +144,13 @@ const TdCard = ({ td, onSelect, isActive }: { td: any, onSelect: () => void, isA
     Haute: 'bg-red-500',
     Moyenne: 'bg-amber-500',
     Basse: 'bg-green-500',
+    Achevé: 'bg-gray-500',
   };
+   const statusColors = {
+    'En cours': 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+    'Achevé': 'bg-green-500/10 text-green-600 border-green-500/20',
+  };
+
   return (
     <Card
       className={cn(
@@ -153,19 +160,20 @@ const TdCard = ({ td, onSelect, isActive }: { td: any, onSelect: () => void, isA
       onClick={onSelect}
     >
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-            <CardTitle className="text-base">{td.title}</CardTitle>
+        <div className="flex justify-between items-start">
+            <CardTitle className="text-base font-semibold">{td.title}</CardTitle>
             <Badge className={cn(priorityColors[td.priority as keyof typeof priorityColors])}>{td.priority}</Badge>
         </div>
         <CardDescription>{td.module}</CardDescription>
       </CardHeader>
-      <CardContent className="text-sm space-y-2">
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Progression</span>
-          <span>{td.progress}%</span>
+      <CardContent className="text-sm space-y-4">
+        <div className="flex justify-between items-center text-xs text-muted-foreground">
+            <span>Échéance: {td.deadline}</span>
+             <Badge variant="outline" className={cn("text-xs", statusColors[td.status as keyof typeof statusColors])}>
+                {td.status}
+            </Badge>
         </div>
-        <Progress value={td.progress} className="h-1.5" />
-        <div className="flex justify-between items-center pt-2">
+        <div className="flex items-center justify-between pt-2">
           <div className="flex -space-x-2">
             {td.team.map((memberId: string) => {
               const member = teamMembers[memberId as keyof typeof teamMembers];
@@ -186,7 +194,6 @@ const TdCard = ({ td, onSelect, isActive }: { td: any, onSelect: () => void, isA
               );
             })}
           </div>
-          <span className="text-xs text-muted-foreground">{td.deadline}</span>
         </div>
       </CardContent>
     </Card>
@@ -622,15 +629,20 @@ export default function GroupWorkPage() {
   const [tds, setTds] = useState(initialTds);
   const [selectedTd, setSelectedTd] = useState<any>(tds.find(t => t.status === 'En cours') || null);
   const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   
   // For demo purposes, we hardcode the current user ID. In a real app, this would come from an auth context.
   const currentUserId = 'sarah-dupont';
 
   const filteredTds = useMemo(() => {
-    if (filter === 'all') return tds;
-    return tds.filter(td => td.status.toLowerCase().replace('é', 'e').replace('s','') === filter);
-  }, [tds, filter]);
+    return tds
+      .filter(td => {
+        if (filter === 'all') return true;
+        return td.status.toLowerCase().replace('é', 'e').replace('s','') === filter;
+      })
+      .filter(td => td.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [tds, filter, searchTerm]);
 
   const handleAddTask = (task: Omit<Task, 'id' | 'status' | 'files'>) => {
     if (!selectedTd) return;
@@ -669,7 +681,16 @@ export default function GroupWorkPage() {
                 <CardHeader>
                     <CardTitle>Mes Travaux Dirigés</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
+                <CardContent className="p-4 space-y-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Rechercher un TD..."
+                            className="pl-10"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                     <Tabs defaultValue="all" onValueChange={setFilter}>
                         <TabsList className="w-full grid grid-cols-3">
                             <TabsTrigger value="all">Tous</TabsTrigger>
@@ -690,7 +711,7 @@ export default function GroupWorkPage() {
                 ))}
                  {filteredTds.length === 0 && (
                     <div className="text-center text-muted-foreground pt-10">
-                        <p>Aucun TD dans cette catégorie.</p>
+                        <p>Aucun TD trouvé.</p>
                     </div>
                 )}
             </div>
@@ -724,7 +745,3 @@ export default function GroupWorkPage() {
     </div>
   );
 }
-
-    
-
-    
