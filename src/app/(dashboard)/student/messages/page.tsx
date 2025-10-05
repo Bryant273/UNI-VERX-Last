@@ -199,17 +199,19 @@ const ConversationList = ({ conversations, onSelect, selectedId }: { conversatio
 };
 
 
-const ChatView = ({ conversationId, onBack }: { conversationId: string | null, onBack: () => void }) => {
+const ChatView = ({ conversationId, onBack, onNewMessage }: { conversationId: string | null, onBack: () => void, onNewMessage: (convId: string, message: any) => void }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [attachments, setAttachments] = useState<File[]>([]);
+    const [message, setMessage] = useState('');
     
     const conversation = conversationId ? initialConversationsData.find(c => c.id === conversationId) : null;
-    const messages = (conversationId ? messagesData[conversationId] : []) || [];
+    const currentMessages = (conversationId ? messagesData[conversationId] : []) || [];
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+    }, [currentMessages, conversationId]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -219,6 +221,40 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
     
     const removeAttachment = (index: number) => {
         setAttachments(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleEmojiClick = (emoji: string) => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const newText = text.substring(0, start) + emoji + text.substring(end);
+            setMessage(newText);
+            
+            // Move cursor after inserted emoji
+            setTimeout(() => {
+                textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+                textarea.focus();
+            }, 0);
+        }
+    };
+
+    const handleSendMessage = () => {
+        if ((!message.trim() && attachments.length === 0) || !conversationId) return;
+
+        const newMessage = {
+            id: Date.now(),
+            sender: 'Sarah Dupont', // Hardcoded for demo
+            avatar: 'https://i.pravatar.cc/100?img=5',
+            content: message.trim(),
+            time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            isMe: true,
+            attachments: attachments.map(f => ({ name: f.name, size: f.size, type: f.type })),
+        };
+        onNewMessage(conversationId, newMessage);
+        setMessage('');
+        setAttachments([]);
     };
 
     if (!conversation) {
@@ -256,7 +292,7 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
                 </div>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-6">
-                {(messages || []).map((msg: any) => (
+                {(currentMessages || []).map((msg: any) => (
                     <div key={msg.id} className={cn("flex items-end gap-2", msg.isMe ? "justify-end" : "justify-start")}>
                         {!msg.isMe && (
                             <Avatar className="h-8 w-8">
@@ -297,7 +333,19 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
                     </div>
                  )}
                 <div className="relative">
-                    <Textarea placeholder="Écrivez un message..." className="pr-28" />
+                    <Textarea
+                        ref={textareaRef}
+                        placeholder="Écrivez un message..." 
+                        className="pr-28" 
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendMessage();
+                            }
+                        }}
+                    />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
                         <Popover>
                             <PopoverTrigger asChild>
@@ -310,7 +358,7 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
                                         <h4 className="text-sm font-semibold text-muted-foreground px-2 py-1">{category}</h4>
                                         <div className="grid grid-cols-8 gap-1">
                                             {emojis.map((emoji) => (
-                                                <Button key={emoji} variant="ghost" size="icon" className="text-lg">
+                                                <Button key={emoji} variant="ghost" size="icon" className="text-lg" onClick={() => handleEmojiClick(emoji)}>
                                                     {emoji}
                                                 </Button>
                                             ))}
@@ -323,7 +371,7 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
                         
                         <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}><Paperclip className="h-5 w-5" /></Button>
                         <input type="file" ref={fileInputRef} className="hidden" multiple onChange={handleFileChange} />
-                        <Button size="icon"><Send className="h-5 w-5" /></Button>
+                        <Button size="icon" onClick={handleSendMessage}><Send className="h-5 w-5" /></Button>
                     </div>
                 </div>
             </div>
@@ -334,7 +382,7 @@ const ChatView = ({ conversationId, onBack }: { conversationId: string | null, o
 
 export default function MessagesPage() {
     const [conversations, setConversations] = useState(initialConversationsData);
-    const [selectedConversationId, setSelectedConversationId] = useState<string | null>('group-1');
+    const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
     const handleSelectConversation = (id: string) => {
         setSelectedConversationId(id);
@@ -343,6 +391,18 @@ export default function MessagesPage() {
                 c.id === id ? { ...c, unread: 0 } : c
             )
         );
+    };
+
+    const handleNewMessage = (convId: string, message: any) => {
+        // In a real app, this would update a central state store or send to a server.
+        // Here, we just update the messagesData mock.
+        if (messagesData[convId]) {
+            messagesData[convId].push(message);
+        } else {
+            messagesData[convId] = [message];
+        }
+        // Force a re-render by creating a new object reference.
+        setSelectedConversationId(convId);
     };
 
     return (
@@ -355,7 +415,11 @@ export default function MessagesPage() {
               />
             </div>
             <div className={cn("flex-1", !selectedConversationId && 'hidden md:block')}>
-              <ChatView conversationId={selectedConversationId} onBack={() => setSelectedConversationId(null)} />
+              <ChatView 
+                conversationId={selectedConversationId} 
+                onBack={() => setSelectedConversationId(null)}
+                onNewMessage={handleNewMessage}
+              />
             </div>
         </div>
     );
