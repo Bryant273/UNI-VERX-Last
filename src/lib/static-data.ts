@@ -52,7 +52,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       title: 'Collaboratif',
       links: [
         { href: '/student/group-work', label: 'TD de groupe', icon: Users },
-        { href: '#', label: 'Messages', icon: MessageSquare },
+        { href: '/student/messages', label: 'Messages', icon: MessageSquare },
       ],
     },
     {
