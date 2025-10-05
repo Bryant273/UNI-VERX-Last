@@ -270,6 +270,15 @@ const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dis
     const isGroupLeader = currentUserId === 'sarah-dupont'; 
     const allFiles = td.tasks.flatMap((task: Task) => task.files);
 
+    const filesByTask = useMemo(() => {
+        return td.tasks.reduce((acc: { [key: string]: TaskFile[] }, task: Task) => {
+            if (task.files.length > 0) {
+                acc[task.title] = task.files;
+            }
+            return acc;
+        }, {});
+    }, [td.tasks]);
+
   return (
     <Card className="flex-1 flex flex-col h-full">
       <CardHeader>
@@ -281,23 +290,26 @@ const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dis
             <TabsList>
               <TabsTrigger value="tasks"><ClipboardList className="mr-2 h-4 w-4"/>Tâches</TabsTrigger>
               <TabsTrigger value="discussion"><MessageSquare className="mr-2 h-4 w-4"/>Discussion</TabsTrigger>
+              <TabsTrigger value="files"><FileText className="mr-2 h-4 w-4"/>Fichiers</TabsTrigger>
               <TabsTrigger value="submit" disabled={td.status === 'Achevé'}><Send className="mr-2 h-4 w-4"/>Soumettre</TabsTrigger>
             </TabsList>
         </div>
         
-        <TabsContent value="tasks" className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
-             {isGroupLeader && (
-                <div className="flex justify-end">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Ajouter une tâche
-                    </Button>
-                </div>
-            )}
-             {td.tasks.map((task: Task) => (
-                <TaskCard key={task.id} task={task} currentUserId={currentUserId} />
-             ))}
-             {td.tasks.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune tâche pour ce TD.</p>}
+        <TabsContent value="tasks" className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
+                {isGroupLeader && (
+                    <div className="flex justify-end">
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Ajouter une tâche
+                        </Button>
+                    </div>
+                )}
+                {td.tasks.map((task: Task) => (
+                    <TaskCard key={task.id} task={task} currentUserId={currentUserId} />
+                ))}
+                {td.tasks.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune tâche pour ce TD.</p>}
+            </div>
         </TabsContent>
 
         <TabsContent value="discussion" className="flex-1 flex flex-col overflow-hidden">
@@ -325,49 +337,92 @@ const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dis
                 <Button><Send className="h-4 w-4"/></Button>
             </div>
         </TabsContent>
-        
-        <TabsContent value="submit" className="flex-1 overflow-y-auto p-6 text-center">
-             <CardTitle className="mb-2">Soumission du devoir</CardTitle>
-             <CardDescription className="mb-4">
-                {isGroupLeader 
-                    ? "Rassemblez les fichiers de l'équipe et soumettez le devoir final." 
-                    : "Seul le chef de groupe peut soumettre le devoir final."}
-            </CardDescription>
 
-            <Card className="my-6 text-left">
-                <CardHeader>
-                    <CardTitle className="text-base">Fichiers collectés</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 max-h-48 overflow-auto p-4">
-                    {allFiles.length > 0 ? allFiles.map((file: TaskFile) => (
-                         <div key={file.id} className="flex items-center justify-between bg-muted/50 p-2 rounded">
-                            <div className="flex items-center gap-2 overflow-hidden">
-                                <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0"/>
-                                <span className="text-sm truncate" title={file.name}>{file.name}</span>
-                                <span className="text-xs text-muted-foreground flex-shrink-0">({file.size})</span>
+        <TabsContent value="files" className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-muted/20">
+                 {Object.keys(filesByTask).length > 0 ? (
+                    Object.entries(filesByTask).map(([taskTitle, files]) => (
+                        <div key={taskTitle}>
+                            <h4 className="font-semibold mb-2">{taskTitle}</h4>
+                            <div className="space-y-2">
+                                {files.map((file: TaskFile) => {
+                                     const submitter = teamMembers[file.submittedBy as keyof typeof teamMembers];
+                                     return (
+                                        <div key={file.id} className="flex items-center justify-between bg-background p-3 rounded-lg border">
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0"/>
+                                                <div>
+                                                    <p className="text-sm font-medium truncate" title={file.name}>{file.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{file.size}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>Soumis par {submitter.name.split(' ')[0]}</span>
+                                                <Avatar className="h-6 w-6">
+                                                    <AvatarImage src={submitter.avatar} />
+                                                    <AvatarFallback>{submitter.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                        </div>
+                                     );
+                                })}
                             </div>
-                            <span className="text-xs text-muted-foreground">de {teamMembers[file.submittedBy as keyof typeof teamMembers].name.split(' ')[0]}</span>
                         </div>
-                    )) : (
-                        <p className="text-sm text-muted-foreground italic text-center p-4">Aucun fichier soumis par l'équipe pour le moment.</p>
-                    )}
-                </CardContent>
-            </Card>
+                    ))
+                 ) : (
+                    <div className="text-center text-muted-foreground py-8">
+                        <FileText className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+                        <h3 className="text-lg font-medium">Aucun fichier soumis</h3>
+                        <p className="text-sm">Les fichiers de votre équipe apparaîtront ici.</p>
+                    </div>
+                 )}
+            </div>
+        </TabsContent>
+        
+        <TabsContent value="submit" className="flex-1 flex flex-col overflow-hidden">
+             <div className="flex-1 overflow-y-auto p-6 text-center">
+                <CardTitle className="mb-2">Soumission du devoir</CardTitle>
+                <CardDescription className="mb-4">
+                    {isGroupLeader 
+                        ? "Rassemblez les fichiers de l'équipe et soumettez le devoir final." 
+                        : "Seul le chef de groupe peut soumettre le devoir final."}
+                </CardDescription>
 
-             {isGroupLeader && (
-                <>
-                 <div className="mx-auto max-w-md border-2 border-dashed rounded-lg p-8 hover:border-primary transition-colors cursor-pointer">
-                    <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <p className="mt-4 text-muted-foreground">Déposez le fichier final ici ou cliquez pour parcourir.</p>
-                 </div>
-                 <Button className="mt-6" onClick={() => {
-                     alert('Devoir soumis ! Le statut du TD et du devoir correspondant dans "Évaluations" a été mis à jour.');
-                     setTds(prevTds => prevTds.map(t => t.id === td.id ? {...t, status: 'Achevé', progress: 100} : t));
-                 }}>
-                    Soumettre le TD pour l'équipe
-                 </Button>
-                </>
-             )}
+                <Card className="my-6 text-left">
+                    <CardHeader>
+                        <CardTitle className="text-base">Fichiers collectés</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2 max-h-48 overflow-auto p-4">
+                        {allFiles.length > 0 ? allFiles.map((file: TaskFile) => (
+                            <div key={file.id} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                    <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0"/>
+                                    <span className="text-sm truncate" title={file.name}>{file.name}</span>
+                                    <span className="text-xs text-muted-foreground flex-shrink-0">({file.size})</span>
+                                </div>
+                                <span className="text-xs text-muted-foreground">de {teamMembers[file.submittedBy as keyof typeof teamMembers].name.split(' ')[0]}</span>
+                            </div>
+                        )) : (
+                            <p className="text-sm text-muted-foreground italic text-center p-4">Aucun fichier soumis par l'équipe pour le moment.</p>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {isGroupLeader && (
+                    <>
+                    <div className="mx-auto max-w-md border-2 border-dashed rounded-lg p-8 hover:border-primary transition-colors cursor-pointer">
+                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <p className="mt-4 text-muted-foreground">Déposez le fichier final ici ou cliquez pour parcourir.</p>
+                    </div>
+                    <Button className="mt-6" onClick={() => {
+                        alert('Devoir soumis ! Le statut du TD et du devoir correspondant dans "Évaluations" a été mis à jour.');
+                        setTds(prevTds => prevTds.map(t => t.id === td.id ? {...t, status: 'Achevé', progress: 100} : t));
+                    }}>
+                        Soumettre le TD pour l'équipe
+                    </Button>
+                    </>
+                )}
+            </div>
         </TabsContent>
       </Tabs>
     </Card>
