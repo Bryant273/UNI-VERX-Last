@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -10,7 +11,7 @@ import {
   SlidersHorizontal,
   X,
   Star,
-  UserGraduate,
+  GraduationCap,
   ClipboardCheck,
   FileText,
   Pen,
@@ -135,7 +136,7 @@ export default function JobsPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center space-x-4">
-              <UserGraduate className="h-10 w-10 text-primary" />
+              <GraduationCap className="h-10 w-10 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">Profil Candidat</p>
                 <p className="font-semibold">Complété à 85%</p>
