@@ -72,16 +72,16 @@ const MissionItem = ({ mission }: { mission: Mission }) => {
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <div className="border rounded-lg">
                 <CollapsibleTrigger className="w-full p-4 flex justify-between items-center cursor-pointer hover:bg-muted/50 rounded-t-lg">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 text-left">
                         {StatusIcon && <StatusIcon className={cn(`h-5 w-5`, statusColor)} />}
                         <span className="font-semibold">{mission.title}</span>
                          <Badge variant="outline" className={cn('border-0', statusColor.replace('text','bg').replace('-600', '-100').replace('-400', '/30'))}>{statusText}</Badge>
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="text-sm text-muted-foreground">{completedTasks}/{totalTasks} tâches</span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                             {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        </Button>
+                        <div className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                            {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </div>
                     </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
