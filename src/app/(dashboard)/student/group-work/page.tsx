@@ -4,19 +4,16 @@
 import React, { useState, useMemo } from 'react';
 import {
   List,
-  Filter,
   Users,
   MessageSquare,
   FileText,
   ClipboardList,
-  Paperclip,
   Send,
-  MoreVertical,
-  ChevronDown,
   Plus,
   Trash2,
   Edit,
   UploadCloud,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -177,8 +174,11 @@ const TdCard = ({ td, onSelect, isActive }: { td: any, onSelect: () => void, isA
   );
 };
 
-const TaskCard = ({ task, isGroupLeader }: { task: Task, isGroupLeader: boolean }) => {
+const TaskCard = ({ task, currentUserId }: { task: Task, currentUserId: string }) => {
     const assignee = teamMembers[task.assigneeId as keyof typeof teamMembers];
+    const isAssignee = currentUserId === task.assigneeId;
+    const isGroupLeader = currentUserId === 'sarah-dupont'; // Demo logic
+
     const statusConfig = {
         todo: { label: 'À faire', color: 'bg-gray-400' },
         'in-progress': { label: 'En cours', color: 'bg-blue-500' },
@@ -232,31 +232,42 @@ const TaskCard = ({ task, isGroupLeader }: { task: Task, isGroupLeader: boolean 
             <div>
                 <h5 className="text-sm font-medium mb-2">Fichiers soumis</h5>
                 <div className="space-y-2">
-                    {task.files.length > 0 ? task.files.map(file => (
-                        <div key={file.id} className="flex items-center justify-between bg-muted/50 p-2 rounded">
-                            <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-muted-foreground"/>
-                                <span className="text-sm">{file.name}</span>
-                                <span className="text-xs text-muted-foreground">({file.size})</span>
+                    {task.files.length > 0 ? task.files.map(file => {
+                        const canDelete = currentUserId === file.submittedBy;
+                        return (
+                            <div key={file.id} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                    <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0"/>
+                                    <span className="text-sm truncate" title={file.name}>{file.name}</span>
+                                    <span className="text-xs text-muted-foreground flex-shrink-0">({file.size})</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground hidden sm:inline">par {teamMembers[file.submittedBy as keyof typeof teamMembers].name.split(' ')[0]}</span>
+                                  {canDelete && (
+                                     <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:bg-red-500/10">
+                                         <X className="h-3 w-3" />
+                                     </Button>
+                                  )}
+                                </div>
                             </div>
-                            <span className="text-xs text-muted-foreground">par {teamMembers[file.submittedBy as keyof typeof teamMembers].name}</span>
-                        </div>
-                    )) : (
+                        )
+                    }) : (
                         <p className="text-xs text-muted-foreground italic">Aucun fichier pour cette tâche.</p>
                     )}
                 </div>
-                 <Button variant="outline" size="sm" className="w-full mt-3">
-                    <UploadCloud className="mr-2 h-4 w-4"/>
-                    Soumettre un fichier
-                </Button>
+                 {isAssignee && (
+                    <Button variant="outline" size="sm" className="w-full mt-3">
+                        <UploadCloud className="mr-2 h-4 w-4"/>
+                        Soumettre un fichier
+                    </Button>
+                 )}
             </div>
         </div>
     );
 };
 
-const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.SetStateAction<any[]>> }) => {
-    // Our demo user is Sarah, the group leader
-    const isGroupLeader = true; 
+const TdWorkspace = ({ td, setTds, currentUserId }: { td: any, setTds: React.Dispatch<React.SetStateAction<any[]>>, currentUserId: string }) => {
+    const isGroupLeader = currentUserId === 'sarah-dupont'; 
     const allFiles = td.tasks.flatMap((task: Task) => task.files);
 
   return (
@@ -266,7 +277,7 @@ const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.Set
         <CardDescription>Espace de travail du groupe</CardDescription>
       </CardHeader>
       <Tabs defaultValue="tasks" className="flex-1 flex flex-col overflow-hidden">
-        <div className="px-6">
+        <div className="px-6 border-b">
             <TabsList>
               <TabsTrigger value="tasks"><ClipboardList className="mr-2 h-4 w-4"/>Tâches</TabsTrigger>
               <TabsTrigger value="discussion"><MessageSquare className="mr-2 h-4 w-4"/>Discussion</TabsTrigger>
@@ -274,7 +285,7 @@ const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.Set
             </TabsList>
         </div>
         
-        <TabsContent value="tasks" className="flex-1 flex flex-col overflow-y-auto p-6 space-y-4">
+        <TabsContent value="tasks" className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
              {isGroupLeader && (
                 <div className="flex justify-end">
                     <Button>
@@ -284,13 +295,13 @@ const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.Set
                 </div>
             )}
              {td.tasks.map((task: Task) => (
-                <TaskCard key={task.id} task={task} isGroupLeader={isGroupLeader} />
+                <TaskCard key={task.id} task={task} currentUserId={currentUserId} />
              ))}
              {td.tasks.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune tâche pour ce TD.</p>}
         </TabsContent>
 
-        <TabsContent value="discussion" className="flex-1 flex flex-col overflow-y-auto p-6 space-y-4">
-            <div className="flex-1 space-y-4">
+        <TabsContent value="discussion" className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 space-y-4 p-6 overflow-y-auto">
                 {td.messages.map((msg: any) => (
                     <div key={msg.id} className="flex items-start gap-3">
                         <Avatar>
@@ -309,7 +320,7 @@ const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.Set
                     </div>
                 ))}
             </div>
-            <div className="flex items-center gap-2 pt-4 border-t">
+            <div className="flex items-center gap-2 p-4 border-t">
                 <Textarea placeholder="Écrire un message..." className="flex-1" />
                 <Button><Send className="h-4 w-4"/></Button>
             </div>
@@ -327,13 +338,13 @@ const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.Set
                 <CardHeader>
                     <CardTitle className="text-base">Fichiers collectés</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 max-h-48 overflow-auto">
+                <CardContent className="space-y-2 max-h-48 overflow-auto p-4">
                     {allFiles.length > 0 ? allFiles.map((file: TaskFile) => (
                          <div key={file.id} className="flex items-center justify-between bg-muted/50 p-2 rounded">
-                            <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-muted-foreground"/>
-                                <span className="text-sm">{file.name}</span>
-                                <span className="text-xs text-muted-foreground">({file.size})</span>
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0"/>
+                                <span className="text-sm truncate" title={file.name}>{file.name}</span>
+                                <span className="text-xs text-muted-foreground flex-shrink-0">({file.size})</span>
                             </div>
                             <span className="text-xs text-muted-foreground">de {teamMembers[file.submittedBy as keyof typeof teamMembers].name.split(' ')[0]}</span>
                         </div>
@@ -345,12 +356,9 @@ const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.Set
 
              {isGroupLeader && (
                 <>
-                 <div className="mx-auto max-w-md border-2 border-dashed rounded-lg p-8">
-                    <p className="mb-4 text-muted-foreground">Déposez le fichier final ici ou cliquez pour parcourir.</p>
-                    <Button>
-                        <UploadCloud className="mr-2 h-4 w-4"/>
-                        Choisir le fichier final
-                    </Button>
+                 <div className="mx-auto max-w-md border-2 border-dashed rounded-lg p-8 hover:border-primary transition-colors cursor-pointer">
+                    <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <p className="mt-4 text-muted-foreground">Déposez le fichier final ici ou cliquez pour parcourir.</p>
                  </div>
                  <Button className="mt-6" onClick={() => {
                      alert('Devoir soumis ! Le statut du TD et du devoir correspondant dans "Évaluations" a été mis à jour.');
@@ -371,24 +379,27 @@ export default function GroupWorkPage() {
   const [tds, setTds] = useState(initialTds);
   const [selectedTd, setSelectedTd] = useState<any>(tds.find(t => t.status === 'En cours') || null);
   const [filter, setFilter] = useState('all');
+  
+  // For demo purposes, we hardcode the current user ID. In a real app, this would come from an auth context.
+  const currentUserId = 'sarah-dupont';
 
   const filteredTds = useMemo(() => {
     if (filter === 'all') return tds;
-    return tds.filter(td => td.status.toLowerCase().replace('é', 'e') === filter);
+    return tds.filter(td => td.status.toLowerCase().replace('é', 'e').replace('s','') === filter);
   }, [tds, filter]);
 
   return (
     <div className="flex h-full gap-6 flex-col md:flex-row">
-        <div className="md:w-1/3 xl:w-1/4 flex flex-col gap-6">
+        <div className="w-full md:w-1/3 xl:w-1/4 flex flex-col gap-6">
             <Card>
                 <CardHeader>
                     <CardTitle>Mes Travaux Dirigés</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4">
                     <Tabs defaultValue="all" onValueChange={setFilter}>
                         <TabsList className="w-full grid grid-cols-3">
                             <TabsTrigger value="all">Tous</TabsTrigger>
-                            <TabsTrigger value="en cours">En cours</TabsTrigger>
+                            <TabsTrigger value="en cour">En cours</TabsTrigger>
                             <TabsTrigger value="acheve">Achevés</TabsTrigger>
                         </TabsList>
                     </Tabs>
@@ -403,17 +414,22 @@ export default function GroupWorkPage() {
                         isActive={selectedTd?.id === td.id}
                     />
                 ))}
+                 {filteredTds.length === 0 && (
+                    <div className="text-center text-muted-foreground pt-10">
+                        <p>Aucun TD dans cette catégorie.</p>
+                    </div>
+                )}
             </div>
         </div>
 
-      <div className="md:w-2/3 xl:w-3/4 flex">
+      <div className="w-full md:w-2/3 xl:w-3/4 flex">
         {selectedTd ? (
-          <TdWorkspace td={selectedTd} setTds={setTds} />
+          <TdWorkspace td={selectedTd} setTds={setTds} currentUserId={currentUserId} />
         ) : (
           <Card className="flex-1 flex items-center justify-center border-2 border-dashed bg-muted/20">
-            <div className="text-center">
+            <div className="text-center p-6">
               <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-lg font-medium text-muted-foreground">Sélectionnez un TD</p>
+              <h3 className="mt-4 text-lg font-medium text-muted-foreground">Sélectionnez un TD</h3>
               <p className="mt-1 text-sm text-muted-foreground">Choisissez un travail dirigé dans la liste pour voir l'espace de collaboration.</p>
             </div>
           </Card>
