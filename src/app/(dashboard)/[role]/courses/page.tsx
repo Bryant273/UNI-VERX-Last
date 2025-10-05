@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
@@ -484,10 +485,10 @@ export default function CoursesPage() {
                     ? "w-screen h-screen max-w-full" 
                     : "sm:max-w-4xl h-[90vh]"
             )}>
-            <DialogHeader className="p-4 flex-row items-center justify-between">
-              <DialogTitle className="flex items-center gap-2">
+            <DialogHeader className="p-4 flex-row items-center justify-between border-b">
+              <DialogTitle className="flex items-center gap-3">
                 <FileTypeIcon type={previewDocument.type} showLabel />
-                {previewDocument.documentName}
+                <span>{previewDocument.documentName}</span>
               </DialogTitle>
                 <TooltipProvider>
                     <Tooltip>
@@ -529,5 +530,7 @@ export default function CoursesPage() {
     </div>
   );
 }
+
+    
 
     
