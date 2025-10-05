@@ -223,10 +223,20 @@ const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.Set
     const [tasks, setTasks] = useState<Task[]>(td.tasks);
 
     const tasksByStatus = useMemo(() => {
+        const initial: Record<TaskStatus, Task[]> = {
+            todo: [],
+            'in-progress': [],
+            done: [],
+        };
+        
         return tasks.reduce((acc, task) => {
-            acc[task.status].push(task);
+            if (acc[task.status]) {
+                acc[task.status].push(task);
+            } else {
+                console.warn(`Task with id ${task.id} has an unknown status: ${task.status}`);
+            }
             return acc;
-        }, { todo: [], 'in-progress': [], done: [] } as Record<TaskStatus, Task[]>);
+        }, initial);
     }, [tasks]);
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -289,7 +299,7 @@ const TdWorkspace = ({ td, setTds }: { td: any, setTds: React.Dispatch<React.Set
         </TabsContent>
         <TabsContent value="tasks" className="flex-1 overflow-y-auto p-6">
              <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-                <div className="flex gap-6">
+                <div className="flex flex-col lg:flex-row gap-6">
                     <KanbanColumn id="todo" title="À faire" tasks={tasksByStatus.todo} />
                     <KanbanColumn id="in-progress" title="En cours" tasks={tasksByStatus['in-progress']} />
                     <KanbanColumn id="done" title="Terminé" tasks={tasksByStatus.done} />
@@ -333,8 +343,8 @@ export default function GroupWorkPage() {
   }, [tds, filter]);
 
   return (
-    <div className="flex h-full gap-6">
-        <div className="w-1/3 flex flex-col gap-6">
+    <div className="flex h-full gap-6 flex-col md:flex-row">
+        <div className="md:w-1/3 flex flex-col gap-6">
             <Card>
                 <CardHeader>
                     <CardTitle>Mes Travaux Dirigés</CardTitle>
@@ -361,7 +371,7 @@ export default function GroupWorkPage() {
             </div>
         </div>
 
-      <div className="w-2/3 flex">
+      <div className="md:w-2/3 flex">
         {selectedTd ? (
           <TdWorkspace td={selectedTd} setTds={setTds} />
         ) : (
