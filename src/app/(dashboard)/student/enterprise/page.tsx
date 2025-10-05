@@ -34,6 +34,7 @@ import { Progress } from '@/components/ui/progress';
 import { enterpriseData, type Mission } from '@/lib/enterprise-data';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
 
 const icons: { [key: string]: React.ElementType } = {
   Briefcase,
