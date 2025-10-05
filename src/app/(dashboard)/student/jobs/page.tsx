@@ -22,6 +22,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -123,6 +124,7 @@ export default function JobsPage() {
   
   const renderPagination = () => {
     const pages = [];
+    if (totalPages <= 1) return null;
     for (let i = 1; i <= totalPages; i++) {
         pages.push(
             <Button
@@ -310,8 +312,18 @@ export default function JobsPage() {
                                     <TableCell>{app.jobTitle}</TableCell>
                                     <TableCell>{app.date}</TableCell>
                                     <TableCell>{getStatusBadge(app.status)}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                    <TableCell className="text-right space-x-2">
+                                        <Button variant="outline" size="sm" onClick={() => {
+                                             const offer = jobOffers.find(o => o.company === app.company && o.title === app.jobTitle);
+                                             if (offer) setSelectedOffer(offer);
+                                        }}>
+                                            <Eye className="mr-2 h-3 w-3"/>
+                                            Voir l'offre
+                                        </Button>
+                                         <Button variant="destructive" size="sm">
+                                            <Trash2 className="mr-2 h-3 w-3"/>
+                                            Retirer
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
