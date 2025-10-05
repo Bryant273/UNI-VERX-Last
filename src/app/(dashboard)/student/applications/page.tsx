@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -218,7 +219,7 @@ export default function ApplicationsPage() {
                         </TableHeader>
                         <TableBody>
                             {paginatedApplications.map((app) => (
-                                <TableRow key={app.id}>
+                                <TableRow key={app.id} className="even:bg-muted/40">
                                     <TableCell className="font-medium">{app.company}</TableCell>
                                     <TableCell>{app.jobTitle}</TableCell>
                                     <TableCell>{app.date}</TableCell>
