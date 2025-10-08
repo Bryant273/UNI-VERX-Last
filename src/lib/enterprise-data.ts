@@ -39,6 +39,7 @@ export interface EnterpriseData {
     company: {
         name: string;
         logo: string;
+        sector: string;
     };
     internship: {
         title: string;
@@ -74,6 +75,7 @@ export const enterpriseData: EnterpriseData = {
     company: {
         name: 'TechSolutions',
         logo: 'https://i.imgur.com/8Km9tLL.png',
+        sector: 'Développement Logiciel & Solutions Cloud'
     },
     internship: {
         title: 'Stage Développeur Front-end',
@@ -149,6 +151,7 @@ export const enterpriseData: EnterpriseData = {
         { name: 'Convention de stage', type: 'pdf', info: 'Signé le 15/03/2025' },
         { name: 'Guide du stagiaire', type: 'word', info: 'Mise à jour: 01/04/2025' },
         { name: 'Planning du stage', type: 'excel', info: 'Mise à jour: 05/04/2025' },
+        { name: 'Rapport mensuel - Avril', type: 'pdf', info: 'Soumis le 30/04/2025' },
     ],
     loginInfo: {
         username: 'sdupont_stage',
