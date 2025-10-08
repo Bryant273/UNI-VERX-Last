@@ -10,10 +10,14 @@ import { studentData } from '@/lib/static-data';
 import { enterpriseData } from '@/lib/enterprise-data';
 import { getInitials } from '@/lib/messages-data';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Eye, EyeOff } from 'lucide-react';
 
 
 export default function EnterpriseAccessPage() {
     const [loginModalOpen, setLoginModalOpen] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const hasInternship = true; // Simule si l'étudiant a un stage
 
     return (
@@ -70,16 +74,36 @@ export default function EnterpriseAccessPage() {
                     <DialogHeader>
                         <DialogTitle>Accès au portail {enterpriseData.company.name}</DialogTitle>
                         <DialogDescription>
-                            Saisissez vos identifiants fournis par l'entreprise pour vous connecter.
+                            Vos identifiants UNI-VERX sont utilisés pour accéder au portail de l'entreprise.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <p className="text-sm text-muted-foreground">Cette action vous redirigera vers le portail externe de l'entreprise.</p>
-                        <p className="text-sm p-3 bg-muted rounded-md">Identifiant: <span className="font-mono bg-background px-2 py-1 rounded">{enterpriseData.loginInfo.username}</span></p>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" type="email" value={studentData.email} readOnly />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Mot de passe</Label>
+                            <div className="relative">
+                                <Input id="password" type={showPassword ? "text" : "password"} value={studentData.password} readOnly />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </Button>
+                            </div>
+                        </div>
+                         <p className="text-xs text-muted-foreground pt-2">
+                            Pour des raisons de sécurité, vous serez redirigé vers le portail de connexion de {enterpriseData.company.name}.
+                        </p>
                     </div>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setLoginModalOpen(false)}>Annuler</Button>
-                        <Button onClick={() => setLoginModalOpen(false)}>Se connecter</Button>
+                        <Button onClick={() => setLoginModalOpen(false)}>Continuer vers la connexion</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
