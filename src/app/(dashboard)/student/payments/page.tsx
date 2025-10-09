@@ -93,8 +93,8 @@ const TransactionDetailsModal = ({ transaction, onClose }: { transaction: Transa
                      <div className="space-y-2">
                         <p className="text-sm font-medium text-muted-foreground">Documents</p>
                         <Button variant="outline" className="w-full justify-start" disabled={transaction.status !== 'Payé'}>
-                           <Receipt className="mr-2 h-4 w-4" />
-                           Télécharger le reçu
+                           <Printer className="mr-2 h-4 w-4" />
+                           Imprimer le reçu
                         </Button>
                      </div>
                 </div>
@@ -187,7 +187,7 @@ export default function PaymentsPage() {
                 <TableHead>Type</TableHead>
                 <TableHead className="text-right">Montant</TableHead>
                 <TableHead className="text-center">Statut</TableHead>
-                <TableHead className="text-center">Détails</TableHead>
+                <TableHead className="text-center">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -206,8 +206,9 @@ export default function PaymentsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button variant="ghost" size="icon" onClick={() => setSelectedTransaction(transaction)}>
-                          <Eye className="h-4 w-4" />
+                        <Button variant="outline" size="sm" onClick={() => setSelectedTransaction(transaction)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Voir
                         </Button>
                       </TableCell>
                     </TableRow>
