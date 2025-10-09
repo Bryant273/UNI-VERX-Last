@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { studentData } from '@/lib/static-data';
 import { enterpriseData } from '@/lib/enterprise-data';
@@ -12,7 +12,7 @@ import { getInitials } from '@/lib/messages-data';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Eye, EyeOff, FileDown } from 'lucide-react';
+import { Eye, EyeOff, FileDown, Building } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const InfoRow = ({ label, value }: { label: string, value: string }) => (
@@ -77,6 +77,16 @@ export default function EnterpriseAccessPage() {
                 </CardContent>
             </Card>
 
+            <Card>
+                <CardHeader>
+                    <CardTitle>Portail Entreprise</CardTitle>
+                    <CardDescription>Connectez-vous à l'ERP de l'entreprise pour suivre vos missions et votre progression.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <Button size="lg" className="w-full md:w-auto" onClick={() => setLoginModalOpen(true)}>Se Connecter</Button>
+                </CardContent>
+            </Card>
+            
             {hasInternship && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <Card>
@@ -117,16 +127,6 @@ export default function EnterpriseAccessPage() {
                 </div>
             )}
             
-            <Card>
-                <CardHeader>
-                    <CardTitle>Portail Entreprise</CardTitle>
-                    <CardDescription>Connectez-vous à l'ERP de l'entreprise pour suivre vos missions et votre progression.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <Button size="lg" className="w-full md:w-auto" onClick={() => setLoginModalOpen(true)}>Se Connecter</Button>
-                </CardContent>
-            </Card>
-
             {/* Login Modal */}
             <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
                 <DialogContent>
