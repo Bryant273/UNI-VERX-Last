@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -61,8 +62,8 @@ export default function TimetablePage() {
     { ...allEvents.student[2], day: 'Jeudi', time: '13:30 - 15:00'},
     { ...allEvents.student[3], day: 'Vendredi', time: '08:30 - 10:00'},
     { ...allEvents.student[4], day: 'Lundi', time: '15:30 - 17:00'},
-    { ...allEvents.professor[1], day: 'Mercredi', time: '10:30 - 12:00'},
-    { ...allEvents.professor[2], day: 'Samedi', time: '08:30 - 10:00'},
+    { ...allEvents.professor[0], day: 'Mercredi', time: '10:30 - 12:00'},
+    { ...allEvents.professor[1], day: 'Samedi', time: '08:30 - 10:00'},
   ];
 
 
