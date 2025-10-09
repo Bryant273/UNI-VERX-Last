@@ -35,6 +35,15 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
   Tabs,
   TabsContent,
   TabsList,
@@ -47,6 +56,38 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { studentData } from '@/lib/static-data';
+import { cn } from '@/lib/utils';
+import { semesterResults } from '@/lib/results-data';
+
+const coursesForTable = [
+    ...semesterResults.s1.courses.map(c => ({...c, teacher: 'Prof. A'})),
+    ...semesterResults.s2.courses.map(c => ({...c, teacher: 'Prof. B'}))
+];
+
+const getStatusForGrade = (grade: string) => {
+    const numericGrade = parseFloat(grade.split('/')[0].replace(',', '.'));
+    if (numericGrade >= 10) {
+        return <Badge variant="outline" className="text-green-600 border-green-600/30 bg-green-500/10">Validé</Badge>;
+    }
+    if (numericGrade < 10 && numericGrade > 0) {
+        return <Badge variant="outline" className="text-red-600 border-red-600/30 bg-red-500/10">Rattrapage</Badge>;
+    }
+    return <Badge variant="outline">En cours</Badge>;
+};
+
+const skills = [
+  { name: "Python", category: "Technique", acquired: true },
+  { name: "SQL", category: "Technique", acquired: true },
+  { name: "JavaScript", category: "Technique", acquired: true },
+  { name: "React", category: "Technique", acquired: false },
+  { name: "Travail en équipe", category: "Transversale", acquired: true },
+  { name: "Communication", category: "Transversale", acquired: true },
+  { name: "Résolution de problèmes", category: "Transversale", acquired: true },
+  { name: "Gestion de projet", category: "Transversale", acquired: false },
+  { name: "Français", category: "Langue", acquired: true },
+  { name: "Anglais", category: "Langue", acquired: true },
+];
+
 
 const ProfilePage = () => {
   return (
@@ -140,51 +181,56 @@ const ProfilePage = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Progression par matière</CardTitle>
+                <CardTitle>Suivi des Unités d'Enseignement (UE)</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1 text-sm"><p>Programmation Orientée Objet</p><p className="font-semibold">92%</p></div>
-                  <Progress value={92} />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1 text-sm"><p>Bases de Données</p><p className="font-semibold">85%</p></div>
-                  <Progress value={85} />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1 text-sm"><p>Algorithmes</p><p className="font-semibold">78%</p></div>
-                  <Progress value={78} />
-                </div>
-                 <div>
-                  <div className="flex justify-between mb-1 text-sm"><p>Développement Web</p><p className="font-semibold">88%</p></div>
-                  <Progress value={88} />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1 text-sm"><p>Réseaux</p><p className="font-semibold">65%</p></div>
-                  <Progress value={65} />
-                </div>
+              <CardContent>
+                 <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Matière</TableHead>
+                        <TableHead>Moyenne</TableHead>
+                        <TableHead>Statut</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {coursesForTable.slice(0,5).map((course) => (
+                        <TableRow key={course.id}>
+                          <TableCell className="font-medium">{course.module}</TableCell>
+                          <TableCell>{course.grade}</TableCell>
+                          <TableCell>{getStatusForGrade(course.grade)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
         <TabsContent value="competences" className="mt-6">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="grid grid-cols-1 gap-6">
                 <Card>
-                    <CardHeader><CardTitle>Compétences techniques</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <div><div className="flex justify-between mb-1 text-sm"><p>Python</p><p>92%</p></div><Progress value={92} /></div>
-                        <div><div className="flex justify-between mb-1 text-sm"><p>SQL</p><p>88%</p></div><Progress value={88} /></div>
-                        <div><div className="flex justify-between mb-1 text-sm"><p>JavaScript</p><p>78%</p></div><Progress value={78} /></div>
-                        <div><div className="flex justify-between mb-1 text-sm"><p>React</p><p>65%</p></div><Progress value={65} /></div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader><CardTitle>Compétences transversales</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <div><div className="flex justify-between mb-1 text-sm"><p>Travail en équipe</p><p>95%</p></div><Progress value={95} /></div>
-                        <div><div className="flex justify-between mb-1 text-sm"><p>Communication</p><p>82%</p></div><Progress value={82} /></div>
-                        <div><div className="flex justify-between mb-1 text-sm"><p>Résolution de problèmes</p><p>90%</p></div><Progress value={90} /></div>
-                        <div><div className="flex justify-between mb-1 text-sm"><p>Gestion de projet</p><p>79%</p></div><Progress value={79} /></div>
+                    <CardHeader><CardTitle>Référentiel de Compétences</CardTitle></CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Compétence</TableHead>
+                                    <TableHead>Catégorie</TableHead>
+                                    <TableHead className="text-center">Évaluation</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {skills.map((skill) => (
+                                    <TableRow key={skill.name}>
+                                        <TableCell className="font-medium">{skill.name}</TableCell>
+                                        <TableCell>{skill.category}</TableCell>
+                                        <TableCell className="text-center">
+                                            <Checkbox checked={skill.acquired} aria-label={`Compétence ${skill.name} ${skill.acquired ? 'acquise' : 'non acquise'}`} />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
            </div>
@@ -229,3 +275,4 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
