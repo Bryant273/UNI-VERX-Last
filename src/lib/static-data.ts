@@ -62,7 +62,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       links: [
         { href: '/student/jobs', label: 'Espace Carrière', icon: Briefcase },
         { href: '/student/enterprise', label: 'Accès Entreprise', icon: Building },
-        { href: '#', label: 'Documents', icon: FileText },
+        { href: '/student/documents', label: 'Documents', icon: FileText },
       ],
     },
   ],
@@ -235,6 +235,24 @@ export const allEvents: Record<UserRole, TimetableEvent[]> = {
       type: 'activité',
       instructor: 'Direction',
       presenceStatus: 'na',
+    },
+    { 
+        id: 8, 
+        time: '10:30 - 12:00', 
+        course: 'Introduction à la programmation',
+        location: 'Salle 101', 
+        type: 'cours',
+        instructor: 'Dr. Alan Turing',
+        presenceStatus: 'na',
+    },
+    { 
+        id: 9, 
+        time: '08:30 - 10:00',
+        course: 'Club de Robotique',
+        location: 'Atelier Tech', 
+        type: 'activité',
+        instructor: 'Dr. Alan Turing',
+        presenceStatus: 'na',
     }
   ],
   admin: [
