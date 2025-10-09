@@ -58,7 +58,7 @@ export default function AppSidebar() {
           {currentNavItems.map((item, index) => {
             if (isNavGroup(item)) {
               return (
-                <Collapsible key={index} className="w-full" defaultOpen>
+                <Collapsible key={index} className="w-full">
                   <CollapsibleTrigger className="w-full">
                     <div className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       {item.title}
