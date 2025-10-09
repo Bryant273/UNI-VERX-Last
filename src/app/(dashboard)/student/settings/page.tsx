@@ -181,6 +181,199 @@ const SecuritySection = () => {
     );
 };
 
+const NotificationsSection = () => (
+    <Card>
+        <CardHeader>
+            <CardTitle>Notifications</CardTitle>
+            <CardDescription>Gérez comment et quand vous recevez des notifications.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                    <Label htmlFor="email-notifs" className="font-semibold">Notifications par Email</Label>
+                    <p className="text-xs text-muted-foreground">Recevoir des résumés et des alertes importantes sur votre email.</p>
+                </div>
+                <Switch id="email-notifs" defaultChecked />
+            </div>
+             <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                    <Label htmlFor="push-notifs" className="font-semibold">Notifications Push</Label>
+                    <p className="text-xs text-muted-foreground">Recevoir des notifications en temps réel sur vos appareils.</p>
+                </div>
+                <Switch id="push-notifs" defaultChecked />
+            </div>
+            <Separator />
+            <div className="space-y-4">
+                <h4 className="font-semibold">Notifications Détaillées</h4>
+                <div className="flex items-center justify-between">
+                    <p className="text-sm">Annonces des cours</p>
+                    <Switch defaultChecked/>
+                </div>
+                 <div className="flex items-center justify-between">
+                    <p className="text-sm">Rappels de devoirs</p>
+                    <Switch defaultChecked/>
+                </div>
+                 <div className="flex items-center justify-between">
+                    <p className="text-sm">Nouveaux messages</p>
+                    <Switch defaultChecked/>
+                </div>
+                 <div className="flex items-center justify-between">
+                    <p className="text-sm">Activité de groupe</p>
+                    <Switch />
+                </div>
+            </div>
+             <div className="flex justify-end">
+                <Button>Enregistrer les modifications</Button>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const AppearanceSection = () => (
+     <Card>
+        <CardHeader>
+            <CardTitle>Apparence</CardTitle>
+            <CardDescription>Personnalisez l'apparence de l'application.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+             <div>
+                <Label className="font-semibold">Thème</Label>
+                <RadioGroup defaultValue="system" className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <RadioGroupItem value="light" id="light" className="peer sr-only" />
+                        <Label htmlFor="light" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                            <Sun className="mb-3 h-6 w-6" />
+                            Clair
+                        </Label>
+                    </div>
+                     <div>
+                        <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
+                        <Label htmlFor="dark" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                            <Moon className="mb-3 h-6 w-6" />
+                            Sombre
+                        </Label>
+                    </div>
+                     <div>
+                        <RadioGroupItem value="system" id="system" className="peer sr-only" />
+                        <Label htmlFor="system" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                            <Monitor className="mb-3 h-6 w-6" />
+                            Système
+                        </Label>
+                    </div>
+                </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="language">Langue</Label>
+                <Select defaultValue="fr">
+                    <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez une langue" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="fr">Français</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="es">Español</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+             <div className="flex justify-end">
+                <Button>Enregistrer les modifications</Button>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const PrivacySection = () => (
+    <Card>
+        <CardHeader>
+            <CardTitle>Confidentialité</CardTitle>
+            <CardDescription>Contrôlez quelles informations sont visibles par les autres.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div className="space-y-4">
+                <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="profile-visibility" className="font-semibold">Visibilité de votre profil</Label>
+                        <p className="text-xs text-muted-foreground">Permettre aux autres étudiants et professeurs de voir votre profil.</p>
+                    </div>
+                    <Switch id="profile-visibility" defaultChecked />
+                </div>
+                 <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="show-online" className="font-semibold">Statut en ligne</Label>
+                        <p className="text-xs text-muted-foreground">Afficher quand vous êtes actif sur la plateforme.</p>
+                    </div>
+                    <Switch id="show-online" defaultChecked />
+                </div>
+                 <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="share-data" className="font-semibold">Partage de données anonymes</Label>
+                        <p className="text-xs text-muted-foreground">Aidez-nous à améliorer la plateforme en partageant des données d'utilisation anonymes.</p>
+                    </div>
+                    <Switch id="share-data" />
+                </div>
+            </div>
+             <div className="flex justify-between items-center">
+                 <Button variant="outline">Télécharger mes données</Button>
+                 <Button>Enregistrer les modifications</Button>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const IntegrationsSection = () => (
+    <Card>
+        <CardHeader>
+            <CardTitle>Intégrations</CardTitle>
+            <CardDescription>Connectez UNI-VERX à vos applications préférées.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+            <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+                           <Mail className="h-6 w-6 text-red-600"/>
+                        </div>
+                        <div>
+                            <p className="font-semibold">Google Calendar</p>
+                            <p className="text-sm text-muted-foreground">Synchronisez votre emploi du temps.</p>
+                        </div>
+                    </div>
+                    <Switch defaultChecked/>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                         <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                           <Briefcase className="h-6 w-6 text-blue-600"/>
+                        </div>
+                        <div>
+                            <p className="font-semibold">Slack</p>
+                            <p className="text-sm text-muted-foreground">Recevez des notifications dans Slack.</p>
+                        </div>
+                    </div>
+                    <Switch />
+                </CardContent>
+            </Card>
+             <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                         <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700">
+                           <User className="h-6 w-6 text-gray-800 dark:text-gray-200"/>
+                        </div>
+                        <div>
+                            <p className="font-semibold">GitHub</p>
+                            <p className="text-sm text-muted-foreground">Liez vos dépôts à vos projets.</p>
+                        </div>
+                    </div>
+                    <Switch defaultChecked/>
+                </CardContent>
+            </Card>
+        </CardContent>
+    </Card>
+);
+
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -191,7 +384,14 @@ export default function SettingsPage() {
         return <ProfileSection />;
       case 'security':
         return <SecuritySection />;
-      // ... autres sections ...
+      case 'notifications':
+        return <NotificationsSection />;
+      case 'appearance':
+        return <AppearanceSection />;
+      case 'privacy':
+        return <PrivacySection />;
+      case 'integrations':
+        return <IntegrationsSection />;
       default:
         return (
           <Card>
@@ -207,8 +407,8 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="grid md:grid-cols-12 gap-8">
-      <div className="md:col-span-3">
+    <div className="grid md:grid-cols-[250px_1fr] gap-8">
+      <div>
         <Card>
           <CardContent className="p-2">
             <nav className="space-y-1">
@@ -227,7 +427,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="md:col-span-9 space-y-6">
+      <div className="space-y-6">
         {renderContent()}
       </div>
     </div>

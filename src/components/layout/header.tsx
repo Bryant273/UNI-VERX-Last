@@ -1,6 +1,7 @@
 
 'use client';
 
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { PanelLeft, Search, Bell, User, Settings, LogOut, Wand2 } from 'lucide-react';
 
@@ -48,6 +49,7 @@ export default function Header() {
           size="icon"
           variant="ghost"
           onClick={toggleSidebar}
+          className="md:hidden"
         >
           <PanelLeft className="h-5 w-5" />
           <span className="sr-only">Ouvrir/Fermer le menu</span>
@@ -89,9 +91,11 @@ export default function Header() {
                 <Wand2 className="mr-2 h-4 w-4" />
                 Actions
             </DropdownMenuItem>
-            <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Paramètres
+            <DropdownMenuItem asChild>
+                <Link href={`/${role}/settings`}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Paramètres
+                </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
