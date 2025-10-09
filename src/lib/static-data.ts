@@ -48,7 +48,7 @@ export const userRolesForLogin: { value: UserRole; label: string }[] = [
 export const navLinks: Record<UserRole, NavItem[]> = {
   student: [
     { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-    { href: '#', label: 'Paiements', icon: CreditCard },
+    { href: '/student/payments', label: 'Paiements', icon: CreditCard },
     { href: '/student/courses', label: 'Mes cours', icon: BookOpen },
     { href: '/student/timetable', label: 'Emploi du temps', icon: Calendar },
     { href: '/student/evaluations', label: 'Évaluations', icon: ClipboardList },

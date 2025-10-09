@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   History,
   Filter,
@@ -60,31 +60,33 @@ const deviceConfig: Record<Action['device'], { icon: LucideIcon }> = {
     Android: { icon: Smartphone },
 };
 
-const today = new Date();
-const yesterday = new Date(new Date().setDate(today.getDate() - 1));
-const dayBeforeYesterday = new Date(new Date().setDate(today.getDate() - 2));
+const createActionsForDate = (date: Date): Action[] => [
+    { id: `${date.getTime()}-1`, date: new Date(date.setHours(8, 27, 15)), type: 'connexion', details: 'Première connexion de la journée', location: 'Campus de Paris', device: 'Windows' },
+    { id: `${date.getTime()}-2`, date: new Date(date.setHours(8, 32, 47)), type: 'consultation', details: 'Consultation du tableau de bord', location: 'Campus de Paris', device: 'Windows' },
+    { id: `${date.getTime()}-3`, date: new Date(date.setHours(8, 45, 12)), type: 'consultation', details: 'Consultation des cours - Base de Données Avancées', location: 'Campus de Paris', device: 'Windows' },
+    { id: `${date.getTime()}-4`, date: new Date(date.setHours(9, 12, 38)), type: 'téléchargement', details: 'Téléchargement du cours "SQL Avancé.pdf"', location: 'Campus de Paris', device: 'Windows' },
+    { id: `${date.getTime()}-5`, date: new Date(date.setHours(10, 5, 22)), type: 'consultation', details: 'Consultation des évaluations', location: 'Campus de Paris', device: 'Windows' },
+    { id: `${date.getTime()}-6`, date: new Date(date.setHours(10, 45, 53)), type: 'soumission', details: 'Soumission du devoir "TP1 - Création d\'un site responsive"', location: 'Campus de Paris', device: 'Windows' },
+    { id: `${date.getTime()}-7`, date: new Date(date.setHours(14, 5, 42)), type: 'évaluation', details: 'Évaluation terminée - QCM de Développement Web', location: 'Campus de Paris', device: 'Windows' },
+];
 
+const today = new Date();
+const yesterday = new Date();
+yesterday.setDate(today.getDate() - 1);
+const dayBeforeYesterday = new Date();
+dayBeforeYesterday.setDate(today.getDate() - 2);
 
 const mockActions: Action[] = [
-  // Today's actions
-  { id: '1', date: new Date(new Date().setHours(8, 27, 15)), type: 'connexion', details: 'Première connexion de la journée', location: 'Campus de Paris', device: 'Windows' },
-  { id: '2', date: new Date(new Date().setHours(8, 32, 47)), type: 'consultation', details: 'Consultation du tableau de bord', location: 'Campus de Paris', device: 'Windows' },
-  { id: '3', date: new Date(new Date().setHours(8, 45, 12)), type: 'consultation', details: 'Consultation des cours - Base de Données Avancées', location: 'Campus de Paris', device: 'Windows' },
-  { id: '4', date: new Date(new Date().setHours(9, 12, 38)), type: 'téléchargement', details: 'Téléchargement du cours "SQL Avancé.pdf"', location: 'Campus de Paris', device: 'Windows' },
-  { id: '5', date: new Date(new Date().setHours(10, 5, 22)), type: 'consultation', details: 'Consultation des évaluations', location: 'Campus de Paris', device: 'Windows' },
-  { id: '6', date: new Date(new Date().setHours(10, 45, 53)), type: 'soumission', details: 'Soumission du devoir "TP1 - Création d\'un site responsive"', location: 'Campus de Paris', device: 'Windows' },
-  { id: '7', date: new Date(new Date().setHours(14, 5, 42)), type: 'évaluation', details: 'Évaluation terminée - QCM de Développement Web', location: 'Campus de Paris', device: 'Windows' },
-  // Yesterday's actions
-  { id: '8', date: new Date(yesterday.setHours(9, 5, 33)), type: 'connexion', details: 'Première connexion de la journée', location: 'À distance', device: 'iOS' },
-  { id: '9', date: new Date(yesterday.setHours(9, 10, 15)), type: 'consultation', details: 'Consultation de l\'emploi du temps', location: 'À distance', device: 'iOS' },
-  { id: '10', date: new Date(yesterday.setHours(9, 45, 22)), type: 'message', details: 'Message envoyé à Emma Bernard', location: 'À distance', device: 'iOS' },
-  { id: '11', date: new Date(yesterday.setHours(14, 12, 38)), type: 'connexion', details: 'Connexion à l\'application', location: 'Campus de Paris', device: 'macOS' },
-  { id: '12', date: new Date(yesterday.setHours(14, 30, 45)), type: 'téléchargement', details: 'Téléchargement du cours "Introduction NoSQL.pdf"', location: 'Campus de Paris', device: 'macOS' },
-  { id: '13', date: new Date(yesterday.setHours(15, 45, 10)), type: 'modification', details: 'Modification du profil utilisateur', location: 'Campus de Paris', device: 'macOS' },
-  // Day before yesterday's actions
-  { id: '14', date: new Date(dayBeforeYesterday.setHours(8, 15, 42)), type: 'connexion', details: 'Première connexion de la journée', location: 'Campus de Paris', device: 'Windows' },
-  { id: '15', date: new Date(dayBeforeYesterday.setHours(8, 30, 15)), type: 'consultation', details: 'Consultation des résultats', location: 'Campus de Paris', device: 'Windows' },
-  { id: '16', date: new Date(dayBeforeYesterday.setHours(9, 15, 22)), type: 'téléchargement', details: 'Téléchargement du sujet "TD Algorithmes de graphes.docx"', location: 'Campus de Paris', device: 'Windows' },
+  ...createActionsForDate(new Date(today.setHours(0,0,0,0))),
+  { id: 'y-1', date: new Date(new Date(yesterday).setHours(9, 5, 33)), type: 'connexion', details: 'Première connexion de la journée', location: 'À distance', device: 'iOS' },
+  { id: 'y-2', date: new Date(new Date(yesterday).setHours(9, 10, 15)), type: 'consultation', details: 'Consultation de l\'emploi du temps', location: 'À distance', device: 'iOS' },
+  { id: 'y-3', date: new Date(new Date(yesterday).setHours(9, 45, 22)), type: 'message', details: 'Message envoyé à Emma Bernard', location: 'À distance', device: 'iOS' },
+  { id: 'y-4', date: new Date(new Date(yesterday).setHours(14, 12, 38)), type: 'connexion', details: 'Connexion à l\'application', location: 'Campus de Paris', device: 'macOS' },
+  { id: 'y-5', date: new Date(new Date(yesterday).setHours(14, 30, 45)), type: 'téléchargement', details: 'Téléchargement du cours "Introduction NoSQL.pdf"', location: 'Campus de Paris', device: 'macOS' },
+  { id: 'y-6', date: new Date(new Date(yesterday).setHours(15, 45, 10)), type: 'modification', details: 'Modification du profil utilisateur', location: 'Campus de Paris', device: 'macOS' },
+  { id: 'dby-1', date: new Date(new Date(dayBeforeYesterday).setHours(8, 15, 42)), type: 'connexion', details: 'Première connexion de la journée', location: 'Campus de Paris', device: 'Windows' },
+  { id: 'dby-2', date: new Date(new Date(dayBeforeYesterday).setHours(8, 30, 15)), type: 'consultation', details: 'Consultation des résultats', location: 'Campus de Paris', device: 'Windows' },
+  { id: 'dby-3', date: new Date(new Date(dayBeforeYesterday).setHours(9, 15, 22)), type: 'téléchargement', details: 'Téléchargement du sujet "TD Algorithmes de graphes.docx"', location: 'Campus de Paris', device: 'Windows' },
 ];
 
 const ITEMS_PER_PAGE = 10;
@@ -96,7 +98,7 @@ export default function ActionsPage() {
 
   const filteredActions = useMemo(() => {
     let actions = mockActions.filter(action =>
-      format(action.date, 'yyyy-MM-dd') === (date ? format(date, 'yyyy-MM-dd') : '')
+      date ? format(action.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd') : true
     );
     if (activeFilter !== 'all') {
       actions = actions.filter(action => action.type === activeFilter);
@@ -109,6 +111,11 @@ export default function ActionsPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  useEffect(() => {
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [date, activeFilter]);
 
   return (
     <div className="space-y-6">
@@ -145,13 +152,12 @@ export default function ActionsPage() {
                     onSelect={setDate}
                     initialFocus
                     locale={fr}
-                    defaultMonth={new Date()}
                   />
                 </PopoverContent>
               </Popover>
 
               <Select value={activeFilter} onValueChange={(value) => setActiveFilter(value as ActionType | 'all')}>
-                <SelectTrigger className="w-[240px]">
+                <SelectTrigger className="w-full md:w-[240px]">
                   <SelectValue placeholder="Filtrer par action" />
                 </SelectTrigger>
                 <SelectContent>
@@ -203,7 +209,7 @@ export default function ActionsPage() {
                   const { icon: DeviceIcon } = deviceConfig[action.device];
                   
                   return (
-                    <TableRow key={action.id} className={cn('even:bg-muted/40', action.type === 'connexion' && action.details === 'Première connexion de la journée' && 'bg-gradient-to-r from-primary/5 to-[#FFB26B]/10')}>
+                    <TableRow key={action.id} className={cn('even:bg-muted/40', action.type === 'connexion' && action.details === 'Première connexion de la journée' && 'bg-gradient-to-r from-primary/10 to-[#FFB26B]/20')}>
                       <TableCell className="font-mono text-xs">{format(action.date, 'HH:mm:ss')}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn('border-0 font-normal', color)}>
