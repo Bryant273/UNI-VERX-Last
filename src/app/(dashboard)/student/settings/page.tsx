@@ -188,7 +188,18 @@ const ProfileSection = () => {
                     </div>
                      <div className="space-y-1">
                         <Label htmlFor="specialization">Spécialisation</Label>
-                        <Input id="specialization" defaultValue={studentData.speciality} />
+                        <Select defaultValue={studentData.speciality}>
+                            <SelectTrigger id="specialization">
+                                <SelectValue placeholder="Choisir une spécialisation" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Ingénierie Logicielle">Ingénierie Logicielle</SelectItem>
+                                <SelectItem value="Science des Données">Science des Données</SelectItem>
+                                <SelectItem value="Cybersécurité">Cybersécurité</SelectItem>
+                                <SelectItem value="Réseaux et Systèmes">Réseaux et Systèmes</SelectItem>
+                                <SelectItem value="Intelligence Artificielle">Intelligence Artificielle</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                      <div className="flex justify-end">
                         <Button>Enregistrer les modifications</Button>
