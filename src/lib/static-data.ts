@@ -253,3 +253,26 @@ export const allEvents: Record<UserRole, TimetableEvent[]> = {
   rectorate: [],
   'erp-provider': [],
 };
+
+export const courses = {
+  student: [
+    { id: 1, title: 'Mathématiques Avancées', code: 'MATH-301', instructor: 'Dr. Alan Turing', thumbnailId: 'course-thumb-1' },
+    { id: 2, title: 'Physique Quantique', code: 'PHY-310', instructor: 'Dr. Marie Curie', thumbnailId: 'course-thumb-2' },
+    { id: 3, title: 'Histoire du 20ème Siècle', code: 'HIST-205', instructor: 'Dr. Indiana Jones', thumbnailId: 'course-thumb-3' },
+  ],
+  professor: [
+    { id: 1, title: 'Mathématiques Avancées', code: 'MATH-301', students: 45, thumbnailId: 'course-thumb-1' },
+    { id: 4, title: 'Théorie de la Littérature', code: 'LIT-401', students: 30, thumbnailId: 'course-thumb-4' },
+  ],
+  admin: [],
+  'academic-advisor': [],
+  secretariat: [],
+  rectorate: [],
+  'erp-provider': [],
+};
+
+export const messages = [
+  { id: 1, sender: 'Dr. Évelyne Dubois', subject: 'Rappel : Examen de mi-semestre', time: '10:42' },
+  { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
+  { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
+];

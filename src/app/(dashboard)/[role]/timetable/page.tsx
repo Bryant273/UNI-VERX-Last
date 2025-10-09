@@ -62,8 +62,8 @@ export default function TimetablePage() {
     { ...allEvents.student[2], day: 'Jeudi', time: '13:30 - 15:00'},
     { ...allEvents.student[3], day: 'Vendredi', time: '08:30 - 10:00'},
     { ...allEvents.student[4], day: 'Lundi', time: '15:30 - 17:00'},
-    { ...allEvents.professor[0], day: 'Mercredi', time: '10:30 - 12:00'},
-    { ...allEvents.professor[1], day: 'Samedi', time: '08:30 - 10:00'},
+    { ...allEvents.professor[0], day: 'Mercredi', time: '10:30 - 12:00', type: 'cours'},
+    { ...allEvents.professor[1], day: 'Samedi', time: '08:30 - 10:00', type: 'activité' },
   ];
 
 
@@ -116,7 +116,7 @@ export default function TimetablePage() {
         const row: string[] = [time];
         DAYS_OF_WEEK.forEach(day => {
           const event = getEventForSlot(userEvents, day, time);
-          if (event) {
+          if (event && event.type) {
             row.push(`${event.course}\n(${event.type.toUpperCase()})\n${event.instructor || ''}\n${event.location}`);
           } else {
             row.push('');
@@ -151,7 +151,7 @@ export default function TimetablePage() {
         didParseCell: function (data: any) {
           if (data.section === 'body' && !data.cell.raw.colSpan) { // Check it's not a recreation/pause row
              const event = getEventForSlot(userEvents, DAYS_OF_WEEK[data.column.index - 1], body.find(r => r[0] === data.cell.raw[0])?.[0]);
-             if (event) {
+             if (event && event.type) {
                 const colorMap = {
                     cours: [240, 248, 255],
                     td: [255, 247, 237],
