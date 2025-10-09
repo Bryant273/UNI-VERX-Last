@@ -21,7 +21,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -60,21 +60,19 @@ const deviceConfig: Record<Action['device'], { icon: LucideIcon }> = {
 };
 
 const today = new Date();
-const yesterday = new Date(today);
-yesterday.setDate(yesterday.getDate() - 1);
-const dayBeforeYesterday = new Date(today);
-dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
+const yesterday = new Date(new Date().setDate(today.getDate() - 1));
+const dayBeforeYesterday = new Date(new Date().setDate(today.getDate() - 2));
 
 
 const mockActions: Action[] = [
   // Today's actions
-  { id: '1', date: new Date(today.setHours(8, 27, 15)), type: 'connexion', details: 'Première connexion de la journée', location: 'Campus de Paris', device: 'Windows' },
-  { id: '2', date: new Date(today.setHours(8, 32, 47)), type: 'consultation', details: 'Consultation du tableau de bord', location: 'Campus de Paris', device: 'Windows' },
-  { id: '3', date: new Date(today.setHours(8, 45, 12)), type: 'consultation', details: 'Consultation des cours - Base de Données Avancées', location: 'Campus de Paris', device: 'Windows' },
-  { id: '4', date: new Date(today.setHours(9, 12, 38)), type: 'téléchargement', details: 'Téléchargement du cours "SQL Avancé.pdf"', location: 'Campus de Paris', device: 'Windows' },
-  { id: '5', date: new Date(today.setHours(10, 5, 22)), type: 'consultation', details: 'Consultation des évaluations', location: 'Campus de Paris', device: 'Windows' },
-  { id: '6', date: new Date(today.setHours(10, 45, 53)), type: 'soumission', details: 'Soumission du devoir "TP1 - Création d\'un site responsive"', location: 'Campus de Paris', device: 'Windows' },
-  { id: '7', date: new Date(today.setHours(14, 5, 42)), type: 'évaluation', details: 'Évaluation terminée - QCM de Développement Web', location: 'Campus de Paris', device: 'Windows' },
+  { id: '1', date: new Date(new Date().setHours(8, 27, 15)), type: 'connexion', details: 'Première connexion de la journée', location: 'Campus de Paris', device: 'Windows' },
+  { id: '2', date: new Date(new Date().setHours(8, 32, 47)), type: 'consultation', details: 'Consultation du tableau de bord', location: 'Campus de Paris', device: 'Windows' },
+  { id: '3', date: new Date(new Date().setHours(8, 45, 12)), type: 'consultation', details: 'Consultation des cours - Base de Données Avancées', location: 'Campus de Paris', device: 'Windows' },
+  { id: '4', date: new Date(new Date().setHours(9, 12, 38)), type: 'téléchargement', details: 'Téléchargement du cours "SQL Avancé.pdf"', location: 'Campus de Paris', device: 'Windows' },
+  { id: '5', date: new Date(new Date().setHours(10, 5, 22)), type: 'consultation', details: 'Consultation des évaluations', location: 'Campus de Paris', device: 'Windows' },
+  { id: '6', date: new Date(new Date().setHours(10, 45, 53)), type: 'soumission', details: 'Soumission du devoir "TP1 - Création d\'un site responsive"', location: 'Campus de Paris', device: 'Windows' },
+  { id: '7', date: new Date(new Date().setHours(14, 5, 42)), type: 'évaluation', details: 'Évaluation terminée - QCM de Développement Web', location: 'Campus de Paris', device: 'Windows' },
   // Yesterday's actions
   { id: '8', date: new Date(yesterday.setHours(9, 5, 33)), type: 'connexion', details: 'Première connexion de la journée', location: 'À distance', device: 'iOS' },
   { id: '9', date: new Date(yesterday.setHours(9, 10, 15)), type: 'consultation', details: 'Consultation de l\'emploi du temps', location: 'À distance', device: 'iOS' },
@@ -159,20 +157,22 @@ export default function ActionsPage() {
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
-              variant={activeFilter === 'all' ? 'default' : 'outline'}
+              variant={activeFilter === 'all' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setActiveFilter('all')}
+              className="h-8"
             >
-              Toutes les actions
+              Toutes
             </Button>
             {Object.keys(actionConfig).map((key) => {
               const config = actionConfig[key as ActionType];
               return (
                 <Button
                   key={key}
-                  variant={activeFilter === key ? 'default' : 'outline'}
+                  variant={activeFilter === key ? 'secondary' : 'outline'}
                   size="sm"
                   onClick={() => setActiveFilter(key as ActionType)}
+                  className="h-8"
                 >
                   <config.icon className="mr-2 h-4 w-4" />
                   {config.label}
@@ -188,7 +188,6 @@ export default function ActionsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
                 <TableHead>Heure</TableHead>
                 <TableHead>Type d'action</TableHead>
                 <TableHead>Détails</TableHead>
@@ -198,27 +197,24 @@ export default function ActionsPage() {
             </TableHeader>
             <TableBody>
               {paginatedActions.length > 0 ? (
-                paginatedActions.map((action, index) => {
+                paginatedActions.map((action) => {
                   const { icon: ActionIcon, label, color } = actionConfig[action.type];
                   const { icon: DeviceIcon } = deviceConfig[action.device];
-                  const isFirstLogin = action.type === 'connexion' &&
-                    !filteredActions.slice(0, index).some(a => a.type === 'connexion');
                   
                   return (
-                    <TableRow key={action.id} className={cn(isFirstLogin && 'bg-primary/5 border-l-4 border-primary')}>
-                      <TableCell>{format(action.date, 'dd/MM/yyyy')}</TableCell>
-                      <TableCell>{format(action.date, 'HH:mm:ss')}</TableCell>
+                    <TableRow key={action.id} className={cn(action.type === 'connexion' && 'bg-primary/5')}>
+                      <TableCell className="font-mono text-xs">{format(action.date, 'HH:mm:ss')}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={cn('border-0', color)}>
-                          <ActionIcon className="mr-1 h-3 w-3" />
+                        <Badge variant="outline" className={cn('border-0 font-normal', color)}>
+                          <ActionIcon className="mr-1.5 h-3 w-3" />
                           {label}
                         </Badge>
                       </TableCell>
-                      <TableCell>{action.details}</TableCell>
-                      <TableCell>{action.location}</TableCell>
+                      <TableCell className="text-sm">{action.details}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{action.location}</TableCell>
                       <TableCell>
-                        <span className="inline-flex items-center gap-1">
-                          <DeviceIcon className="h-4 w-4 text-muted-foreground" />
+                        <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <DeviceIcon className="h-4 w-4" />
                           {action.device}
                         </span>
                       </TableCell>
@@ -227,7 +223,7 @@ export default function ActionsPage() {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     Aucune action trouvée pour cette date.
                   </TableCell>
                 </TableRow>
@@ -236,7 +232,7 @@ export default function ActionsPage() {
           </Table>
         </div>
         {totalPages > 1 && (
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardFooter className="p-4 flex items-center justify-between border-t">
             <p className="text-sm text-muted-foreground">
               Affichage de {paginatedActions.length} sur {filteredActions.length} actions
             </p>
@@ -250,7 +246,7 @@ export default function ActionsPage() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-sm">
+              <span className="text-sm font-medium">
                 Page {currentPage} sur {totalPages}
               </span>
               <Button
@@ -263,9 +259,10 @@ export default function ActionsPage() {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          </CardContent>
+          </CardFooter>
         )}
       </Card>
     </div>
   );
 }
+
