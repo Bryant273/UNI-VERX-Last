@@ -53,44 +53,152 @@ const TABS = [
 
 const ProfileSection = () => {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Profil Public</CardTitle>
-                <CardDescription>Ces informations seront visibles par les autres utilisateurs.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="flex items-center gap-6">
-                    <Avatar className="h-24 w-24">
-                        <AvatarImage src={studentData.avatar} alt={studentData.name} />
-                        <AvatarFallback>{getInitials(studentData.name)}</AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-2">
-                        <Button><Upload className="mr-2 h-4 w-4" /> Changer la photo</Button>
-                        <p className="text-xs text-muted-foreground">JPG, GIF or PNG. 1MB max.</p>
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Informations personnelles</CardTitle>
+                    <CardDescription>Gérez vos informations publiques et de contact.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="flex items-center gap-6">
+                        <Avatar className="h-24 w-24">
+                            <AvatarImage src={studentData.avatar} alt={studentData.name} />
+                            <AvatarFallback>{getInitials(studentData.name)}</AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-2">
+                            <Button><Upload className="mr-2 h-4 w-4" /> Changer la photo</Button>
+                            <p className="text-xs text-muted-foreground">Cliquez sur l'icône pour changer votre photo</p>
+                        </div>
                     </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                        <Label htmlFor="firstName">Prénom</Label>
-                        <Input id="firstName" defaultValue={studentData.firstName} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <Label htmlFor="firstName">Prénom</Label>
+                            <Input id="firstName" defaultValue={studentData.firstName} />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="lastName">Nom</Label>
+                            <Input id="lastName" defaultValue={studentData.lastName} />
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <Label htmlFor="birthDate">Date de naissance</Label>
+                            <Input id="birthDate" type="date" defaultValue={new Date(studentData.birthDate.split('/').reverse().join('-')).toISOString().split('T')[0]} />
+                        </div>
+                        <div className="space-y-1">
+                             <Label htmlFor="gender">Genre</Label>
+                            <Select defaultValue={studentData.gender}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Masculin">Homme</SelectItem>
+                                    <SelectItem value="Féminin">Femme</SelectItem>
+                                    <SelectItem value="Autre">Autre</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="space-y-1">
+                            <Label htmlFor="personalEmail">Email personnel</Label>
+                            <Input id="personalEmail" type="email" defaultValue={studentData.email} />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="phone">Téléphone</Label>
+                            <Input id="phone" type="tel" defaultValue="06 12 34 56 78" />
+                        </div>
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="lastName">Nom</Label>
-                        <Input id="lastName" defaultValue={studentData.lastName} />
+                        <Label htmlFor="address">Adresse</Label>
+                        <Input id="address" defaultValue="123 Rue de l'Université" />
                     </div>
-                </div>
-                 <div className="space-y-1">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea id="bio" placeholder="Parlez un peu de vous..." defaultValue="Étudiant passionné par les nouvelles technologies et le développement web. Actuellement en Master 1 Ingénierie Logicielle." />
-                </div>
-                 <div className="flex justify-end">
-                    <Button>Enregistrer les modifications</Button>
-                </div>
-            </CardContent>
-        </Card>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                            <Label htmlFor="city">Ville</Label>
+                            <Input id="city" defaultValue="Paris" />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="postalCode">Code postal</Label>
+                            <Input id="postalCode" defaultValue="75005" />
+                        </div>
+                         <div className="space-y-1">
+                            <Label htmlFor="country">Pays</Label>
+                            <Select defaultValue="France">
+                                 <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="France">France</SelectItem>
+                                    <SelectItem value="Belgium">Belgique</SelectItem>
+                                    <SelectItem value="Switzerland">Suisse</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                     <div className="space-y-1">
+                        <Label htmlFor="bio">Bio</Label>
+                        <Textarea id="bio" placeholder="Parlez un peu de vous..." defaultValue="Étudiant passionné par les nouvelles technologies et le développement web. Actuellement en Master 1 Ingénierie Logicielle." />
+                    </div>
+                     <div className="flex justify-end">
+                        <Button>Enregistrer les modifications</Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Informations académiques</CardTitle>
+                    <CardDescription>Ces informations sont gérées par l'administration.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="space-y-1">
+                            <Label htmlFor="university">Université</Label>
+                            <Input id="university" defaultValue="Université de Paris" disabled />
+                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="faculty">Faculté / UFR</Label>
+                            <Input id="faculty" defaultValue={studentData.ufr} disabled />
+                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
+                        </div>
+                         <div className="space-y-1">
+                            <Label htmlFor="degree">Diplôme</Label>
+                            <Input id="degree" defaultValue="Master" disabled />
+                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
+                        </div>
+                         <div className="space-y-1">
+                            <Label htmlFor="level">Niveau / Année</Label>
+                            <Input id="level" defaultValue={studentData.level} disabled />
+                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
+                        </div>
+                         <div className="space-y-1">
+                            <Label htmlFor="studentId">Numéro étudiant</Label>
+                            <Input id="studentId" defaultValue={studentData.id} disabled />
+                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="academicYear">Année académique</Label>
+                            <Input id="academicYear" defaultValue={studentData.academicYear} disabled />
+                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
+                        </div>
+                    </div>
+                     <div className="space-y-1">
+                        <Label htmlFor="specialization">Spécialisation</Label>
+                        <Input id="specialization" defaultValue={studentData.speciality} />
+                    </div>
+                     <div className="flex justify-end">
+                        <Button>Enregistrer les modifications</Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     )
 }
+
 
 const SecuritySection = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
