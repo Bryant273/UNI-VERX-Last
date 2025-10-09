@@ -628,58 +628,112 @@ const PrivacySection = () => (
     </Card>
 );
 
-const IntegrationsSection = () => (
-    <Card>
-        <CardHeader>
-            <CardTitle>Intégrations</CardTitle>
-            <CardDescription>Connectez UNI-VERX à vos applications préférées.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <Card>
-                <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-                           <Mail className="h-6 w-6 text-red-600"/>
+const IntegrationsSection = () => {
+    const [isConfigureModalOpen, setIsConfigureModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+
+    const openModal = (title: string) => {
+        setModalTitle(title);
+        setIsConfigureModalOpen(true);
+    };
+
+    const integrations = [
+        { name: 'Google', description: 'Google Calendar, Drive', icon: Mail, color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900/30', connected: true },
+        { name: 'Microsoft', description: 'Office 365, OneDrive', icon: Briefcase, color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30', connected: true },
+        { name: 'GitHub', description: 'Projets code, collaborations', icon: BookUser, color: 'text-gray-800 dark:text-gray-200', bgColor: 'bg-gray-200 dark:bg-gray-700', connected: true },
+        { name: 'LinkedIn', description: 'Profil professionnel', icon: Briefcase, color: 'text-sky-600', bgColor: 'bg-sky-100 dark:bg-sky-900/30', connected: false }
+    ];
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Intégrations</CardTitle>
+                <CardDescription>Connectez UNI-VERX à vos applications préférées.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div>
+                    <h4 className="font-semibold mb-4">Applications connectées</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {integrations.map((app) => (
+                            <Card key={app.name}>
+                                <CardContent className="p-4 flex flex-col justify-between h-full">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`h-10 w-10 flex items-center justify-center rounded-lg ${app.bgColor}`}>
+                                                <app.icon className={`h-5 w-5 ${app.color}`}/>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold">{app.name}</p>
+                                                <p className="text-xs text-muted-foreground">{app.description}</p>
+                                            </div>
+                                        </div>
+                                        <Switch defaultChecked={app.connected}/>
+                                    </div>
+                                    <Button variant="ghost" size="sm" className="w-full" onClick={() => openModal(app.name)}>
+                                        {app.connected ? 'Configurer' : 'Connecter'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                    <h4 className="font-semibold mb-4">Synchronisation</h4>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                                <Label htmlFor="sync-google" className="font-semibold">Synchronisation avec Google Calendar</Label>
+                                <p className="text-xs text-muted-foreground">Synchroniser votre emploi du temps avec Google Calendar.</p>
+                            </div>
+                            <Switch id="sync-google" defaultChecked />
                         </div>
-                        <div>
-                            <p className="font-semibold">Google</p>
-                            <p className="text-sm text-muted-foreground">Google Calendar, Drive</p>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                                <Label htmlFor="sync-outlook" className="font-semibold">Synchronisation avec Microsoft Outlook</Label>
+                                <p className="text-xs text-muted-foreground">Synchroniser votre emploi du temps avec Outlook.</p>
+                            </div>
+                            <Switch id="sync-outlook" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                                <Label htmlFor="sync-docs" className="font-semibold">Synchronisation des documents</Label>
+                                <p className="text-xs text-muted-foreground">Synchroniser vos documents avec Google Drive ou OneDrive.</p>
+                            </div>
+                            <Switch id="sync-docs" defaultChecked />
                         </div>
                     </div>
-                    <Switch defaultChecked/>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                         <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                           <Briefcase className="h-6 w-6 text-blue-600"/>
-                        </div>
-                        <div>
-                            <p className="font-semibold">Slack</p>
-                            <p className="text-sm text-muted-foreground">Recevez des notifications dans Slack.</p>
-                        </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                    <Button>Enregistrer les paramètres</Button>
+                </div>
+            </CardContent>
+
+             <Dialog open={isConfigureModalOpen} onOpenChange={setIsConfigureModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Configurer l'intégration : {modalTitle}</DialogTitle>
+                        <DialogDescription>
+                            Gérez les autorisations et les paramètres pour {modalTitle}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <p className="text-sm text-muted-foreground">
+                            Les options de configuration pour l'intégration {modalTitle} apparaîtraient ici.
+                        </p>
                     </div>
-                    <Switch />
-                </CardContent>
-            </Card>
-             <Card>
-                <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                         <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700">
-                           <User className="h-6 w-6 text-gray-800 dark:text-gray-200"/>
-                        </div>
-                        <div>
-                            <p className="font-semibold">GitHub</p>
-                            <p className="text-sm text-muted-foreground">Liez vos dépôts à vos projets.</p>
-                        </div>
-                    </div>
-                    <Switch defaultChecked/>
-                </CardContent>
-            </Card>
-        </CardContent>
-    </Card>
-);
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsConfigureModalOpen(false)}>Annuler</Button>
+                        <Button onClick={() => setIsConfigureModalOpen(false)}>Enregistrer</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </Card>
+    );
+};
 
 
 export default function SettingsPage() {
