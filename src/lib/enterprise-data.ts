@@ -1,4 +1,5 @@
 
+
 export interface Task {
     id: string;
     description: string;
@@ -82,12 +83,12 @@ export const enterpriseData: EnterpriseData = {
         sector: 'Développement Logiciel & Solutions Cloud'
     },
     internship: {
-        title: 'Stage Développeur Front-end',
+        title: 'Développeur Front-end',
         period: 'Du 1er avril au 30 septembre 2025',
         duration: '6 mois',
         startDate: '01/04/2025',
         endDate: '30/09/2025',
-        contractType: 'Convention de stage',
+        contractType: 'Stage',
     },
     stats: {
         progress: 45,
