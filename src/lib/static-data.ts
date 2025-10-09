@@ -130,7 +130,7 @@ export const studentData = {
   email: 'alex.dupont@uni-verx.edu',
   password: 'password123',
   birthDate: '01/01/2002',
-  birthPlace: 'Paris',
+  birthPlace: 'Abidjan',
   gender: 'Masculin',
   academicYear: '2024-2025',
   level: 'Master 1',
