@@ -170,7 +170,7 @@ const ProfilePage = () => {
                     76%
                   </div>
                 </div>
-                <p className="text-muted-foreground">Semestre 2 - 2024/2025</p>
+                <p className="text-muted-foreground">Avancement du programme du semestre</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full text-center">
                     <div><p className="font-bold text-lg">15</p><p className="text-xs text-muted-foreground">Cours suivis</p></div>
                     <div><p className="font-bold text-lg">87%</p><p className="text-xs text-muted-foreground">Présence</p></div>
@@ -275,4 +275,5 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
 
