@@ -13,7 +13,7 @@ import {
   Monitor,
   Smartphone,
   Globe,
-  SignIn,
+  LogIn,
   Eye,
   Upload,
   Edit,
@@ -43,7 +43,7 @@ interface Action {
 }
 
 const actionConfig: Record<ActionType, { label: string; icon: LucideIcon; color: string; }> = {
-  connexion: { label: 'Connexion', icon: SignIn, color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' },
+  connexion: { label: 'Connexion', icon: LogIn, color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' },
   consultation: { label: 'Consultation', icon: Eye, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' },
   téléchargement: { label: 'Téléchargement', icon: Download, color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' },
   soumission: { label: 'Soumission', icon: Upload, color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' },
