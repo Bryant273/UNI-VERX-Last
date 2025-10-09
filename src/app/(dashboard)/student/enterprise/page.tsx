@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { studentData } from '@/lib/static-data';
 import { enterpriseData } from '@/lib/enterprise-data';
@@ -12,8 +12,15 @@ import { getInitials } from '@/lib/messages-data';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, FileDown } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
+const InfoRow = ({ label, value }: { label: string, value: string }) => (
+    <div className="flex justify-between items-center py-1.5">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-sm font-semibold">{value}</p>
+    </div>
+);
 
 export default function EnterpriseAccessPage() {
     const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -62,9 +69,61 @@ export default function EnterpriseAccessPage() {
                                 <p className="text-muted-foreground">Poste</p>
                                 <p className="font-semibold text-lg">{enterpriseData.internship.title}</p>
                             </div>
-                            <Button size="lg" className="mt-4 md:mt-0" onClick={() => setLoginModalOpen(true)}>Se Connecter</Button>
+                             <p className="text-sm text-muted-foreground text-center md:text-right mt-4 md:mt-0">
+                                {enterpriseData.internship.period}
+                            </p>
                         </div>
                     )}
+                </CardContent>
+            </Card>
+
+            {hasInternship && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Détails du Contrat</CardTitle>
+                            <CardDescription>Informations administratives concernant votre stage.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <InfoRow label="Durée" value={enterpriseData.internship.duration} />
+                            <Separator />
+                            <InfoRow label="Date de début" value={enterpriseData.internship.startDate} />
+                             <Separator />
+                            <InfoRow label="Date de fin" value={enterpriseData.internship.endDate} />
+                             <Separator />
+                            <InfoRow label="Type de contrat" value={enterpriseData.internship.contractType} />
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Documents</CardTitle>
+                            <CardDescription>Accédez aux documents relatifs à votre stage.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-3">
+                           <Button variant="outline" className="justify-start">
+                                <FileDown className="mr-2 h-4 w-4" />
+                                Télécharger le contrat
+                           </Button>
+                            <Button variant="outline" className="justify-start">
+                                <FileDown className="mr-2 h-4 w-4" />
+                                Télécharger l'attestation de fin de stage
+                           </Button>
+                            <Button variant="outline" className="justify-start">
+                                <FileDown className="mr-2 h-4 w-4" />
+                                Télécharger la convention de stage
+                           </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Portail Entreprise</CardTitle>
+                    <CardDescription>Connectez-vous à l'ERP de l'entreprise pour suivre vos missions et votre progression.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <Button size="lg" className="w-full md:w-auto" onClick={() => setLoginModalOpen(true)}>Se Connecter</Button>
                 </CardContent>
             </Card>
 

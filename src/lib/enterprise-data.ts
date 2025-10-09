@@ -44,6 +44,10 @@ export interface EnterpriseData {
     internship: {
         title: string;
         period: string;
+        duration: string;
+        startDate: string;
+        endDate: string;
+        contractType: string;
     };
     stats: {
         progress: number;
@@ -80,6 +84,10 @@ export const enterpriseData: EnterpriseData = {
     internship: {
         title: 'Stage Développeur Front-end',
         period: 'Du 1er avril au 30 septembre 2025',
+        duration: '6 mois',
+        startDate: '01/04/2025',
+        endDate: '30/09/2025',
+        contractType: 'Convention de stage',
     },
     stats: {
         progress: 45,
