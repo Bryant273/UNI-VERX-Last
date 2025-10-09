@@ -66,7 +66,6 @@ export const navLinks: Record<UserRole, NavItem[]> = {
         { href: '/student/jobs', label: 'Espace Carrière', icon: Briefcase },
         { href: '/student/enterprise', label: 'Accès Entreprise', icon: Building },
         { href: '/student/documents', label: 'Documents', icon: FileText },
-        { href: '/student/settings', label: 'Paramètres', icon: Settings },
       ],
     },
   ],
