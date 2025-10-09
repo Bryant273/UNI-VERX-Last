@@ -33,7 +33,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { getInitials, allUsers } from '@/lib/messages-data';
+import { getInitials } from '@/lib/messages-data';
 import { studentData } from '@/lib/static-data';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -53,215 +53,291 @@ const TABS = [
 
 const ProfileSection = () => {
     return (
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Informations personnelles</CardTitle>
-                    <CardDescription>Gérez vos informations publiques et de contact.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="flex items-center gap-6">
-                        <Avatar className="h-24 w-24">
-                            <AvatarImage src={studentData.avatar} alt={studentData.name} />
-                            <AvatarFallback>{getInitials(studentData.name)}</AvatarFallback>
-                        </Avatar>
-                        <div className="space-y-2">
-                            <Button><Upload className="mr-2 h-4 w-4" /> Changer la photo</Button>
-                            <p className="text-xs text-muted-foreground">Cliquez sur l'icône pour changer votre photo</p>
-                        </div>
-                    </div>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations personnelles</CardTitle>
+            <CardDescription>
+              Gérez vos informations publiques et de contact.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center gap-6">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={studentData.avatar} alt={studentData.name} />
+                <AvatarFallback>{getInitials(studentData.name)}</AvatarFallback>
+              </Avatar>
+              <div className="space-y-2">
+                <Button>
+                  <Upload className="mr-2 h-4 w-4" /> Changer la photo
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Cliquez sur l'icône pour changer votre photo
+                </p>
+              </div>
+            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <Label htmlFor="firstName">Prénom</Label>
-                            <Input id="firstName" defaultValue={studentData.firstName} />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="lastName">Nom</Label>
-                            <Input id="lastName" defaultValue={studentData.lastName} />
-                        </div>
-                    </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <Label htmlFor="birthDate">Date de naissance</Label>
-                            <Input id="birthDate" type="date" defaultValue={new Date(studentData.birthDate.split('/').reverse().join('-')).toISOString().split('T')[0]} />
-                        </div>
-                        <div className="space-y-1">
-                             <Label htmlFor="gender">Genre</Label>
-                            <Select defaultValue={studentData.gender}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Masculin">Homme</SelectItem>
-                                    <SelectItem value="Féminin">Femme</SelectItem>
-                                    <SelectItem value="Autre">Autre</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div className="space-y-1">
-                            <Label htmlFor="personalEmail">Email personnel</Label>
-                            <Input id="personalEmail" type="email" defaultValue={studentData.email} />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="phone">Téléphone</Label>
-                            <Input id="phone" type="tel" defaultValue="06 12 34 56 78" />
-                        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="firstName">Prénom</Label>
+                <Input id="firstName" defaultValue={studentData.firstName} />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="lastName">Nom</Label>
+                <Input id="lastName" defaultValue={studentData.lastName} />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="birthDate">Date de naissance</Label>
+                <Input id="birthDate" type="date" defaultValue={new Date(studentData.birthDate.split('/').reverse().join('-')).toISOString().split('T')[0]} />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="gender">Genre</Label>
+                <Select defaultValue={studentData.gender}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Masculin">Homme</SelectItem>
+                    <SelectItem value="Féminin">Femme</SelectItem>
+                    <SelectItem value="Autre">Autre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                    <Label htmlFor="personalEmail">Email personnel</Label>
+                    <Input id="personalEmail" type="email" defaultValue={studentData.email} />
+                </div>
+                <div className="space-y-1">
+                    <Label htmlFor="phone">Téléphone</Label>
+                    <Input id="phone" type="tel" defaultValue="06 12 34 56 78" />
+                </div>
+            </div>
+             <div className="space-y-1">
+                <Label htmlFor="address">Adresse</Label>
+                <Input id="address" defaultValue="123 Rue de l'Université" />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                    <Label htmlFor="city">Ville</Label>
+                    <Input id="city" defaultValue="Paris" />
+                </div>
+                <div className="space-y-1">
+                    <Label htmlFor="postalCode">Code postal</Label>
+                    <Input id="postalCode" defaultValue="75005" />
+                </div>
+                 <div className="space-y-1">
+                    <Label htmlFor="country">Pays</Label>
+                    <Select defaultValue="France">
+                         <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="France">France</SelectItem>
+                            <SelectItem value="Belgium">Belgique</SelectItem>
+                            <SelectItem value="Switzerland">Suisse</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea id="bio" placeholder="Parlez un peu de vous..." defaultValue="Étudiant passionné par les nouvelles technologies et le développement web. Actuellement en Master 1 Ingénierie Logicielle." />
+            </div>
+            <div className="flex justify-end">
+              <Button>Enregistrer les modifications</Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Informations académiques</CardTitle>
+                <CardDescription>Ces informations sont gérées par l'administration.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-1">
+                        <Label htmlFor="university">Université</Label>
+                        <Input id="university" defaultValue="Université de Paris" disabled />
+                         <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="address">Adresse</Label>
-                        <Input id="address" defaultValue="123 Rue de l'Université" />
-                    </div>
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-1">
-                            <Label htmlFor="city">Ville</Label>
-                            <Input id="city" defaultValue="Paris" />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="postalCode">Code postal</Label>
-                            <Input id="postalCode" defaultValue="75005" />
-                        </div>
-                         <div className="space-y-1">
-                            <Label htmlFor="country">Pays</Label>
-                            <Select defaultValue="France">
-                                 <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="France">France</SelectItem>
-                                    <SelectItem value="Belgium">Belgique</SelectItem>
-                                    <SelectItem value="Switzerland">Suisse</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                     <div className="space-y-1">
-                        <Label htmlFor="bio">Bio</Label>
-                        <Textarea id="bio" placeholder="Parlez un peu de vous..." defaultValue="Étudiant passionné par les nouvelles technologies et le développement web. Actuellement en Master 1 Ingénierie Logicielle." />
-                    </div>
-                     <div className="flex justify-end">
-                        <Button>Enregistrer les modifications</Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Informations académiques</CardTitle>
-                    <CardDescription>Ces informations sont gérées par l'administration.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div className="space-y-1">
-                            <Label htmlFor="university">Université</Label>
-                            <Input id="university" defaultValue="Université de Paris" disabled />
-                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="faculty">Faculté / UFR</Label>
-                            <Input id="faculty" defaultValue={studentData.ufr} disabled />
-                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
-                        </div>
-                         <div className="space-y-1">
-                            <Label htmlFor="degree">Diplôme</Label>
-                            <Input id="degree" defaultValue="Master" disabled />
-                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
-                        </div>
-                         <div className="space-y-1">
-                            <Label htmlFor="level">Niveau / Année</Label>
-                            <Input id="level" defaultValue={studentData.level} disabled />
-                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
-                        </div>
-                         <div className="space-y-1">
-                            <Label htmlFor="studentId">Numéro étudiant</Label>
-                            <Input id="studentId" defaultValue={studentData.id} disabled />
-                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="academicYear">Année académique</Label>
-                            <Input id="academicYear" defaultValue={studentData.academicYear} disabled />
-                             <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
-                        </div>
+                        <Label htmlFor="faculty">Faculté / UFR</Label>
+                        <Input id="faculty" defaultValue={studentData.ufr} disabled />
+                         <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
                     </div>
                      <div className="space-y-1">
-                        <Label htmlFor="specialization">Spécialisation</Label>
-                        <Select defaultValue={studentData.speciality}>
-                            <SelectTrigger id="specialization">
-                                <SelectValue placeholder="Choisir une spécialisation" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Ingénierie Logicielle">Ingénierie Logicielle</SelectItem>
-                                <SelectItem value="Science des Données">Science des Données</SelectItem>
-                                <SelectItem value="Cybersécurité">Cybersécurité</SelectItem>
-                                <SelectItem value="Réseaux et Systèmes">Réseaux et Systèmes</SelectItem>
-                                <SelectItem value="Intelligence Artificielle">Intelligence Artificielle</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <Label htmlFor="degree">Diplôme</Label>
+                        <Input id="degree" defaultValue="Master" disabled />
+                         <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
                     </div>
-                     <div className="flex justify-end">
-                        <Button>Enregistrer les modifications</Button>
+                     <div className="space-y-1">
+                        <Label htmlFor="level">Niveau / Année</Label>
+                        <Input id="level" defaultValue={studentData.level} disabled />
+                         <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
-    )
+                     <div className="space-y-1">
+                        <Label htmlFor="studentId">Numéro étudiant</Label>
+                        <Input id="studentId" defaultValue={studentData.id} disabled />
+                         <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor="academicYear">Année académique</Label>
+                        <Input id="academicYear" defaultValue={studentData.academicYear} disabled />
+                         <p className="text-xs text-muted-foreground">Ce champ ne peut pas être modifié</p>
+                    </div>
+                </div>
+                 <div className="space-y-1">
+                    <Label htmlFor="specialization">Spécialisation</Label>
+                    <Select defaultValue={studentData.speciality}>
+                        <SelectTrigger id="specialization">
+                            <SelectValue placeholder="Choisir une spécialisation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Ingénierie Logicielle">Ingénierie Logicielle</SelectItem>
+                            <SelectItem value="Science des Données">Science des Données</SelectItem>
+                            <SelectItem value="Cybersécurité">Cybersécurité</SelectItem>
+                            <SelectItem value="Réseaux et Systèmes">Réseaux et Systèmes</SelectItem>
+                            <SelectItem value="Intelligence Artificielle">Intelligence Artificielle</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <div className="flex justify-end">
+                    <Button>Enregistrer les modifications</Button>
+                </div>
+            </CardContent>
+        </Card>
+      </div>
+    );
 }
 
 
 const SecuritySection = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     return (
-        <>
+        <div className="space-y-6">
         <Card>
             <CardHeader>
-                <CardTitle>Connexion & Sécurité</CardTitle>
-                <CardDescription>Gérez vos informations de connexion et la sécurité de votre compte.</CardDescription>
+                <CardTitle>Informations de connexion</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="space-y-1">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" defaultValue={studentData.email} disabled />
-                    </div>
+                <div className="space-y-1">
+                    <Label htmlFor="username">Nom d'utilisateur</Label>
+                    <Input id="username" defaultValue="sarah.dupont" />
                 </div>
-                 <div>
-                    <Label>Mot de passe</Label>
-                    <div className="mt-1 flex flex-col sm:flex-row gap-2 items-center justify-between p-3 border rounded-lg bg-muted/30">
-                        <p className="text-sm">••••••••••••</p>
-                        <Button variant="outline">Changer le mot de passe</Button>
+                <div className="space-y-1">
+                    <Label htmlFor="email">Email institutionnel</Label>
+                    <div className="flex items-center gap-2">
+                      <Input id="email" type="email" defaultValue={studentData.email} disabled />
+                      <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Vérifié</Badge>
                     </div>
+                    <p className="text-xs text-muted-foreground">Cet email est géré par votre institution et ne peut pas être modifié</p>
+                </div>
+                <div className="flex justify-end">
+                    <Button>Enregistrer les modifications</Button>
                 </div>
             </CardContent>
         </Card>
 
         <Card>
             <CardHeader>
-                <CardTitle>Sessions Actives</CardTitle>
-                <CardDescription>Voici la liste des appareils connectés à votre compte.</CardDescription>
+                <CardTitle>Mot de passe</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                 <div className="space-y-1">
+                    <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+                    <Input id="currentPassword" type="password" placeholder="••••••••" />
+                </div>
+                <div className="space-y-1">
+                    <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+                    <Input id="newPassword" type="password" placeholder="••••••••" />
+                    <p className="text-xs text-muted-foreground">Veuillez saisir un mot de passe</p>
+                </div>
+                <div className="space-y-1">
+                    <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                    <Input id="confirmPassword" type="password" placeholder="••••••••" />
+                </div>
+                <div className="flex justify-end">
+                    <Button>Mettre à jour le mot de passe</Button>
+                </div>
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle>Sécurité du compte</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="2fa" className="font-semibold">Authentification à deux facteurs</Label>
+                        <p className="text-xs text-muted-foreground">Renforce la sécurité de votre compte avec une vérification supplémentaire.</p>
+                    </div>
+                    <Switch id="2fa" />
+                </div>
+                <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="auto-logout" className="font-semibold">Déconnexion automatique</Label>
+                        <p className="text-xs text-muted-foreground">Déconnexion automatique après une période d'inactivité.</p>
+                    </div>
+                    <Switch id="auto-logout" defaultChecked />
+                </div>
+                 <div className="ml-6">
+                    <Select defaultValue="60">
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Durée d'inactivité" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="30">Après 30 minutes</SelectItem>
+                            <SelectItem value="60">Après 1 heure</SelectItem>
+                            <SelectItem value="120">Après 2 heures</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Appareils connectés</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Smartphone className="h-6 w-6 text-muted-foreground"/>
                         <div>
-                            <p className="font-semibold">iPhone 14 Pro</p>
-                            <p className="text-sm text-muted-foreground">Paris, FR · Actif maintenant</p>
+                            <p className="font-semibold">iPhone 13</p>
+                            <p className="text-sm text-muted-foreground">Paris, FR · Dernière connexion: Hier</p>
                         </div>
                     </div>
-                     <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Actif</Badge>
+                     <Button variant="ghost" size="sm">Déconnecter</Button>
                 </div>
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Globe className="h-6 w-6 text-muted-foreground"/>
                         <div>
-                            <p className="font-semibold">Chrome sur Windows</p>
-                            <p className="text-sm text-muted-foreground">Lyon, FR · Il y a 2 heures</p>
+                            <p className="font-semibold">Chrome sur MacBook Pro</p>
+                            <p className="text-sm text-muted-foreground">Paris, FR • Actif maintenant</p>
                         </div>
                     </div>
-                    <Button variant="ghost" size="sm">Déconnecter</Button>
+                    <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Cet appareil</Badge>
+                </div>
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Globe className="h-6 w-6 text-muted-foreground"/>
+                        <div>
+                            <p className="font-semibold">iPad</p>
+                            <p className="text-sm text-muted-foreground">Paris, FR • 18/03/2025</p>
+                        </div>
+                    </div>
+                     <Button variant="ghost" size="sm">Déconnecter</Button>
+                </div>
+                <div className="pt-4 flex justify-center">
+                    <Button variant="outline">Déconnecter tous les autres appareils</Button>
                 </div>
             </CardContent>
         </Card>
@@ -303,7 +379,7 @@ const SecuritySection = () => {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-        </>
+        </div>
     );
 };
 
