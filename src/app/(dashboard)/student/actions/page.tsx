@@ -30,6 +30,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type ActionType = 'connexion' | 'consultation' | 'téléchargement' | 'soumission' | 'modification' | 'évaluation' | 'message';
 
@@ -132,7 +133,7 @@ export default function ActionsPage() {
             <div className="flex flex-wrap gap-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full md:w-auto justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                  <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", !date && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {date ? format(date, "PPP", { locale: fr }) : <span>Choisir une date</span>}
                   </Button>
@@ -148,37 +149,37 @@ export default function ActionsPage() {
                   />
                 </PopoverContent>
               </Popover>
+
+              <Select value={activeFilter} onValueChange={(value) => setActiveFilter(value as ActionType | 'all')}>
+                <SelectTrigger className="w-[240px]">
+                  <SelectValue placeholder="Filtrer par action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center">
+                      <Filter className="mr-2 h-4 w-4" />
+                      <span>Toutes les actions</span>
+                    </div>
+                  </SelectItem>
+                  {Object.keys(actionConfig).map((key) => {
+                    const config = actionConfig[key as ActionType];
+                    return (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center">
+                          <config.icon className="mr-2 h-4 w-4" />
+                          <span>{config.label}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              
               <Button>
                 <Download className="mr-2 h-4 w-4" />
                 Exporter
               </Button>
             </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              variant={activeFilter === 'all' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setActiveFilter('all')}
-              className="h-8"
-            >
-              Toutes
-            </Button>
-            {Object.keys(actionConfig).map((key) => {
-              const config = actionConfig[key as ActionType];
-              return (
-                <Button
-                  key={key}
-                  variant={activeFilter === key ? 'secondary' : 'outline'}
-                  size="sm"
-                  onClick={() => setActiveFilter(key as ActionType)}
-                  className="h-8"
-                >
-                  <config.icon className="mr-2 h-4 w-4" />
-                  {config.label}
-                </Button>
-              );
-            })}
           </div>
         </CardContent>
       </Card>
@@ -202,7 +203,7 @@ export default function ActionsPage() {
                   const { icon: DeviceIcon } = deviceConfig[action.device];
                   
                   return (
-                    <TableRow key={action.id} className={cn(action.type === 'connexion' && 'bg-primary/5')}>
+                    <TableRow key={action.id} className={cn('even:bg-muted/40', action.type === 'connexion' && action.details === 'Première connexion de la journée' && 'bg-primary/5')}>
                       <TableCell className="font-mono text-xs">{format(action.date, 'HH:mm:ss')}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn('border-0 font-normal', color)}>
@@ -224,7 +225,7 @@ export default function ActionsPage() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    Aucune action trouvée pour cette date.
+                    Aucune action trouvée pour cette date ou ce filtre.
                   </TableCell>
                 </TableRow>
               )}
@@ -265,4 +266,3 @@ export default function ActionsPage() {
     </div>
   );
 }
-
