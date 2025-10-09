@@ -18,6 +18,7 @@ import {
   BookUser,
   type LucideIcon,
   ClipboardList,
+  History,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
@@ -64,6 +65,8 @@ export const navLinks: Record<UserRole, NavItem[]> = {
         { href: '/student/jobs', label: 'Espace Carrière', icon: Briefcase },
         { href: '/student/enterprise', label: 'Accès Entreprise', icon: Building },
         { href: '/student/documents', label: 'Documents', icon: FileText },
+        { href: '/student/settings', label: 'Paramètres', icon: Settings },
+        { href: '/student/actions', label: 'Actions', icon: History },
       ],
     },
   ],

@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { PanelLeft, Search, Bell, User, Settings, LogOut, Wand2 } from 'lucide-react';
+import { PanelLeft, Search, Bell, User, Settings, LogOut, History } from 'lucide-react';
 
 import type { UserRole } from '@/lib/data';
 import { userData, VALID_ROLES } from '@/lib/static-data';
@@ -88,9 +88,11 @@ export default function Header() {
                     Profil
                 </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-                <Wand2 className="mr-2 h-4 w-4" />
-                Actions
+            <DropdownMenuItem asChild>
+                <Link href={`/${role}/actions`}>
+                    <History className="mr-2 h-4 w-4" />
+                    Actions
+                </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
                 <Link href={`/${role}/settings`}>
