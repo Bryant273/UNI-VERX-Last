@@ -82,9 +82,11 @@ export default function Header() {
             <DropdownMenuContent align="end" className="w-[220px]">
             <DropdownMenuLabel>{user?.name || 'Mon Compte'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                Profil
+            <DropdownMenuItem asChild>
+                <Link href={`/${role}/profile`}>
+                    <User className="mr-2 h-4 w-4" />
+                    Profil
+                </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
                 <Wand2 className="mr-2 h-4 w-4" />
