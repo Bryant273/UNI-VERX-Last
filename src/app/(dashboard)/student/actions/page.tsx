@@ -203,7 +203,7 @@ export default function ActionsPage() {
                   const { icon: DeviceIcon } = deviceConfig[action.device];
                   
                   return (
-                    <TableRow key={action.id} className={cn('even:bg-muted/40', action.type === 'connexion' && action.details === 'Première connexion de la journée' && 'bg-primary/5')}>
+                    <TableRow key={action.id} className={cn('even:bg-muted/40', action.type === 'connexion' && action.details === 'Première connexion de la journée' && 'bg-gradient-to-r from-primary/5 to-[#FFB26B]/10')}>
                       <TableCell className="font-mono text-xs">{format(action.date, 'HH:mm:ss')}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn('border-0 font-normal', color)}>
