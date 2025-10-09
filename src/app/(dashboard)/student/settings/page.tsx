@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -14,6 +15,10 @@ import {
   Smartphone,
   Globe,
   Trash2,
+  Sun,
+  Moon,
+  Monitor,
+  Briefcase
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,6 +39,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
 
 const TABS = [
   { id: 'profile', label: 'Profil', icon: User },
@@ -433,3 +440,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
