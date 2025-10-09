@@ -1,4 +1,5 @@
 
+
 import type { LucideIcon } from 'lucide-react';
 import { FileText, Award, Building, Briefcase, GraduationCap, User, Home, ImageIcon, FileQuestion, FileCheck2, FileArchive, BookOpen } from 'lucide-react';
 
@@ -38,28 +39,28 @@ export const documentConfig: Record<DocumentType, { label: string; icon: LucideI
 
 
 export const personalDocuments: Document[] = [
-  { id: 'perso-1', type: 'cv', name: 'CV_Sarah_Dupont_2025.pdf', description: 'Curriculum Vitae mis à jour pour les candidatures de stage', status: 'uploaded', category: 'personal', date: '12/05/2025' },
-  { id: 'perso-2', type: 'lettre-motivation', name: 'Lettre_Motivation_Generique.docx', description: 'Modèle de lettre de motivation adaptable', status: 'uploaded', category: 'personal', date: '10/05/2025' },
-  { id: 'perso-3', type: 'cni', name: 'CNI_Sarah_Dupont.jpg', description: 'Carte Nationale d\'Identité (recto/verso)', status: 'uploaded', category: 'personal', date: '01/03/2025' },
-  { id: 'perso-4', type: 'justificatif-domicile', name: 'Justificatif_Domicile.pdf', description: 'Facture d\'électricité de moins de 3 mois', status: 'missing', category: 'personal' },
-  { id: 'perso-5', type: 'photo-identite', name: 'Photo_Identite.jpg', description: 'Photo d\'identité au format officiel', status: 'missing', category: 'personal' },
+  { id: 'perso-1', type: 'cv', name: 'CV_Sarah_Dupont_2025.pdf', description: 'CV pour candidatures de stage. Format PDF privilégié.', status: 'uploaded', category: 'personal', date: '12/05/2025' },
+  { id: 'perso-2', type: 'lettre-motivation', name: 'Lettre_Motivation_Generique.docx', description: 'Modèle de lettre de motivation. Format PDF ou DOCX.', status: 'uploaded', category: 'personal', date: '10/05/2025' },
+  { id: 'perso-3', type: 'cni', name: 'CNI_Sarah_Dupont.pdf', description: 'Scan de la Carte Nationale d\'Identité (recto/verso).', status: 'uploaded', category: 'personal', date: '01/03/2025' },
+  { id: 'perso-4', type: 'justificatif-domicile', name: 'Justificatif_Domicile.pdf', description: 'Facture d\'électricité de moins de 3 mois.', status: 'missing', category: 'personal' },
+  { id: 'perso-5', type: 'photo-identite', name: 'Photo_Identite.jpg', description: 'Photo d\'identité officielle. Format image (.jpg, .png).', status: 'missing', category: 'personal' },
 ];
 
 export const diplomaDocuments: Document[] = [
-  { id: 'diplo-1', type: 'diplome', name: 'Baccalauréat_2022.pdf', description: 'Diplôme du Baccalauréat général, Mention Très Bien', status: 'uploaded', category: 'academic', date: '05/07/2022' },
-  { id: 'diplo-2', type: 'certificat', name: 'Certif_Python_Avance.pdf', description: 'Certification "Python for Data Science" de Coursera', status: 'uploaded', category: 'professional', date: '18/11/2024' },
-  { id: 'diplo-3', type: 'attestation', name: 'Attestation_TOEIC_825.pdf', description: 'Attestation de score TOEIC (825 points)', status: 'uploaded', category: 'academic', date: '20/02/2025' },
-  { id: 'diplo-4', type: 'diplome', name: 'DEUG_MIAS_2024.pdf', description: 'Diplôme d\'Études Universitaires Générales, MIAS', status: 'missing', category: 'academic' },
+  { id: 'diplo-1', type: 'diplome', name: 'Baccalaureat_2022.pdf', description: 'Diplôme du Baccalauréat général, Mention Très Bien.', status: 'uploaded', category: 'academic', date: '05/07/2022' },
+  { id: 'diplo-2', type: 'certificat', name: 'Certif_Python_Avance.pdf', description: 'Certification "Python for Data Science" de Coursera.', status: 'uploaded', category: 'professional', date: '18/11/2024' },
+  { id: 'diplo-3', type: 'attestation', name: 'Attestation_TOEIC_825.pdf', description: 'Attestation de score TOEIC (825 points).', status: 'uploaded', category: 'academic', date: '20/02/2025' },
+  { id: 'diplo-4', type: 'diplome', name: 'DEUG_MIAS_2024.pdf', description: 'Diplôme d\'Études Universitaires Générales, MIAS.', status: 'missing', category: 'academic' },
 ];
 
 export const universityDocuments: Document[] = [
-  { id: 'uni-1', type: 'certificat-scolarite', name: 'Certificat_Scolarite_2024-2025.pdf', description: 'Certificat de scolarité pour l\'année en cours', status: 'uploaded', category: 'administrative', date: '01/09/2024' },
-  { id: 'uni-2', type: 'convention-stage', name: 'Convention_Stage_TechSolutions.pdf', description: 'Convention de stage à faire signer par l\'entreprise', status: 'uploaded', category: 'professional', date: '14/05/2025' },
-  { id: 'uni-3', type: 'releve-notes', name: 'Releve_Notes_S1.pdf', description: 'Relevé de notes officiel du Semestre 1', status: 'uploaded', category: 'academic', date: '28/01/2025' },
-  { id: 'uni-4', type: 'facture', name: 'Facture_Frais_Scolarite_2024.pdf', description: 'Facture des frais de scolarité annuels', status: 'uploaded', category: 'administrative', date: '15/09/2024' },
+  { id: 'uni-1', type: 'certificat-scolarite', name: 'Certificat_Scolarite_2024-2025.pdf', description: 'Certificat de scolarité pour l\'année en cours, fourni par l\'université.', status: 'uploaded', category: 'administrative', date: '01/09/2024' },
+  { id: 'uni-2', type: 'convention-stage', name: 'Convention_Stage_TechSolutions.pdf', description: 'Convention pré-remplie à faire signer par l\'entreprise.', status: 'uploaded', category: 'professional', date: '14/05/2025' },
+  { id: 'uni-3', type: 'releve-notes', name: 'Releve_Notes_S1.pdf', description: 'Relevé de notes officiel du Semestre 1.', status: 'uploaded', category: 'academic', date: '28/01/2025' },
+  { id: 'uni-4', type: 'facture', name: 'Facture_Frais_Scolarite_2024.pdf', description: 'Facture acquittée des frais de scolarité annuels.', status: 'uploaded', category: 'administrative', date: '15/09/2024' },
 ];
 
 export const enterpriseDocuments: Document[] = [
-    { id: 'ent-1', type: 'contrat-stage', name: 'Contrat_Stage_Signe_TechSolutions.pdf', description: 'Contrat de stage signé par toutes les parties', status: 'uploaded', category: 'professional', date: '20/05/2025' },
-    { id: 'ent-2', type: 'guide-accueil', name: 'Guide_Accueil_Stagiaire.pdf', description: 'Guide d\'accueil pour les nouveaux stagiaires', status: 'uploaded', category: 'professional', date: '01/04/2025' },
+    { id: 'ent-1', type: 'contrat-stage', name: 'Contrat_Stage_Signe_TechSolutions.pdf', description: 'Contrat de stage signé, fourni par l\'entreprise.', status: 'uploaded', category: 'professional', date: '20/05/2025' },
+    { id: 'ent-2', type: 'guide-accueil', name: 'Guide_Accueil_Stagiaire.pdf', description: 'Guide d\'accueil pour les nouveaux stagiaires.', status: 'uploaded', category: 'professional', date: '01/04/2025' },
 ];
