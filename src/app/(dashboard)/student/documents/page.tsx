@@ -138,7 +138,8 @@ export default function DocumentsPage() {
     const allDocuments = useMemo(() => ({
         personal: personalDocuments,
         diplomas: diplomaDocuments,
-        downloads: [...universityDocuments, ...enterpriseDocuments],
+        university: universityDocuments,
+        enterprise: enterpriseDocuments,
     }), []);
 
     const filteredDocs = useMemo(() => {
@@ -182,10 +183,11 @@ export default function DocumentsPage() {
       </Card>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="personal"><User className="mr-2"/>Personnels</TabsTrigger>
           <TabsTrigger value="diplomas"><Award className="mr-2"/>Diplômes</TabsTrigger>
-          <TabsTrigger value="downloads"><Download className="mr-2"/>À télécharger</TabsTrigger>
+          <TabsTrigger value="university"><GraduationCap className="mr-2"/>Université</TabsTrigger>
+          <TabsTrigger value="enterprise"><Building className="mr-2"/>Entreprise</TabsTrigger>
         </TabsList>
         
         <TabsContent value="personal">
@@ -228,7 +230,29 @@ export default function DocumentsPage() {
                 </CardContent>
             </Card>
         </TabsContent>
-        <TabsContent value="downloads">
+        <TabsContent value="university">
+             <Card>
+                <CardContent className="p-0">
+                    <Table>
+                         <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-16">#</TableHead>
+                                <TableHead className="w-40">Type</TableHead>
+                                <TableHead>Nom du fichier</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead className="text-right w-40">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredDocs.map((doc, i) => (
+                                <DownloadableDocumentRow key={doc.id} doc={doc} index={i} />
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </TabsContent>
+         <TabsContent value="enterprise">
              <Card>
                 <CardContent className="p-0">
                     <Table>

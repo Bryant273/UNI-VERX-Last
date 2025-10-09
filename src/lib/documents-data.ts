@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { FileText, FileUp, Award, FileCheck2, User, Home, Building, FileArchive, ImageIcon, FileQuestion, GraduationCap, Briefcase, BookOpen } from 'lucide-react';
+import { FileText, Award, Building, Briefcase, GraduationCap, User, Home, ImageIcon, FileQuestion, FileCheck2, FileArchive, BookOpen } from 'lucide-react';
 
 export type DocumentType = 'cv' | 'lettre-motivation' | 'cni' | 'justificatif-domicile' | 'photo-identite' | 'autre-perso' | 'diplome' | 'certificat' | 'attestation' | 'releve-notes' | 'certificat-scolarite' | 'convention-stage' | 'facture' | 'contrat-stage' | 'guide-accueil';
 
