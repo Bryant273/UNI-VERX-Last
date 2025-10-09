@@ -105,7 +105,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
 };
 
 export const bottomNavLinks: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: '#', label: 'Paramètres', icon: Settings },
+  { href: '/student/settings', label: 'Paramètres', icon: Settings },
   { href: '#', label: 'Déconnexion', icon: LogOut },
 ];
 
