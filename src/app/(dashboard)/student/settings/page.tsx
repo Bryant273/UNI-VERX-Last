@@ -19,7 +19,9 @@ import {
   Sun,
   Moon,
   Monitor,
-  Briefcase
+  Briefcase,
+  BookUser,
+  FileCog
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -487,7 +489,7 @@ const AppearanceSection = () => {
                 <div>
                     <Label className="font-semibold">Thème</Label>
                     <RadioGroup 
-                        defaultValue={theme} 
+                        value={theme} 
                         onValueChange={setTheme}
                         className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4"
                     >
@@ -640,8 +642,8 @@ const IntegrationsSection = () => (
                            <Mail className="h-6 w-6 text-red-600"/>
                         </div>
                         <div>
-                            <p className="font-semibold">Google Calendar</p>
-                            <p className="text-sm text-muted-foreground">Synchronisez votre emploi du temps.</p>
+                            <p className="font-semibold">Google</p>
+                            <p className="text-sm text-muted-foreground">Google Calendar, Drive</p>
                         </div>
                     </div>
                     <Switch defaultChecked/>
