@@ -125,7 +125,7 @@ const ProfilePage = () => {
                     value={76}
                     className="absolute w-full h-full rounded-full"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center text-3xl font-bold text-primary">
+                  <div className="absolute inset-0 flex items-center justify-center text-3xl font-bold text-foreground">
                     76%
                   </div>
                 </div>
