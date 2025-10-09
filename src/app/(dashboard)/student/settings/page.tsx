@@ -315,7 +315,7 @@ const SecuritySection = () => {
                             <p className="text-sm text-muted-foreground">Paris, FR • Actif maintenant</p>
                         </div>
                     </div>
-                    <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Cet appareil</Badge>
+                     <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Cet appareil</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -553,32 +553,74 @@ const PrivacySection = () => (
             <CardDescription>Contrôlez quelles informations sont visibles par les autres.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-            <div className="space-y-4">
+             <div className="space-y-4">
+                <h4 className="font-semibold">Visibilité du profil</h4>
                 <div className="flex items-start justify-between p-4 border rounded-lg">
                     <div>
-                        <Label htmlFor="profile-visibility" className="font-semibold">Visibilité de votre profil</Label>
-                        <p className="text-xs text-muted-foreground">Permettre aux autres étudiants et professeurs de voir votre profil.</p>
+                        <Label htmlFor="profile-visibility-students" className="font-semibold">Profil visible par les autres étudiants</Label>
+                        <p className="text-xs text-muted-foreground">Permettre aux autres étudiants de voir votre profil.</p>
                     </div>
-                    <Switch id="profile-visibility" defaultChecked />
+                    <Switch id="profile-visibility-students" defaultChecked />
                 </div>
                  <div className="flex items-start justify-between p-4 border rounded-lg">
                     <div>
-                        <Label htmlFor="show-online" className="font-semibold">Statut en ligne</Label>
-                        <p className="text-xs text-muted-foreground">Afficher quand vous êtes actif sur la plateforme.</p>
+                        <Label htmlFor="profile-visibility-companies" className="font-semibold">Profil visible par les entreprises</Label>
+                        <p className="text-xs text-muted-foreground">Permettre aux entreprises partenaires de voir votre profil.</p>
                     </div>
-                    <Switch id="show-online" defaultChecked />
-                </div>
-                 <div className="flex items-start justify-between p-4 border rounded-lg">
-                    <div>
-                        <Label htmlFor="share-data" className="font-semibold">Partage de données anonymes</Label>
-                        <p className="text-xs text-muted-foreground">Aidez-nous à améliorer la plateforme en partageant des données d'utilisation anonymes.</p>
-                    </div>
-                    <Switch id="share-data" />
+                    <Switch id="profile-visibility-companies" defaultChecked />
                 </div>
             </div>
-             <div className="flex justify-between items-center">
+
+            <Separator />
+            
+             <div className="space-y-4">
+                <h4 className="font-semibold">Informations partagées</h4>
+                <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="share-email" className="font-semibold">Email de contact</Label>
+                        <p className="text-xs text-muted-foreground">Partager votre email avec les autres utilisateurs.</p>
+                    </div>
+                    <Switch id="share-email" defaultChecked />
+                </div>
+                 <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="share-phone" className="font-semibold">Numéro de téléphone</Label>
+                        <p className="text-xs text-muted-foreground">Partager votre numéro de téléphone.</p>
+                    </div>
+                    <Switch id="share-phone" />
+                </div>
+                 <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="share-results" className="font-semibold">Résultats académiques</Label>
+                        <p className="text-xs text-muted-foreground">Partager vos résultats avec les entreprises.</p>
+                    </div>
+                    <Switch id="share-results" defaultChecked />
+                </div>
+            </div>
+
+             <Separator />
+
+             <div className="space-y-4">
+                <h4 className="font-semibold">Partage des données</h4>
+                <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="share-stats" className="font-semibold">Statistiques d'utilisation</Label>
+                        <p className="text-xs text-muted-foreground">Partager des données anonymes pour améliorer le service.</p>
+                    </div>
+                    <Switch id="share-stats" defaultChecked />
+                </div>
+                <div className="flex items-start justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="share-cookies" className="font-semibold">Cookies et traceurs</Label>
+                        <p className="text-xs text-muted-foreground">Accepter les cookies non essentiels.</p>
+                    </div>
+                    <Switch id="share-cookies" />
+                </div>
+            </div>
+
+             <div className="flex justify-between items-center pt-4">
                  <Button variant="outline">Télécharger mes données</Button>
-                 <Button>Enregistrer les modifications</Button>
+                 <Button>Enregistrer les préférences</Button>
             </div>
         </CardContent>
     </Card>
