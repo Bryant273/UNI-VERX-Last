@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTheme } from 'next-themes';
 import {
   User,
   Shield,
@@ -87,7 +88,7 @@ const ProfileSection = () => {
                 <Input id="lastName" defaultValue={studentData.lastName} />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="space-y-1">
                 <Label htmlFor="birthDate">Date de naissance</Label>
                 <Input id="birthDate" type="text" defaultValue={studentData.birthDate} />
@@ -143,7 +144,7 @@ const ProfileSection = () => {
                     </Select>
                 </div>
             </div>
-            <div className="space-y-1">
+             <div className="space-y-1">
               <Label htmlFor="bio">Bio</Label>
               <Textarea id="bio" placeholder="Parlez un peu de vous..." defaultValue="Étudiant passionné par les nouvelles technologies et le développement web. Actuellement en Master 1 Ingénierie Logicielle." />
             </div>
@@ -193,7 +194,7 @@ const ProfileSection = () => {
                 </div>
                  <div className="space-y-1">
                     <Label htmlFor="specialization">Spécialisation</Label>
-                    <Select defaultValue={studentData.speciality}>
+                     <Select defaultValue={studentData.speciality}>
                         <SelectTrigger id="specialization">
                             <SelectValue placeholder="Choisir une spécialisation" />
                         </SelectTrigger>
@@ -308,16 +309,6 @@ const SecuritySection = () => {
             <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Smartphone className="h-6 w-6 text-muted-foreground"/>
-                        <div>
-                            <p className="font-semibold">iPhone 13</p>
-                            <p className="text-sm text-muted-foreground">Paris, FR · Dernière connexion: Hier</p>
-                        </div>
-                    </div>
-                     <Button variant="ghost" size="sm">Déconnecter</Button>
-                </div>
-                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
                         <Globe className="h-6 w-6 text-muted-foreground"/>
                         <div>
                             <p className="font-semibold">Chrome sur MacBook Pro</p>
@@ -325,6 +316,16 @@ const SecuritySection = () => {
                         </div>
                     </div>
                     <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Cet appareil</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Smartphone className="h-6 w-6 text-muted-foreground"/>
+                        <div>
+                            <p className="font-semibold">iPhone 13</p>
+                            <p className="text-sm text-muted-foreground">Paris, FR · Dernière connexion: Hier</p>
+                        </div>
+                    </div>
+                     <Button variant="ghost" size="sm">Déconnecter</Button>
                 </div>
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -472,59 +473,78 @@ const NotificationsSection = () => (
     </Card>
 );
 
-const AppearanceSection = () => (
-     <Card>
-        <CardHeader>
-            <CardTitle>Apparence</CardTitle>
-            <CardDescription>Personnalisez l'apparence de l'application.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-             <div>
-                <Label className="font-semibold">Thème</Label>
-                <RadioGroup defaultValue="system" className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <RadioGroupItem value="light" id="light" className="peer sr-only" />
-                        <Label htmlFor="light" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                            <Sun className="mb-3 h-6 w-6" />
-                            Clair
-                        </Label>
-                    </div>
-                     <div>
-                        <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
-                        <Label htmlFor="dark" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                            <Moon className="mb-3 h-6 w-6" />
-                            Sombre
-                        </Label>
-                    </div>
-                     <div>
-                        <RadioGroupItem value="system" id="system" className="peer sr-only" />
-                        <Label htmlFor="system" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                            <Monitor className="mb-3 h-6 w-6" />
-                            Système
-                        </Label>
-                    </div>
-                </RadioGroup>
-            </div>
+const AppearanceSection = () => {
+    const { theme, setTheme } = useTheme();
+    const [language, setLanguage] = useState('fr');
 
-            <div className="space-y-2">
-                <Label htmlFor="language">Langue</Label>
-                <Select defaultValue="fr">
-                    <SelectTrigger>
-                        <SelectValue placeholder="Sélectionnez une langue" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="fr">Français</SelectItem>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Español</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-             <div className="flex justify-end">
-                <Button>Enregistrer les modifications</Button>
-            </div>
-        </CardContent>
-    </Card>
-);
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Apparence</CardTitle>
+                <CardDescription>Personnalisez l'apparence de l'application.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div>
+                    <Label className="font-semibold">Thème</Label>
+                    <RadioGroup 
+                        defaultValue={theme} 
+                        onValueChange={setTheme}
+                        className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4"
+                    >
+                        <div>
+                            <RadioGroupItem value="light" id="light" className="peer sr-only" />
+                            <Label htmlFor="light" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                                <div className="w-full h-16 mb-3 bg-white rounded-md overflow-hidden shadow-sm border">
+                                    <div className="w-full h-3 bg-gray-100"></div>
+                                </div>
+                                <Sun className="mb-2 h-5 w-5" />
+                                Clair
+                            </Label>
+                        </div>
+                        <div>
+                            <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
+                            <Label htmlFor="dark" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                                <div className="w-full h-16 mb-3 bg-gray-900 rounded-md overflow-hidden shadow-sm border border-gray-800">
+                                    <div className="w-full h-3 bg-gray-800"></div>
+                                </div>
+                                <Moon className="mb-2 h-5 w-5" />
+                                Sombre
+                            </Label>
+                        </div>
+                        <div>
+                            <RadioGroupItem value="system" id="system" className="peer sr-only" />
+                            <Label htmlFor="system" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                                <div className="w-full h-16 mb-3 bg-gradient-to-r from-white to-gray-900 rounded-md overflow-hidden shadow-sm border border-gray-300 dark:border-gray-700">
+                                   <div className="w-full h-3 bg-gray-100 dark:bg-gray-800"></div>
+                                </div>
+                                <Monitor className="mb-2 h-5 w-5" />
+                                Système
+                            </Label>
+                        </div>
+                    </RadioGroup>
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="language">Langue</Label>
+                    <Select value={language} onValueChange={setLanguage}>
+                        <SelectTrigger className="w-[280px]">
+                            <SelectValue placeholder="Sélectionnez une langue" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="fr">Français</SelectItem>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="es">Español</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="flex justify-end">
+                    <Button>Enregistrer les modifications</Button>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 const PrivacySection = () => (
     <Card>
