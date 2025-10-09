@@ -88,9 +88,9 @@ const ProfileSection = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
+               <div className="space-y-1">
                 <Label htmlFor="birthDate">Date de naissance</Label>
-                <Input id="birthDate" type="date" defaultValue={new Date(studentData.birthDate.split('/').reverse().join('-')).toISOString().split('T')[0]} />
+                <Input id="birthDate" type="text" defaultValue={studentData.birthDate} />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="gender">Genre</Label>
@@ -390,41 +390,82 @@ const NotificationsSection = () => (
             <CardDescription>Gérez comment et quand vous recevez des notifications.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                    <Label htmlFor="email-notifs" className="font-semibold">Notifications par Email</Label>
-                    <p className="text-xs text-muted-foreground">Recevoir des résumés et des alertes importantes sur votre email.</p>
-                </div>
-                <Switch id="email-notifs" defaultChecked />
-            </div>
-             <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                    <Label htmlFor="push-notifs" className="font-semibold">Notifications Push</Label>
-                    <p className="text-xs text-muted-foreground">Recevoir des notifications en temps réel sur vos appareils.</p>
-                </div>
-                <Switch id="push-notifs" defaultChecked />
-            </div>
-            <Separator />
             <div className="space-y-4">
-                <h4 className="font-semibold">Notifications Détaillées</h4>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="email-notifs" className="font-semibold">Notifications par Email</Label>
+                        <p className="text-xs text-muted-foreground">Recevoir des résumés et des alertes importantes sur votre email.</p>
+                    </div>
+                    <Switch id="email-notifs" defaultChecked />
+                </div>
+                 <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                        <Label htmlFor="push-notifs" className="font-semibold">Notifications Push</Label>
+                        <p className="text-xs text-muted-foreground">Recevoir des notifications en temps réel sur vos appareils.</p>
+                    </div>
+                    <Switch id="push-notifs" defaultChecked />
+                </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+                <h4 className="font-semibold">Types de notifications</h4>
                 <div className="flex items-center justify-between">
-                    <p className="text-sm">Annonces des cours</p>
+                    <div>
+                        <p className="text-sm">Cours et enseignements</p>
+                        <p className="text-xs text-muted-foreground">Nouveaux cours, modifications d'horaires, etc.</p>
+                    </div>
                     <Switch defaultChecked/>
                 </div>
                  <div className="flex items-center justify-between">
-                    <p className="text-sm">Rappels de devoirs</p>
+                    <div>
+                        <p className="text-sm">Évaluations et examens</p>
+                         <p className="text-xs text-muted-foreground">Nouvelles évaluations, résultats, etc.</p>
+                    </div>
                     <Switch defaultChecked/>
                 </div>
                  <div className="flex items-center justify-between">
-                    <p className="text-sm">Nouveaux messages</p>
+                     <div>
+                        <p className="text-sm">Messages et collaborations</p>
+                        <p className="text-xs text-muted-foreground">Nouveaux messages, travaux de groupe, etc.</p>
+                    </div>
                     <Switch defaultChecked/>
                 </div>
                  <div className="flex items-center justify-between">
-                    <p className="text-sm">Activité de groupe</p>
+                     <div>
+                        <p className="text-sm">Stages et emplois</p>
+                        <p className="text-xs text-muted-foreground">Nouvelles offres, candidatures, etc.</p>
+                    </div>
+                    <Switch />
+                </div>
+                 <div className="flex items-center justify-between">
+                     <div>
+                        <p className="text-sm">Administration et documents</p>
+                        <p className="text-xs text-muted-foreground">Documents administratifs, informations générales, etc.</p>
+                    </div>
                     <Switch />
                 </div>
             </div>
-             <div className="flex justify-end">
+
+            <Separator />
+
+            <div className="space-y-2">
+                 <Label htmlFor="emailFrequency">Fréquence des notifications</Label>
+                 <Select defaultValue="daily">
+                    <SelectTrigger className="w-[280px]">
+                        <SelectValue placeholder="Emails récapitulatifs" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="instant">Instantané</SelectItem>
+                        <SelectItem value="daily">Quotidien (résumé une fois par jour)</SelectItem>
+                        <SelectItem value="weekly">Hebdomadaire</SelectItem>
+                        <SelectItem value="never">Jamais</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+             <div className="flex justify-end pt-4">
                 <Button>Enregistrer les modifications</Button>
             </div>
         </CardContent>
