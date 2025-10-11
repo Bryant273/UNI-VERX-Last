@@ -31,6 +31,7 @@ import {
   FileStack,
   DoorOpen,
   Megaphone,
+  FolderOpen,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
@@ -83,11 +84,25 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   professor: [
     { href: '/professor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/professor/courses', label: 'Mes cours', icon: BookOpen },
-    { href: '/professor/group-work', label: 'TD de groupe', icon: Users },
-    { href: '#', label: 'Étudiants', icon: Users },
+    { href: '/professor/timetable', label: 'Planning', icon: Calendar },
     { href: '#', label: 'Évaluations', icon: ClipboardCheck },
-    { href: '/professor/timetable', label: 'Emploi du temps', icon: Calendar },
-    { href: '/professor/messages', label: 'Messages', icon: MessageSquare },
+    { href: '#', label: 'Notes & Résultats', icon: GraduationCap },
+    {
+      title: 'Pédagogique',
+      links: [
+        { href: '#', label: 'Mes étudiants', icon: Users },
+        { href: '/professor/messages', label: 'Messages', icon: MessageSquare },
+        { href: '#', label: 'Ressources', icon: FolderOpen },
+      ],
+    },
+    {
+      title: 'Administratif',
+      links: [
+        { href: '#', label: 'Présences', icon: UserCheck },
+        { href: '#', label: 'Rapports', icon: FileText },
+        { href: '#', label: 'Paramètres', icon: Settings },
+      ],
+    },
   ],
   admin: [
     { href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -336,4 +351,5 @@ export const messages = [
   { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
   { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
 ];
+
 
