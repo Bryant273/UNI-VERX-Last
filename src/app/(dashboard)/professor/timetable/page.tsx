@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -10,7 +11,7 @@ import {
   Eye,
   UserCheck,
   Search,
-  CheckDouble,
+  CheckCheck,
   X,
   Undo
 } from 'lucide-react';
@@ -227,7 +228,7 @@ export default function ProfessorTimetablePage() {
                     <Input placeholder="Rechercher un étudiant..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                 </div>
                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => markAll(true)}><CheckDouble className="mr-2 h-4 w-4"/>Tous présents</Button>
+                    <Button size="sm" variant="outline" onClick={() => markAll(true)}><CheckCheck className="mr-2 h-4 w-4"/>Tous présents</Button>
                     <Button size="sm" variant="outline" onClick={() => markAll(false)}><X className="mr-2 h-4 w-4"/>Tous absents</Button>
                     <Button size="sm" variant="outline" onClick={() => markAll(false)}><Undo className="mr-2 h-4 w-4"/>Réinitialiser</Button>
                 </div>
@@ -242,7 +243,7 @@ export default function ProfessorTimetablePage() {
                                 <span className="text-sm font-medium">{student.name}</span>
                             </div>
                             <Button variant={student.present ? 'default' : 'outline'} size="sm" onClick={() => toggleStudentAttendance(student.id)}>
-                                {student.present ? <><CheckDouble className="mr-2 h-4 w-4"/>Présent</> : 'Marquer présent'}
+                                {student.present ? <><CheckCheck className="mr-2 h-4 w-4"/>Présent</> : 'Marquer présent'}
                             </Button>
                         </div>
                     ))}
