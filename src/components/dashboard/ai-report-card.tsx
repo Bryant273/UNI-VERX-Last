@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from 'react';
 import { BrainCircuit, Loader2 } from 'lucide-react';
-import { getAiReport } from '@/app/actions';
+import { getAiStudentReport, getAiProfessorReport } from '@/app/actions';
 import {
   Card,
   CardContent,
@@ -21,12 +21,17 @@ import {
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { GenerateStudentReportOutput } from '@/ai/flows/generate-student-report';
+import type { GenerateProfessorReportOutput } from '@/ai/flows/generate-professor-report';
 import AiReportModal from './ai-report-modal';
 
-export default function AiReportCard() {
+interface AiReportCardProps {
+  role: 'student' | 'professor' | 'admin';
+}
+
+export default function AiReportCard({ role }: AiReportCardProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [report, setReport] = useState<GenerateStudentReportOutput | null>(null);
+  const [report, setReport] = useState<GenerateStudentReportOutput | GenerateProfessorReportOutput | null>(null);
   const [semester, setSemester] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -44,7 +49,9 @@ export default function AiReportCard() {
     formData.append('semester', semester);
 
     startTransition(async () => {
-      const result = await getAiReport(null, formData);
+      const action = role === 'student' ? getAiStudentReport : getAiProfessorReport;
+      const result = await action(null, formData);
+
       if (result.error) {
         setError(result.error);
       } else if (result.report) {
@@ -63,7 +70,7 @@ export default function AiReportCard() {
               <div>
                 <CardTitle>Rapport de Performance IA</CardTitle>
                 <CardDescription>
-                  Générez un rapport académique personnalisé basé sur l'IA.
+                  Générez un rapport personnalisé basé sur l'IA.
                 </CardDescription>
               </div>
               <BrainCircuit className="h-6 w-6 text-muted-foreground" />
@@ -105,6 +112,7 @@ export default function AiReportCard() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           report={report}
+          role={role}
         />
       )}
     </>

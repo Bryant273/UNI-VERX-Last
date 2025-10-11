@@ -51,7 +51,7 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {role === 'student' && (
           <>
             <AverageCard />
-            <AiReportCard />
+            <AiReportCard role={role} />
             <div className="flex justify-center sm:justify-start">
               <CurrentEventCard role="student" />
             </div>
@@ -61,34 +61,10 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {/* Tableau de bord Professeur */}
         {role === 'professor' && (
           <>
-            <AiReportCard />
+            <AiReportCard role={role} />
             <div className="flex justify-center sm:justify-start">
               <CurrentEventCard role="professor" />
             </div>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Présence des étudiants</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">92.5%</div>
-                <p className="text-xs text-muted-foreground">
-                  +2.1% depuis le mois dernier
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Progression des notations</CardTitle>
-                <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">75/120</div>
-                <p className="text-xs text-muted-foreground">
-                  Examens de mi-semestre notés
-                </p>
-              </CardContent>
-            </Card>
           </>
         )}
 
@@ -135,7 +111,7 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
             <div className="flex justify-center sm:justify-start">
              <CurrentEventCard role="admin" />
             </div>
-            <AiReportCard />
+            <AiReportCard role={role}/>
           </>
         )}
 

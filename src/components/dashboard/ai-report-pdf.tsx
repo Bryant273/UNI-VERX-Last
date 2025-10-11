@@ -2,10 +2,12 @@
 
 import React from 'react';
 import type { GenerateStudentReportOutput } from '@/ai/flows/generate-student-report';
+import type { GenerateProfessorReportOutput } from '@/ai/flows/generate-professor-report';
 import Logo from '@/components/logo';
 
 interface AiReportPDFProps {
-  report: GenerateStudentReportOutput;
+  report: GenerateStudentReportOutput | GenerateProfessorReportOutput;
+  role: 'student' | 'professor' | 'admin';
 }
 
 const ReportSectionPDF: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -15,20 +17,10 @@ const ReportSectionPDF: React.FC<{ title: string; children: React.ReactNode }> =
     </div>
 );
 
-export default function AiReportPDF({ report }: AiReportPDFProps) {
+const StudentReportPDF: React.FC<{ report: GenerateStudentReportOutput }> = ({ report }) => {
   const { studentName, studentId, studentClass, semester, generalAverage, subjectAverages, courses, absenceHours, comment } = report;
-
   return (
-    <div
-      style={{
-        width: '595px', // A4 width in pixels at 72 DPI
-        minHeight: '842px', // A4 height
-        padding: '40px',
-        backgroundColor: 'white',
-        fontFamily: 'Arial, sans-serif',
-        color: '#000',
-      }}
-    >
+    <>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #6A5ACD', paddingBottom: '15px', marginBottom: '30px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Rapport de Performance IA</h1>
@@ -75,6 +67,69 @@ export default function AiReportPDF({ report }: AiReportPDFProps) {
           <p style={{ fontStyle: 'italic', lineHeight: '1.5' }}>{comment}</p>
         </ReportSectionPDF>
       </main>
+    </>
+  )
+}
+
+const ProfessorReportPDF: React.FC<{ report: GenerateProfessorReportOutput }> = ({ report }) => {
+  const { professorName, department, semester, performanceScore, coursesTaught, studentAttendance, gradeEvolution, comment } = report;
+  return (
+    <>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #6A5ACD', paddingBottom: '15px', marginBottom: '30px' }}>
+        <div>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Rapport de Performance IA</h1>
+          <div style={{ fontSize: '11px', color: '#555' }}>
+            <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Professeur :</strong> {professorName}</p>
+            <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Département :</strong> {department}</p>
+            <p style={{ margin: 0 }}><strong style={{ color: '#000' }}>Semestre :</strong> {semester}</p>
+          </div>
+        </div>
+        <Logo />
+      </header>
+
+      <main>
+         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '25px' }}>
+          <div style={{ padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px', textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>Score de Performance</h4>
+            <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#6A5ACD', margin: 0 }}>{performanceScore}/100</p>
+          </div>
+          <div style={{ padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px', textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>Cours Dispensés</h4>
+            <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#6A5ACD', margin: 0 }}>{coursesTaught}</p>
+          </div>
+        </div>
+
+        <ReportSectionPDF title="Présence des Étudiants">
+          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>{studentAttendance}%</p>
+        </ReportSectionPDF>
+
+        <ReportSectionPDF title="Évolution des Notes">
+          <p style={{ lineHeight: '1.5' }}>{gradeEvolution}</p>
+        </ReportSectionPDF>
+
+        <ReportSectionPDF title="Commentaire de l'IA">
+          <p style={{ fontStyle: 'italic', lineHeight: '1.5' }}>{comment}</p>
+        </ReportSectionPDF>
+      </main>
+    </>
+  )
+}
+
+export default function AiReportPDF({ report, role }: AiReportPDFProps) {
+  const isStudentReport = (report: any): report is GenerateStudentReportOutput => role === 'student' && 'studentName' in report;
+
+  return (
+    <div
+      style={{
+        width: '595px', // A4 width in pixels at 72 DPI
+        minHeight: '842px', // A4 height
+        padding: '40px',
+        backgroundColor: 'white',
+        fontFamily: 'Arial, sans-serif',
+        color: '#000',
+      }}
+    >
+      {isStudentReport(report) ? <StudentReportPDF report={report} /> : <ProfessorReportPDF report={report as GenerateProfessorReportOutput} />}
 
       <footer style={{ marginTop: '40px', paddingTop: '15px', borderTop: '1px solid #ddd', fontSize: '10px', color: '#888', textAlign: 'center' }}>
         <p>Généré par UNI-VERX - Le Système Universitaire Intelligent</p>

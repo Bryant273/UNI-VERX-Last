@@ -12,11 +12,11 @@ import EventDetailsModal from './event-details-modal';
 
 const eventTypeConfig: Record<TimetableEventType, { color: string; label: string }> = {
   cours: { color: 'bg-blue-500', label: 'Cours' },
-  devoir: { color: 'bg-orange-500', label: 'Devoir' },
+  devoir: { color: 'bg-yellow-500', label: 'Devoir' },
   examen: { color: 'bg-red-600', label: 'Examen' },
   activité: { color: 'bg-purple-500', label: 'Activité' },
   td: { color: 'bg-orange-500', label: 'TD' },
-  tp: { color: 'bg-orange-500', label: 'TP' },
+  tp: { color: 'bg-green-500', label: 'TP' },
 };
 
 export default function CurrentEventCard({ role }: { role: UserRole }) {
