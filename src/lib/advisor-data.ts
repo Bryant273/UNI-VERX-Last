@@ -1,38 +1,335 @@
+import {
+  LayoutDashboard,
+  BookOpen,
+  Calendar,
+  GraduationCap,
+  MessageSquare,
+  FileText,
+  Settings,
+  Users,
+  ClipboardCheck,
+  Shield,
+  PieChart,
+  LogOut,
+  Building,
+  Briefcase,
+  FileCog,
+  BookUser,
+  type LucideIcon,
+  ClipboardList,
+  History,
+  CreditCard,
+  UserCheck,
+  UserPlus,
+  AlertTriangle,
+  CalendarCheck,
+  Download,
+  FileBarChart,
+  Vote,
+  FileStack,
+  DoorOpen,
+  Megaphone,
+} from 'lucide-react';
+import { PlaceHolderImages } from './placeholder-images';
+import type { UserRole, NavItem, TimetableEvent } from './data';
+import type { DemoUser } from './messages-data';
 
-export type CourseStatus = 'pending' | 'approved' | 'published' | 'rejected';
+export const VALID_ROLES: UserRole[] = [
+  'student', 
+  'professor', 
+  'academic-advisor', 
+  'secretariat', 
+  'rectorate',
+  'admin',
+  'erp-provider'
+];
 
-export interface AdvisorCourse {
-  id: number;
-  date: string;
-  teacher: string;
-  level: string;
-  class: string;
-  module: string;
-  title: string;
-  extension: string;
-  status: CourseStatus;
-  description: string;
-}
+export const userRolesForLogin: { value: UserRole; label: string }[] = [
+    { value: 'student', label: 'Étudiant' },
+    { value: 'professor', label: 'Professeur' },
+    { value: 'academic-advisor', label: 'Responsable Pédagogique' },
+    { value: 'secretariat', label: 'Secrétariat' },
+    { value: 'rectorate', label: 'Rectorat' },
+    { value: 'admin', label: 'Admin-Université' },
+    { value: 'erp-provider', label: 'Fournisseur ERP' },
+];
 
-export const allCoursesData: AdvisorCourse[] = [
-    { id: 1, date: '10/05/2025', teacher: 'Dr. Claire Dubois', level: 'L3', class: 'INFO', module: 'Bases de Données', title: 'Cours SQL Avancé.pdf', extension: 'pdf', status: 'published', description: 'Introduction aux requêtes SQL avancées' },
-    { id: 2, date: '09/05/2025', teacher: 'Prof. Martin', level: 'L2', class: 'INFO', module: 'Algorithmique', title: 'TD Algorithmes de graphes.docx', extension: 'docx', status: 'pending', description: 'Exercices pratiques sur les algorithmes de graphes' },
-    { id: 3, date: '08/05/2025', teacher: 'Prof. Leroy', level: 'L3', class: 'INFO', module: 'Programmation', title: 'Exemples de code.zip', extension: 'zip', status: 'approved', description: 'Collection d\'exemples de code' },
-    { id: 4, date: '07/05/2025', teacher: 'Dr. Sophie Moreau', level: 'L3', class: 'INFO', module: 'Développement Web', title: 'Introduction JavaScript.pptx', extension: 'pptx', status: 'published', description: 'Présentation des bases de JavaScript' },
-    { id: 5, date: '06/05/2025', teacher: 'Dr. Claire Dubois', level: 'L2', class: 'INFO', module: 'Bases de Données', title: 'Introduction NoSQL.pdf', extension: 'pdf', status: 'pending', description: 'Concepts des bases de données NoSQL' },
-    { id: 6, date: '05/05/2025', teacher: 'Prof. Jean Durand', level: 'L3', class: 'INFO', module: 'Réseaux Informatiques', title: 'Protocoles TCP-IP.pdf', extension: 'pdf', status: 'published', description: 'Guide des protocoles réseau' },
-    { id: 7, date: '04/05/2025', teacher: 'Prof. Martin', level: 'L2', class: 'MATH', module: 'Mathématiques', title: 'Analyse complexe.pdf', extension: 'pdf', status: 'approved', description: 'Cours d\'analyse complexe' },
-    { id: 8, date: '03/05/2025', teacher: 'Dr. Sophie Moreau', level: 'L3', class: 'INFO', module: 'Systèmes d\'exploitation', title: 'Gestion mémoire.pptx', extension: 'pptx', status: 'published', description: 'Mécanismes de gestion mémoire' },
-    { id: 9, date: '02/05/2025', teacher: 'Prof. Leroy', level: 'L2', class: 'INFO', module: 'Algorithmique', title: 'Tri et recherche.docx', extension: 'docx', status: 'rejected', description: 'Algorithmes de tri et de recherche' },
-    { id: 10, date: '01/05/2025', teacher: 'Dr. Claire Dubois', level: 'L3', class: 'INFO', module: 'Programmation', title: 'POO Java.zip', extension: 'zip', status: 'pending', description: 'Programmation orientée objet en Java' },
-    { id: 11, date: '30/04/2025', teacher: 'Prof. Martin', level: 'L1', class: 'MATH', module: 'Mathématiques', title: 'Algèbre linéaire.pdf', extension: 'pdf', status: 'published', description: 'Fondements de l\'algèbre linéaire' },
-    { id: 12, date: '29/04/2025', teacher: 'Prof. Jean Durand', level: 'L2', class: 'INFO', module: 'Bases de Données', title: 'Modélisation ER.pdf', extension: 'pdf', status: 'approved', description: 'Modélisation Entité-Relation' },
-    { id: 13, date: '28/04/2025', teacher: 'Dr. Sophie Moreau', level: 'L3', class: 'INFO', module: 'Développement Web', title: 'CSS Avancé.zip', extension: 'zip', status: 'published', description: 'Techniques CSS avancées' },
-    { id: 14, date: '27/04/2025', teacher: 'Prof. Leroy', level: 'M1', class: 'INFO', module: 'Réseaux Informatiques', title: 'Sécurité réseau.pptx', extension: 'pptx', status: 'pending', description: 'Sécurité des réseaux informatiques' },
-    { id: 15, date: '26/04/2025', teacher: 'Dr. Claire Dubois', level: 'L3', class: 'INFO', module: 'Systèmes d\'exploitation', title: 'Processus et threads.pdf', extension: 'pdf', status: 'published', description: 'Gestion des processus et threads' },
-    { id: 16, date: '25/04/2025', teacher: 'Prof. Martin', level: 'L2', class: 'PHYS', module: 'Physique', title: 'Mécanique quantique.pdf', extension: 'pdf', status: 'approved', description: 'Introduction à la mécanique quantique' },
-    { id: 17, date: '24/04/2025', teacher: 'Prof. Jean Durand', level: 'L1', class: 'ELEC', module: 'Électronique', title: 'Circuits électriques.pptx', extension: 'pptx', status: 'published', description: 'Bases des circuits électriques' },
-    { id: 18, date: '23/04/2025', teacher: 'Dr. Sophie Moreau', level: 'L2', class: 'INFO', module: 'Programmation', title: 'Python avancé.zip', extension: 'zip', status: 'pending', description: 'Techniques avancées en Python' },
-    { id: 19, date: '22/04/2025', teacher: 'Prof. Leroy', level: 'M1', class: 'INFO', module: 'Intelligence Artificielle', title: 'Machine Learning.pdf', extension: 'pdf', status: 'published', description: 'Introduction au Machine Learning' },
-    { id: 20, date: '21/04/2025', teacher: 'Dr. Claire Dubois', level: 'L3', class: 'INFO', module: 'Génie Logiciel', title: 'Méthodes Agiles.docx', extension: 'docx', status: 'approved', description: 'Méthodes de développement agiles' },
+export const navLinks: Record<UserRole, NavItem[]> = {
+  student: [
+    { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/student/payments', label: 'Paiements', icon: CreditCard },
+    { href: '/student/courses', label: 'Mes cours', icon: BookOpen },
+    { href: '/student/timetable', label: 'Emploi du temps', icon: Calendar },
+    { href: '/student/evaluations', label: 'Évaluations', icon: ClipboardList },
+    { href: '/student/results', label: 'Résultats', icon: GraduationCap },
+    {
+      title: 'Collaboratif',
+      links: [
+        { href: '/student/group-work', label: 'TD de groupe', icon: Users },
+        { href: '/student/messages', label: 'Messages', icon: MessageSquare },
+      ],
+    },
+    {
+      title: 'Administratif',
+      links: [
+        { href: '/student/jobs', label: 'Espace Carrière', icon: Briefcase },
+        { href: '/student/enterprise', label: 'Accès Entreprise', icon: Building },
+        { href: '/student/documents', label: 'Documents', icon: FileText },
+      ],
+    },
+  ],
+  professor: [
+    { href: '/professor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/professor/courses', label: 'Mes cours', icon: BookOpen },
+    { href: '/professor/group-work', label: 'TD de groupe', icon: Users },
+    { href: '#', label: 'Étudiants', icon: Users },
+    { href: '#', label: 'Évaluations', icon: ClipboardCheck },
+    { href: '/professor/timetable', label: 'Emploi du temps', icon: Calendar },
+    { href: '/professor/messages', label: 'Messages', icon: MessageSquare },
+  ],
+  admin: [
+    { href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '#', label: 'Gestion des utilisateurs', icon: Users },
+    { href: '/admin/courses', label: 'Gestion des cours', icon: BookOpen },
+    { href: '#', label: 'Statistiques', icon: PieChart },
+    { href: '#', label: 'Sécurité', icon: Shield },
+  ],
+  'academic-advisor': [
+    { href: '/academic-advisor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '#', label: 'Étudiants', icon: Users },
+    { href: '#', label: 'Enseignants', icon: UserCheck },
+    { href: '/academic-advisor/courses', label: 'Cours & Programmes', icon: BookOpen },
+    { href: '#', label: 'Planning Global', icon: Calendar },
+    {
+      title: 'Gestion',
+      links: [
+        { href: '#', label: 'Validations', icon: Vote },
+        { href: '#', label: 'Alertes', icon: AlertTriangle },
+        { href: '#', label: 'Salles', icon: DoorOpen },
+        { href: '#', label: 'Inscriptions', icon: UserPlus },
+        { href: '#', label: 'Scolarité', icon: CreditCard },
+        { href: '#', label: 'Bulletins & Résultats', icon: FileStack },
+      ],
+    },
+    {
+      title: 'Communication',
+      links: [
+        { href: '#', label: 'Messagerie', icon: MessageSquare },
+        { href: '#', label: 'Annonces', icon: Megaphone },
+      ],
+    },
+     {
+      title: 'Rapports',
+      links: [
+        { href: '#', label: 'Statistiques', icon: PieChart },
+        { href: '#', label: 'Rapports', icon: FileBarChart },
+        { href: '#', label: 'Exports', icon: Download },
+      ],
+    },
+  ],
+  secretariat: [
+    { href: '/secretariat/dashboard', label: 'Secrétariat', icon: LayoutDashboard },
+    { href: '#', label: 'Inscriptions', icon: ClipboardCheck },
+    { href: '#', label: 'Gestion Documents', icon: FileCog },
+  ],
+  rectorate: [
+      { href: '/rectorate/dashboard', label: 'Rectorat', icon: LayoutDashboard },
+      { href: '#', label: 'Statistiques Globales', icon: PieChart },
+      { href: '#', label: 'Administration', icon: Building },
+  ],
+  'erp-provider': [
+      { href: '/erp-provider/dashboard', label: 'Fournisseur ERP', icon: LayoutDashboard },
+      { href: '#', label: 'Intégrations', icon: Briefcase },
+      { href: '#', label: 'Maintenance', icon: Settings },
+  ]
+};
+
+export const bottomNavLinks: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: '/student/settings', label: 'Paramètres', icon: Settings },
+];
+
+const semestersData = {
+    'Semestre 1': { average: 14.5, totalStudents: 50, rank: 10 },
+    'Semestre 2': { average: 15.2, totalStudents: 48, rank: 5 },
+};
+const semesterAverages = Object.values(semestersData).map(s => s.average);
+const overallAverage = semesterAverages.reduce((acc, cur) => acc + cur, 0) / semesterAverages.length;
+const overallRank = Math.round(Object.values(semestersData).reduce((acc, cur) => acc + cur.rank, 0) / Object.values(semestersData).length);
+const totalStudents = semestersData['Semestre 1']?.totalStudents || 0;
+
+
+export const studentData = {
+  id: 'ETU-2024-12345',
+  name: 'Alex Dupont',
+  firstName: 'Alex',
+  lastName: 'Dupont',
+  email: 'alex.dupont@uni-verx.edu',
+  password: 'password123',
+  birthDate: '01/01/2002',
+  birthPlace: 'Abidjan',
+  gender: 'Masculin',
+  academicYear: '2024-2025',
+  level: 'Master 1',
+  ufr: 'Sciences et Technologies',
+  speciality: 'Ingénierie Logicielle',
+  class: 'Master 1 - Ingénierie Logicielle',
+  avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
+  semesters: semestersData,
+  overallAverage: overallAverage,
+  overallRank: overallRank,
+  totalStudents: totalStudents,
+};
+
+export const userData: Record<UserRole, { name: string; avatar: string }> = {
+  student: {
+    name: studentData.name,
+    avatar: studentData.avatar,
+  },
+  professor: {
+    name: 'Dr. Évelyne Dubois',
+    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-2')?.imageUrl || '',
+  },
+  admin: {
+    name: 'Samuel Morin',
+    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
+  },
+  'academic-advisor': {
+    name: 'M. Jean Moreau',
+    avatar: 'https://i.pravatar.cc/100?img=25',
+  },
+  secretariat: {
+    name: 'Lucas Bernard',
+    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
+  },
+  rectorate: {
+    name: 'Isabelle Moreau',
+    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
+  },
+  'erp-provider': {
+    name: 'Fournisseur ERP',
+    avatar: '',
+  },
+};
+
+export const allEvents: Record<UserRole, TimetableEvent[]> = {
+  student: [
+    { 
+      id: 1, 
+      time: '09:00 - 11:00', 
+      course: 'Calcul Avancé', 
+      location: 'Amphi A', 
+      type: 'cours',
+      instructor: 'Dr. Alan Turing',
+      fileLink: '/files/calculus-notes.pdf',
+      profComment: 'Excellent travail sur les derniers exercices. Continuez comme ça !',
+      presenceStatus: 'validated',
+      isPast: false,
+    },
+    { 
+      id: 2, 
+      time: '13:00 - 15:00', 
+      course: 'Physique Quantique', 
+      location: 'Labo 3B', 
+      type: 'tp',
+      instructor: 'Dr. Marie Curie',
+      presenceStatus: 'pending',
+      isPast: false,
+    },
+    { 
+      id: 6, 
+      time: '15:00 - 16:00', 
+      course: 'Devoir de calcul', 
+      location: 'À rendre en ligne', 
+      type: 'devoir',
+      fileLink: '/files/devoir-calcul.pdf',
+      profComment: 'Date limite ce soir à 23h59.',
+      presenceStatus: 'na',
+    },
+    { 
+      id: 7, 
+      time: '16:00 - 18:00', 
+      course: 'Histoire', 
+      location: 'Salle 202', 
+      type: 'cours',
+      instructor: 'Dr. Indiana Jones',
+      presenceStatus: 'pending',
+      isPast: true,
+    }
+  ],
+  professor: [
+    { 
+      id: 3, 
+      time: '09:00 - 11:00', 
+      course: 'Calcul Avancé', 
+      location: 'Amphi A', 
+      type: 'cours',
+      instructor: 'Dr. Alan Turing',
+      presenceStatus: 'na',
+    },
+    { 
+      id: 4, 
+      time: '11:00 - 12:00', 
+      course: 'Réunion Pédagogique', 
+      location: 'Salle des profs', 
+      type: 'activité',
+      instructor: 'Direction',
+      presenceStatus: 'na',
+    },
+    { 
+        id: 8, 
+        time: '10:30 - 12:00', 
+        course: 'Introduction à la programmation',
+        location: 'Salle 101', 
+        type: 'cours',
+        instructor: 'Dr. Alan Turing',
+        presenceStatus: 'na',
+    },
+    { 
+        id: 9, 
+        time: '08:30 - 10:00',
+        course: 'Club de Robotique',
+        location: 'Atelier Tech', 
+        type: 'activité',
+        instructor: 'Dr. Alan Turing',
+        presenceStatus: 'na',
+    }
+  ],
+  admin: [
+     { 
+      id: 5, 
+      time: '10:00 - 11:00', 
+      course: 'Conseil d\'administration', 
+      location: 'Salle du conseil', 
+      type: 'activité',
+      instructor: 'Le Recteur',
+      presenceStatus: 'na',
+    }
+  ],
+  'academic-advisor': [],
+  secretariat: [],
+  rectorate: [],
+  'erp-provider': [],
+};
+
+export const courses = {
+  student: [
+    { id: 1, title: 'Mathématiques Avancées', code: 'MATH-301', instructor: 'Dr. Alan Turing', thumbnailId: 'course-thumb-1' },
+    { id: 2, title: 'Physique Quantique', code: 'PHY-310', instructor: 'Dr. Marie Curie', thumbnailId: 'course-thumb-2' },
+    { id: 3, title: 'Histoire du 20ème Siècle', code: 'HIST-205', instructor: 'Dr. Indiana Jones', thumbnailId: 'course-thumb-3' },
+  ],
+  professor: [
+    { id: 1, title: 'Mathématiques Avancées', code: 'MATH-301', students: 45, thumbnailId: 'course-thumb-1' },
+    { id: 4, title: 'Théorie de la Littérature', code: 'LIT-401', students: 30, thumbnailId: 'course-thumb-4' },
+  ],
+  admin: [],
+  'academic-advisor': [],
+  secretariat: [],
+  rectorate: [],
+  'erp-provider': [],
+};
+
+export const messages = [
+  { id: 1, sender: 'Dr. Évelyne Dubois', subject: 'Rappel : Examen de mi-semestre', time: '10:42' },
+  { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
+  { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
 ];
