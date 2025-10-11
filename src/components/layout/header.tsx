@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -23,6 +24,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import DateTime from '@/components/dashboard/date-time';
 
 function getInitials(name: string) {
+  if (!name) return '';
   return name
     .split(' ')
     .map((n) => n[0])

@@ -1,4 +1,5 @@
 
+
 import {
   LayoutDashboard,
   BookOpen,
@@ -20,6 +21,16 @@ import {
   ClipboardList,
   History,
   CreditCard,
+  UserCheck,
+  UserPlus,
+  AlertTriangle,
+  CalendarCheck,
+  Download,
+  FileBarChart,
+  Vote,
+  FileStack,
+  DoorOpen,
+  Megaphone,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
@@ -86,9 +97,37 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '#', label: 'Sécurité', icon: Shield },
   ],
   'academic-advisor': [
-    { href: '/academic-advisor/dashboard', label: 'Responsable Pédagogique', icon: LayoutDashboard },
-    { href: '#', label: 'Programmes', icon: BookOpen },
-    { href: '#', label: 'Suivi Étudiants', icon: Users },
+    { href: '/academic-advisor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '#', label: 'Étudiants', icon: Users },
+    { href: '#', label: 'Enseignants', icon: UserCheck },
+    { href: '/academic-advisor/courses', label: 'Cours & Programmes', icon: BookOpen },
+    { href: '#', label: 'Planning Global', icon: Calendar },
+    {
+      title: 'Gestion',
+      links: [
+        { href: '#', label: 'Validations', icon: Vote },
+        { href: '#', label: 'Alertes', icon: AlertTriangle },
+        { href: '#', label: 'Salles', icon: DoorOpen },
+        { href: '#', label: 'Inscriptions', icon: UserPlus },
+        { href: '#', label: 'Scolarité', icon: CreditCard },
+        { href: '#', label: 'Bulletins & Résultats', icon: FileStack },
+      ],
+    },
+    {
+      title: 'Communication',
+      links: [
+        { href: '#', label: 'Messagerie', icon: MessageSquare },
+        { href: '#', label: 'Annonces', icon: Megaphone },
+      ],
+    },
+     {
+      title: 'Rapports',
+      links: [
+        { href: '#', label: 'Statistiques', icon: PieChart },
+        { href: '#', label: 'Rapports', icon: FileBarChart },
+        { href: '#', label: 'Exports', icon: Download },
+      ],
+    },
   ],
   secretariat: [
     { href: '/secretariat/dashboard', label: 'Secrétariat', icon: LayoutDashboard },
@@ -109,7 +148,6 @@ export const navLinks: Record<UserRole, NavItem[]> = {
 
 export const bottomNavLinks: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/student/settings', label: 'Paramètres', icon: Settings },
-  { href: '#', label: 'Déconnexion', icon: LogOut },
 ];
 
 const semestersData = {
@@ -158,8 +196,8 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
     avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
   },
   'academic-advisor': {
-    name: 'Hélène Olivier',
-    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-2')?.imageUrl || '',
+    name: 'M. Jean Moreau',
+    avatar: 'https://i.pravatar.cc/100?img=25',
   },
   secretariat: {
     name: 'Lucas Bernard',
@@ -297,3 +335,4 @@ export const messages = [
   { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
   { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
 ];
+
