@@ -46,14 +46,14 @@ const eventTypeColors: Record<TimetableEventType, { border: string; bg: string; 
 };
 
 const initialProfessorEvents = [
-    { id: 1, day: "Lundi", time: "08:30 - 10:00", course: "Bases de Données", class: "L3 Informatique", type: "cours" as TimetableEventType, room: "Amphi B", students: 89, attendanceTaken: false },
-    { id: 2, day: "Mercredi", time: "08:30 - 10:00", course: "Programmation Python", class: "L2 Informatique", type: "td" as TimetableEventType, room: "Labo 105", students: 32, attendanceTaken: true },
-    { id: 3, day: "Vendredi", time: "08:30 - 10:00", course: "Algorithmique", class: "L1 Informatique", type: "cours" as TimetableEventType, room: "Amphi A", students: 65, attendanceTaken: false },
-    { id: 4, day: "Mardi", time: "10:30 - 12:00", course: "Bases de Données Avancées", class: "M1 Informatique", type: "td" as TimetableEventType, room: "Labo 203", students: 24, attendanceTaken: false },
-    { id: 5, day: "Mercredi", time: "10:30 - 12:00", course: "Programmation Python", class: "L2 Informatique", type: "tp" as TimetableEventType, room: "Labo 106", students: 16, attendanceTaken: false },
-    { id: 7, day: "Mercredi", time: "13:30 - 15:00", course: "Algorithmique", class: "L1 Informatique", type: "td" as TimetableEventType, room: "Salle 205", students: 31, attendanceTaken: true },
-    { id: 8, day: "Jeudi", time: "13:30 - 15:00", course: "Bases de Données", class: "L3 Informatique", type: "examen" as TimetableEventType, room: "Amphi C", students: 89, attendanceTaken: true },
-    { id: 9, day: "Vendredi", time: "15:30 - 17:00", course: "Séminaire Recherche", class: "M2 Informatique", type: "activité" as TimetableEventType, room: "Salle Séminaire 1", students: 12, attendanceTaken: false },
+    { id: 1, day: "Lundi", time: "08:30 - 10:00", course: "Bases de Données", class: "L3 Informatique", type: "cours" as TimetableEventType, room: "Amphi B", students: 89, attendanceTaken: false, isPast: false },
+    { id: 2, day: "Mercredi", time: "08:30 - 10:00", course: "Programmation Python", class: "L2 Informatique", type: "td" as TimetableEventType, room: "Labo 105", students: 32, attendanceTaken: true, isPast: false },
+    { id: 3, day: "Vendredi", time: "08:30 - 10:00", course: "Algorithmique", class: "L1 Informatique", type: "cours" as TimetableEventType, room: "Amphi A", students: 65, attendanceTaken: false, isPast: false },
+    { id: 4, day: "Mardi", time: "10:30 - 12:00", course: "Bases de Données Avancées", class: "M1 Informatique", type: "td" as TimetableEventType, room: "Labo 203", students: 24, attendanceTaken: false, isPast: false },
+    { id: 5, day: "Mercredi", time: "10:30 - 12:00", course: "Programmation Python", class: "L2 Informatique", type: "tp" as TimetableEventType, room: "Labo 106", students: 16, attendanceTaken: false, isPast: false },
+    { id: 7, day: "Mercredi", time: "13:30 - 15:00", course: "Algorithmique", class: "L1 Informatique", type: "td" as TimetableEventType, room: "Salle 205", students: 31, attendanceTaken: true, isPast: false },
+    { id: 8, day: "Jeudi", time: "13:30 - 15:00", course: "Bases de Données", class: "L3 Informatique", type: "examen" as TimetableEventType, room: "Amphi C", students: 89, attendanceTaken: true, isPast: false },
+    { id: 9, day: "Vendredi", time: "15:30 - 17:00", course: "Séminaire Recherche", class: "M2 Informatique", type: "activité" as TimetableEventType, room: "Salle Séminaire 1", students: 12, attendanceTaken: false, isPast: false },
 ];
 
 const studentsListForAttendance = Array.from({ length: 89 }, (_, i) => ({ id: i, name: `Étudiant ${i + 1}` }));
@@ -87,7 +87,7 @@ export default function ProfessorTimetablePage() {
     const handleEventClick = (event: any | undefined, action?: 'details' | 'attendance') => {
         if (!event) return;
         setSelectedEvent(event);
-        if (action === 'attendance' && !event.attendanceTaken) {
+        if (action === 'attendance' && !event.attendanceTaken && !event.isPast) {
             setAttendanceList(studentsListForAttendance.slice(0, event.students).map(s => ({...s, present: false})));
             setIsAttendanceModalOpen(true);
         } else {
@@ -181,7 +181,7 @@ export default function ProfessorTimetablePage() {
                                     size="icon" 
                                     className="h-7 w-7 bg-white/20 hover:bg-white/40 disabled:bg-green-500/20 disabled:opacity-70 disabled:cursor-not-allowed" 
                                     onClick={(e) => {e.stopPropagation(); handleEventClick(event, 'attendance');}}
-                                    disabled={event.attendanceTaken}
+                                    disabled={event.attendanceTaken || event.isPast}
                                 >
                                     {event.attendanceTaken ? <CheckCheck className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                                 </Button>
@@ -221,12 +221,13 @@ export default function ProfessorTimetablePage() {
                     <p><strong>Horaire :</strong> {selectedEvent?.time}</p>
                     <p><strong>Salle :</strong> {selectedEvent?.room}</p>
                     <p><strong>Étudiants :</strong> {selectedEvent?.students}</p>
+                    {selectedEvent?.isPast && <p className="text-sm text-red-500">Cet événement est terminé.</p>}
                 </div>
                 <DialogFooter>
                     <Button variant="ghost" onClick={() => setIsDetailsModalOpen(false)}>Fermer</Button>
                     <Button 
                         onClick={() => { setIsDetailsModalOpen(false); handleEventClick(selectedEvent, 'attendance'); }}
-                        disabled={selectedEvent?.attendanceTaken}
+                        disabled={selectedEvent?.attendanceTaken || selectedEvent?.isPast}
                     >
                          {selectedEvent?.attendanceTaken ? <CheckCheck className="mr-2 h-4 w-4"/> : <UserCheck className="mr-2 h-4 w-4"/>}
                          {selectedEvent?.attendanceTaken ? "Appel déjà fait" : "Faire l'appel"}

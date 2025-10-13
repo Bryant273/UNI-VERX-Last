@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -12,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import type { TimetableEvent, TimetableEventType, PresenceStatus } from '@/lib/data';
 import { Badge } from '../ui/badge';
-import { CheckCircle, XCircle, AlertCircle, Clock, PartyPopper } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Clock, PartyPopper, UserCheck, CheckCheck } from 'lucide-react';
 import { Separator } from '../ui/separator';
 
 interface EventDetailsModalProps {
@@ -53,8 +54,18 @@ export default function EventDetailsModal({ isOpen, onClose, event }: EventDetai
 
   const handleGoToTimetable = () => {
     onClose();
-    router.push('/student/timetable');
+    // Assuming professor's timetable is at /professor/timetable
+    router.push('/professor/timetable');
   };
+
+  const handleAttendance = () => {
+      // Logic to open attendance modal would go here
+      // For now, we can just close this one.
+      onClose();
+      // Potentially, we could use a global state or callback to open the attendance modal from here.
+      // For simplicity, we'll assume navigation is the primary action for now.
+      router.push('/professor/timetable');
+  }
 
   const renderPresenceStatus = (status: PresenceStatus, isPast?: boolean) => {
       const config = presenceStatusConfig[status];
@@ -80,6 +91,8 @@ export default function EventDetailsModal({ isOpen, onClose, event }: EventDetai
         </div>
       );
   }
+
+  const isProfessorView = router.pathname?.includes('/professor/');
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -124,7 +137,7 @@ export default function EventDetailsModal({ isOpen, onClose, event }: EventDetai
                 </div>
               )}
 
-              {renderPresenceStatus(event.presenceStatus || 'na', event.isPast)}
+              {!isProfessorView && renderPresenceStatus(event.presenceStatus || 'na', event.isPast)}
             </>
           ) : (
             <div className="text-center py-8">
@@ -137,12 +150,23 @@ export default function EventDetailsModal({ isOpen, onClose, event }: EventDetai
 
         <Separator />
 
-        <DialogFooter className='p-4 pt-2'>
-          <Button 
-            className="w-full bg-primary hover:bg-secondary text-white" 
-            onClick={handleGoToTimetable}>
-            Voir l'emploi du temps
-          </Button>
+        <DialogFooter className='p-4 pt-2 flex-col sm:flex-row gap-2'>
+            {isProfessorView && event && (
+                <Button 
+                    className="w-full" 
+                    variant="outline" 
+                    onClick={handleAttendance}
+                    disabled={event.attendanceTaken || event.isPast}
+                >
+                    {event.attendanceTaken ? <CheckCheck className="mr-2" /> : <UserCheck className="mr-2" />}
+                    {event.attendanceTaken ? "Appel déjà fait" : "Faire l'appel"}
+                </Button>
+            )}
+            <Button 
+                className="w-full bg-primary hover:bg-secondary text-white" 
+                onClick={handleGoToTimetable}>
+                Voir l'emploi du temps
+            </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

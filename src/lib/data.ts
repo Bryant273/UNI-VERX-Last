@@ -1,3 +1,4 @@
+
 'use server';
 import type { LucideIcon } from 'lucide-react';
 import { allEvents } from './static-data';
@@ -54,12 +55,18 @@ export async function getActiveEvent(role: UserRole): Promise<TimetableEvent | n
 
   // Find the first event that is currently happening
   const activeEvent = userEvents.find(event => {
-    if (event.isPast) return false;
-    const [startTime, endTime] = event.time.split(' - ').map(t => {
-      const [hours, minutes] = t.split(':').map(Number);
-      return hours * 60 + minutes;
-    });
-    return currentTime >= startTime && currentTime < endTime;
+    const [startTimeStr, endTimeStr] = event.time.split(' - ');
+    const [startHours, startMinutes] = startTimeStr.split(':').map(Number);
+    const [endHours, endMinutes] = endTimeStr.split(':').map(Number);
+    
+    const startTime = startHours * 60 + startMinutes;
+    const endTime = endHours * 60 + endMinutes;
+
+    const isCurrentlyHappening = currentTime >= startTime && currentTime < endTime;
+    
+    event.isPast = currentTime >= endTime;
+    
+    return isCurrentlyHappening;
   });
 
   if (activeEvent) {
