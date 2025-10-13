@@ -38,6 +38,7 @@ export interface TimetableEvent {
   profComment?: string;
   presenceStatus?: PresenceStatus;
   isPast?: boolean;
+  attendanceTaken?: boolean; // New property
 }
 
 // Function to get the current or next event for a user

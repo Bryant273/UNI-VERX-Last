@@ -26,8 +26,7 @@ import 'jspdf-autotable';
 import { format, startOfWeek, endOfWeek, addDays, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import type { TimetableEvent, TimetableEventType } from '@/lib/data';
-import { allEvents } from '@/lib/static-data';
+import type { TimetableEventType } from '@/lib/data';
 
 const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const TIME_SLOTS = [
@@ -46,24 +45,22 @@ const eventTypeColors: Record<TimetableEventType, { border: string; bg: string; 
     activité: { border: 'border-purple-500', bg: 'bg-purple-500/10', text: 'text-purple-700 dark:text-purple-300' },
 };
 
-const mockProfessorEvents = [
-    { id: 1, day: "Lundi", time: "08:30 - 10:00", course: "Bases de Données", class: "L3 Informatique", type: "cours" as TimetableEventType, room: "Amphi B", students: 89 },
-    { id: 2, day: "Mercredi", time: "08:30 - 10:00", course: "Programmation Python", class: "L2 Informatique", type: "td" as TimetableEventType, room: "Labo 105", students: 32 },
-    { id: 3, day: "Vendredi", time: "08:30 - 10:00", course: "Algorithmique", class: "L1 Informatique", type: "cours" as TimetableEventType, room: "Amphi A", students: 65 },
-    { id: 4, day: "Mardi", time: "10:30 - 12:00", course: "Bases de Données Avancées", class: "M1 Informatique", type: "td" as TimetableEventType, room: "Labo 203", students: 24 },
-    { id: 5, day: "Mercredi", time: "10:30 - 12:00", course: "Programmation Python", class: "L2 Informatique", type: "tp" as TimetableEventType, room: "Labo 106", students: 16 },
-    { id: 7, day: "Mercredi", time: "13:30 - 15:00", course: "Algorithmique", class: "L1 Informatique", type: "td" as TimetableEventType, room: "Salle 205", students: 31 },
-    { id: 8, day: "Jeudi", time: "13:30 - 15:00", course: "Bases de Données", class: "L3 Informatique", type: "examen" as TimetableEventType, room: "Amphi C", students: 89 },
-    { id: 9, day: "Vendredi", time: "15:30 - 17:00", course: "Séminaire Recherche", class: "M2 Informatique", type: "activité" as TimetableEventType, room: "Salle Séminaire 1", students: 12 },
+const initialProfessorEvents = [
+    { id: 1, day: "Lundi", time: "08:30 - 10:00", course: "Bases de Données", class: "L3 Informatique", type: "cours" as TimetableEventType, room: "Amphi B", students: 89, attendanceTaken: false },
+    { id: 2, day: "Mercredi", time: "08:30 - 10:00", course: "Programmation Python", class: "L2 Informatique", type: "td" as TimetableEventType, room: "Labo 105", students: 32, attendanceTaken: true },
+    { id: 3, day: "Vendredi", time: "08:30 - 10:00", course: "Algorithmique", class: "L1 Informatique", type: "cours" as TimetableEventType, room: "Amphi A", students: 65, attendanceTaken: false },
+    { id: 4, day: "Mardi", time: "10:30 - 12:00", course: "Bases de Données Avancées", class: "M1 Informatique", type: "td" as TimetableEventType, room: "Labo 203", students: 24, attendanceTaken: false },
+    { id: 5, day: "Mercredi", time: "10:30 - 12:00", course: "Programmation Python", class: "L2 Informatique", type: "tp" as TimetableEventType, room: "Labo 106", students: 16, attendanceTaken: false },
+    { id: 7, day: "Mercredi", time: "13:30 - 15:00", course: "Algorithmique", class: "L1 Informatique", type: "td" as TimetableEventType, room: "Salle 205", students: 31, attendanceTaken: true },
+    { id: 8, day: "Jeudi", time: "13:30 - 15:00", course: "Bases de Données", class: "L3 Informatique", type: "examen" as TimetableEventType, room: "Amphi C", students: 89, attendanceTaken: true },
+    { id: 9, day: "Vendredi", time: "15:30 - 17:00", course: "Séminaire Recherche", class: "M2 Informatique", type: "activité" as TimetableEventType, room: "Salle Séminaire 1", students: 12, attendanceTaken: false },
 ];
 
 const studentsListForAttendance = Array.from({ length: 89 }, (_, i) => ({ id: i, name: `Étudiant ${i + 1}` }));
 
-const getEventForSlot = (day: string, time: string) => {
-  return mockProfessorEvents.find(event => event.day === day && event.time === time);
-};
 
 export default function ProfessorTimetablePage() {
+    const [mockProfessorEvents, setMockProfessorEvents] = useState(initialProfessorEvents);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -77,6 +74,10 @@ export default function ProfessorTimetablePage() {
     const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
     const weekString = `Semaine du ${format(weekStart, 'dd MMMM yyyy', { locale: fr })} au ${format(weekEnd, 'dd MMMM yyyy', { locale: fr })}`;
 
+    const getEventForSlot = (day: string, time: string) => {
+        return mockProfessorEvents.find(event => event.day === day && event.time === time);
+    };
+
     const filteredStudents = useMemo(() => {
         return attendanceList.filter(student => student.name.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [attendanceList, searchTerm]);
@@ -86,13 +87,24 @@ export default function ProfessorTimetablePage() {
     const handleEventClick = (event: any | undefined, action?: 'details' | 'attendance') => {
         if (!event) return;
         setSelectedEvent(event);
-        if (action === 'attendance') {
+        if (action === 'attendance' && !event.attendanceTaken) {
             setAttendanceList(studentsListForAttendance.slice(0, event.students).map(s => ({...s, present: false})));
             setIsAttendanceModalOpen(true);
         } else {
             setIsDetailsModalOpen(true);
         }
     };
+    
+    const handleValidateAttendance = () => {
+        if (!selectedEvent) return;
+        setMockProfessorEvents(prevEvents =>
+            prevEvents.map(event =>
+                event.id === selectedEvent.id ? { ...event, attendanceTaken: true } : event
+            )
+        );
+        setIsAttendanceModalOpen(false);
+    };
+
 
     const handleGeneratePdf = () => {
         setIsPdfModalOpen(true);
@@ -164,8 +176,14 @@ export default function ProfessorTimetablePage() {
                         {event && colorConfig ? (
                           <div className={cn("relative h-full w-full p-2.5 border-l-4 flex flex-col", colorConfig.border, colorConfig.bg, 'hover:bg-opacity-20', `hover:${colorConfig.bg.replace('/10', '/20')}`)}>
                              <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                <Button variant="ghost" size="icon" className="h-7 w-7 bg-white/20 hover:bg-white/40" onClick={(e) => {e.stopPropagation(); handleEventClick(event, 'attendance');}}>
-                                    <UserCheck className="h-4 w-4" />
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-7 w-7 bg-white/20 hover:bg-white/40 disabled:bg-green-500/20 disabled:opacity-70 disabled:cursor-not-allowed" 
+                                    onClick={(e) => {e.stopPropagation(); handleEventClick(event, 'attendance');}}
+                                    disabled={event.attendanceTaken}
+                                >
+                                    {event.attendanceTaken ? <CheckCheck className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                                 </Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7 bg-white/20 hover:bg-white/40" onClick={(e) => {e.stopPropagation(); handleEventClick(event, 'details');}}>
                                     <Eye className="h-4 w-4" />
@@ -206,7 +224,13 @@ export default function ProfessorTimetablePage() {
                 </div>
                 <DialogFooter>
                     <Button variant="ghost" onClick={() => setIsDetailsModalOpen(false)}>Fermer</Button>
-                    <Button onClick={() => { setIsDetailsModalOpen(false); handleEventClick(selectedEvent, 'attendance'); }}>Faire l'appel</Button>
+                    <Button 
+                        onClick={() => { setIsDetailsModalOpen(false); handleEventClick(selectedEvent, 'attendance'); }}
+                        disabled={selectedEvent?.attendanceTaken}
+                    >
+                         {selectedEvent?.attendanceTaken ? <CheckCheck className="mr-2 h-4 w-4"/> : <UserCheck className="mr-2 h-4 w-4"/>}
+                         {selectedEvent?.attendanceTaken ? "Appel déjà fait" : "Faire l'appel"}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -250,7 +274,7 @@ export default function ProfessorTimetablePage() {
                 </div>
                 <DialogFooter>
                     <Button variant="ghost" onClick={() => setIsAttendanceModalOpen(false)}>Annuler</Button>
-                    <Button onClick={() => setIsAttendanceModalOpen(false)}>Valider l'appel</Button>
+                    <Button onClick={handleValidateAttendance}>Valider l'appel</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
