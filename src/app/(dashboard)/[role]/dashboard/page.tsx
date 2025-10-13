@@ -1,5 +1,6 @@
 
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import {
   Users,
   BookOpen,
@@ -19,7 +20,8 @@ import CurrentEventCard from '@/components/dashboard/current-event-card';
 import AiReportCard from '@/components/dashboard/ai-report-card';
 import AverageCard from '@/components/dashboard/average-card';
 import StatsCard from '@/components/dashboard/stats-card';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const ComingSoonCard = ({ title, icon: Icon }: { title: string, icon: React.ElementType }) => (
   <Card className="lg:col-span-3">
@@ -65,30 +67,24 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
         {/* Tableau de bord Professeur */}
         {role === 'professor' && (
           <>
-            <div className="xl:col-span-3 grid gap-6 sm:grid-cols-1 md:grid-cols-3">
+            <div className="xl:col-span-3 grid gap-6 sm:grid-cols-1 md:grid-cols-2">
                 <AiReportCard role={role} />
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Corriger les copies</CardTitle>
-                        <Edit className="h-4 w-4 text-muted-foreground" />
+                    <CardHeader>
+                        <CardTitle>Actions rapides</CardTitle>
+                        <CardDescription>Accédez rapidement à vos tâches principales.</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">23</div>
-                        <p className="text-xs text-muted-foreground">
-                        copies en attente de correction
-                        </p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Publier un cours</CardTitle>
-                        <Upload className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">3</div>
-                        <p className="text-xs text-muted-foreground">
-                        nouveaux cours en brouillon
-                        </p>
+                    <CardContent className="space-y-4">
+                       <Button className="w-full justify-start" size="lg" asChild>
+                         <Link href="/professor/evaluations">
+                            <Edit className="mr-3" />
+                            Corriger les copies (23 en attente)
+                         </Link>
+                       </Button>
+                        <Button className="w-full justify-start" size="lg" variant="outline">
+                             <Upload className="mr-3" />
+                             Publier un nouveau cours
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
