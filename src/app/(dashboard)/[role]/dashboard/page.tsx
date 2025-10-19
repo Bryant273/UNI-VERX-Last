@@ -22,6 +22,7 @@ import AverageCard from '@/components/dashboard/average-card';
 import StatsCard from '@/components/dashboard/stats-card';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import QuickActionsCard from '@/components/dashboard/quick-actions-card';
 
 const ComingSoonCard = ({ title, icon: Icon }: { title: string, icon: React.ElementType }) => (
   <Card className="lg:col-span-3">
@@ -69,24 +70,7 @@ export default function DashboardPage({ params }: { params: { role: UserRole } }
           <>
             <div className="xl:col-span-3 grid gap-6 sm:grid-cols-1 md:grid-cols-2">
                 <AiReportCard role={role} />
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Actions rapides</CardTitle>
-                        <CardDescription>Accédez rapidement à vos tâches principales.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                       <Button className="w-full justify-start" size="lg" asChild>
-                         <Link href="/professor/evaluations">
-                            <Edit className="mr-3" />
-                            Corriger les copies (23 en attente)
-                         </Link>
-                       </Button>
-                        <Button className="w-full justify-start" size="lg" variant="outline">
-                             <Upload className="mr-3" />
-                             Publier un nouveau cours
-                        </Button>
-                    </CardContent>
-                </Card>
+                <QuickActionsCard />
             </div>
             <div className="flex justify-center sm:justify-start xl:justify-center">
               <CurrentEventCard role="professor" />

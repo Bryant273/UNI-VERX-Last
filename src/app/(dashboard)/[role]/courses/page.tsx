@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   File as FileIcon,
   FileText,
@@ -63,6 +63,7 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useCourseModal } from '@/hooks/use-course-modal';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -77,6 +78,16 @@ const documentTypeConfig: Record<
   zip: { icon: FileArchive, color: 'text-purple-500', label: 'Archive' },
   mp4: { icon: Video, color: 'text-indigo-500', label: 'Vidéo' },
 };
+
+const modules = [
+    { value: "Bases de Données", label: "Bases de Données" },
+    { value: "Algorithmique", label: "Algorithmique" },
+    { value: "Programmation", label: "Programmation" },
+    { value: "Développement Web", label: "Développement Web" },
+    { value: "Réseaux Informatiques", label: "Réseaux Informatiques" },
+    { value: "Mathématiques", label: "Mathématiques" },
+    { value: "Systèmes d'exploitation", label: "Systèmes d'exploitation" },
+];
 
 const FileTypeIcon: React.FC<{ type: DocumentType, showLabel?: boolean }> = ({ type, showLabel = false }) => {
   const config = documentTypeConfig[type] || { icon: FileIcon, color: 'text-gray-500', label: 'Fichier' };
@@ -94,12 +105,120 @@ const FileTypeIcon: React.FC<{ type: DocumentType, showLabel?: boolean }> = ({ t
 };
 
 
+const CourseFormModal = () => {
+    const { isOpen, onClose, initialData } = useCourseModal();
+    const [courses, setCourses] = useState<CourseDocument[]>(courseDocuments);
+
+    const handleSave = (formData: Omit<CourseDocument, 'id' | 'date'> & { id?: number }) => {
+        if(initialData && formData.id) {
+            setCourses(prev => prev.map(c => c.id === formData.id ? { ...c, ...formData, date: new Date().toLocaleDateString('fr-FR') } : c));
+        } else {
+            const newCourse: CourseDocument = {
+                ...formData,
+                id: Math.max(...courses.map(c => c.id)) + 1,
+                date: new Date().toLocaleDateString('fr-FR'),
+            };
+            setCourses(prev => [newCourse, ...prev]);
+        }
+        onClose();
+    }
+
+    if (!isOpen) return null;
+
+    return (
+         <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                 <DialogHeader>
+                    <DialogTitle>{initialData ? 'Modifier le cours' : 'Ajouter un cours'}</DialogTitle>
+                    <DialogDescription>Remplissez les informations ci-dessous.</DialogDescription>
+                 </DialogHeader>
+                 <form onSubmit={(e) => {
+                     e.preventDefault();
+                     const formData = new FormData(e.currentTarget);
+                     const data = {
+                         id: initialData?.id,
+                         module: formData.get('module') as string,
+                         documentName: formData.get('title') as string,
+                         description: formData.get('description') as string,
+                         type: 'pdf' as DocumentType,
+                         uploader: 'Dr. Claire Dubois',
+                         level: formData.get('level') as string,
+                         class: formData.get('class') as string,
+                         fileUrl: ''
+                     }
+                     handleSave(data);
+                 }}>
+                     <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-2">
+                                <Label htmlFor="level">Niveau</Label>
+                                <Select name="level" defaultValue={initialData?.level || 'L3'}>
+                                    <SelectTrigger id="level"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="L1">Licence 1</SelectItem>
+                                        <SelectItem value="L2">Licence 2</SelectItem>
+                                        <SelectItem value="L3">Licence 3</SelectItem>
+                                        <SelectItem value="M1">Master 1</SelectItem>
+                                        <SelectItem value="M2">Master 2</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                           </div>
+                           <div className="space-y-2">
+                                <Label htmlFor="class">Filière</Label>
+                                <Select name="class" defaultValue={initialData?.class || 'INFO'}>
+                                    <SelectTrigger id="class"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="INFO">Informatique</SelectItem>
+                                        <SelectItem value="MATH">Mathématiques</SelectItem>
+                                        <SelectItem value="PHYS">Physique</SelectItem>
+                                        <SelectItem value="ELEC">Électronique</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                           </div>
+                        </div>
+                         <div className="space-y-2">
+                             <Label htmlFor="module">Module</Label>
+                             <Select name="module" defaultValue={initialData?.module}>
+                                <SelectTrigger id="module"><SelectValue placeholder="Sélectionnez un module" /></SelectTrigger>
+                                <SelectContent>
+                                    {modules.map(mod => <SelectItem key={mod.value} value={mod.value}>{mod.label}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                         </div>
+                         <div className="space-y-2">
+                             <Label htmlFor="title">Titre du document</Label>
+                             <Input id="title" name="title" defaultValue={initialData?.documentName || ''} required />
+                         </div>
+                         <div className="space-y-2">
+                             <Label htmlFor="description">Description</Label>
+                             <Textarea id="description" name="description" defaultValue={initialData?.description || ''} />
+                         </div>
+                          <div className="space-y-2">
+                             <Label>Fichier</Label>
+                              <div className="p-8 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                                <p className="mt-2 text-sm text-muted-foreground">Glissez-déposez ou cliquez pour parcourir</p>
+                            </div>
+                         </div>
+                     </div>
+                     <DialogFooter>
+                         <Button type="button" variant="ghost" onClick={onClose}>Annuler</Button>
+                         <Button type="submit">Enregistrer</Button>
+                     </DialogFooter>
+                 </form>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 export default function ProfessorCoursesPage() {
   const [courses, setCourses] = useState<CourseDocument[]>(courseDocuments);
   const [levelFilter, setLevelFilter] = useState('L3');
   const [classFilter, setClassFilter] = useState('INFO');
   const [currentPage, setCurrentPage] = useState(1);
-  const [modalState, setModalState] = useState<{ type: 'view' | 'add' | 'edit' | 'delete' | null, doc: CourseDocument | null }>({ type: null, doc: null });
+  const [viewModalDoc, setViewModalDoc] = useState<CourseDocument | null>(null);
+  const [deleteModalDoc, setDeleteModalDoc] = useState<CourseDocument | null>(null);
+  const { onOpen } = useCourseModal();
   
   const filteredDocuments = useMemo(() => {
     return courses
@@ -113,35 +232,14 @@ export default function ProfessorCoursesPage() {
     currentPage * ITEMS_PER_PAGE
   );
   
-  const handleAction = (type: 'view' | 'add' | 'edit' | 'delete', doc?: CourseDocument | null) => {
-    setModalState({ type, doc: doc || null });
-  };
-  
-  const handleCloseModal = () => {
-    setModalState({ type: null, doc: null });
-  };
-
   const handleDelete = (docId: number) => {
     setCourses(prev => prev.filter(c => c.id !== docId));
-    handleCloseModal();
-  }
-  
-  const handleSave = (formData: Omit<CourseDocument, 'id' | 'date'> & { id?: number }) => {
-    if(modalState.type === 'edit' && formData.id) {
-        setCourses(prev => prev.map(c => c.id === formData.id ? { ...c, ...formData, date: new Date().toLocaleDateString('fr-FR') } : c));
-    } else {
-        const newCourse: CourseDocument = {
-            ...formData,
-            id: Math.max(...courses.map(c => c.id)) + 1,
-            date: new Date().toLocaleDateString('fr-FR'),
-        };
-        setCourses(prev => [newCourse, ...prev]);
-    }
-    handleCloseModal();
+    setDeleteModalDoc(null);
   }
 
   return (
     <div className="space-y-6">
+      <CourseFormModal />
       <Card>
         <CardHeader>
           <CardTitle>Gestion des cours</CardTitle>
@@ -182,7 +280,7 @@ export default function ProfessorCoursesPage() {
                 </Select>
               </div>
             </div>
-            <Button onClick={() => handleAction('add')}>
+            <Button onClick={() => onOpen()}>
               <Plus className="mr-2 h-4 w-4" /> Ajouter un cours
             </Button>
           </div>
@@ -202,6 +300,7 @@ export default function ProfessorCoursesPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>#</TableHead>
                 <TableHead>Date de mise en ligne</TableHead>
                 <TableHead>Nom du module</TableHead>
                 <TableHead>Document</TableHead>
@@ -209,8 +308,9 @@ export default function ProfessorCoursesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedDocuments.map((doc) => (
-                <TableRow key={doc.id}>
+              {paginatedDocuments.map((doc, index) => (
+                <TableRow key={doc.id} className="even:bg-muted/40">
+                  <TableCell className="font-medium text-muted-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                   <TableCell className="text-muted-foreground">{doc.date}</TableCell>
                   <TableCell className="font-medium">{doc.module}</TableCell>
                   <TableCell>
@@ -223,19 +323,19 @@ export default function ProfessorCoursesPage() {
                      <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" onClick={() => handleAction('view', doc)}><Eye className="h-4 w-4" /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => setViewModalDoc(doc)}><Eye className="h-4 w-4" /></Button>
                             </TooltipTrigger>
                             <TooltipContent><p>Voir</p></TooltipContent>
                         </Tooltip>
                          <Tooltip>
                             <TooltipTrigger asChild>
-                               <Button variant="ghost" size="icon" onClick={() => handleAction('edit', doc)}><Edit className="h-4 w-4" /></Button>
+                               <Button variant="ghost" size="icon" onClick={() => onOpen(doc)}><Edit className="h-4 w-4" /></Button>
                             </TooltipTrigger>
                             <TooltipContent><p>Modifier</p></TooltipContent>
                         </Tooltip>
                          <Tooltip>
                             <TooltipTrigger asChild>
-                               <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleAction('delete', doc)}><Trash2 className="h-4 w-4" /></Button>
+                               <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteModalDoc(doc)}><Trash2 className="h-4 w-4" /></Button>
                             </TooltipTrigger>
                             <TooltipContent><p>Supprimer</p></TooltipContent>
                         </Tooltip>
@@ -277,120 +377,48 @@ export default function ProfessorCoursesPage() {
       </Card>
       
       {/* View Modal */}
-      {modalState.type === 'view' && modalState.doc && (
-        <Dialog open={true} onOpenChange={handleCloseModal}>
+      {viewModalDoc && (
+        <Dialog open={!!viewModalDoc} onOpenChange={() => setViewModalDoc(null)}>
             <DialogContent className="sm:max-w-2xl">
                  <DialogHeader>
                      <DialogTitle className="flex items-center gap-3">
-                        <FileTypeIcon type={modalState.doc.type} showLabel />
-                        <span>{modalState.doc.documentName}</span>
+                        <FileTypeIcon type={viewModalDoc.type} showLabel />
+                        <span>{viewModalDoc.documentName}</span>
                     </DialogTitle>
-                     <DialogDescription>{modalState.doc.module}</DialogDescription>
+                     <DialogDescription>{viewModalDoc.module}</DialogDescription>
                  </DialogHeader>
                  <div className="py-4 space-y-2 text-sm">
-                    <p><strong className="text-muted-foreground">Date :</strong> {modalState.doc.date}</p>
-                    <p><strong className="text-muted-foreground">Description :</strong> {modalState.doc.description || 'N/A'}</p>
+                    <p><strong className="text-muted-foreground">Date :</strong> {viewModalDoc.date}</p>
+                    <p><strong className="text-muted-foreground">Description :</strong> {viewModalDoc.description || 'N/A'}</p>
                  </div>
-                 <div className="bg-muted rounded-lg p-8 min-h-[200px] flex items-center justify-center">
-                    <p className="text-muted-foreground text-center">L'aperçu du document s'afficherait ici.</p>
-                 </div>
+                 <div className="py-4 my-4 bg-muted/50 rounded-lg flex items-center justify-center min-h-[300px]">
+                    <div className="text-center text-muted-foreground">
+                        <FileText className="mx-auto h-16 w-16" />
+                        <p className="mt-4 font-semibold">Prévisualisation non disponible</p>
+                        <p className="text-sm">Le contenu du fichier serait affiché ici.</p>
+                    </div>
+                </div>
                  <DialogFooter>
-                     <Button variant="ghost" onClick={handleCloseModal}>Fermer</Button>
+                     <Button variant="ghost" onClick={() => setViewModalDoc(null)}>Fermer</Button>
                      <Button><Download className="mr-2 h-4 w-4" /> Télécharger</Button>
                  </DialogFooter>
             </DialogContent>
         </Dialog>
       )}
 
-      {/* Add/Edit Modal */}
-      {(modalState.type === 'add' || modalState.type === 'edit') && (
-        <Dialog open={true} onOpenChange={handleCloseModal}>
-            <DialogContent>
-                 <DialogHeader>
-                    <DialogTitle>{modalState.type === 'edit' ? 'Modifier le cours' : 'Ajouter un cours'}</DialogTitle>
-                    <DialogDescription>Remplissez les informations ci-dessous.</DialogDescription>
-                 </DialogHeader>
-                 <form onSubmit={(e) => {
-                     e.preventDefault();
-                     const formData = new FormData(e.currentTarget);
-                     const data = {
-                         id: modalState.doc?.id,
-                         module: formData.get('module') as string,
-                         documentName: formData.get('title') as string,
-                         description: formData.get('description') as string,
-                         type: 'pdf' as DocumentType, // Simplified
-                         uploader: 'Dr. Claire Dubois', // Simplified
-                         level: formData.get('level') as string,
-                         class: formData.get('class') as string,
-                     }
-                     handleSave(data);
-                 }}>
-                     <div className="space-y-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                           <div className="space-y-2">
-                                <Label htmlFor="level">Niveau</Label>
-                                <Select name="level" defaultValue={modalState.doc?.level || levelFilter}>
-                                    <SelectTrigger id="level"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="L1">Licence 1</SelectItem>
-                                        <SelectItem value="L2">Licence 2</SelectItem>
-                                        <SelectItem value="L3">Licence 3</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                           </div>
-                           <div className="space-y-2">
-                                <Label htmlFor="class">Filière</Label>
-                                <Select name="class" defaultValue={modalState.doc?.class || classFilter}>
-                                    <SelectTrigger id="class"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="INFO">Informatique</SelectItem>
-                                        <SelectItem value="MATH">Mathématiques</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                           </div>
-                        </div>
-                         <div className="space-y-2">
-                             <Label htmlFor="module">Module</Label>
-                             <Input id="module" name="module" defaultValue={modalState.doc?.module || ''} required/>
-                         </div>
-                         <div className="space-y-2">
-                             <Label htmlFor="title">Titre du document</Label>
-                             <Input id="title" name="title" defaultValue={modalState.doc?.documentName || ''} required />
-                         </div>
-                         <div className="space-y-2">
-                             <Label htmlFor="description">Description</Label>
-                             <Textarea id="description" name="description" defaultValue={modalState.doc?.description || ''} />
-                         </div>
-                          <div className="space-y-2">
-                             <Label>Fichier</Label>
-                              <div className="p-8 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors">
-                                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                                <p className="mt-2 text-sm text-muted-foreground">Glissez-déposez ou cliquez pour parcourir</p>
-                            </div>
-                         </div>
-                     </div>
-                     <DialogFooter>
-                         <Button type="button" variant="ghost" onClick={handleCloseModal}>Annuler</Button>
-                         <Button type="submit">Enregistrer</Button>
-                     </DialogFooter>
-                 </form>
-            </DialogContent>
-        </Dialog>
-      )}
-
       {/* Delete Modal */}
-      {modalState.type === 'delete' && modalState.doc && (
-        <Dialog open={true} onOpenChange={handleCloseModal}>
+      {deleteModalDoc && (
+        <Dialog open={!!deleteModalDoc} onOpenChange={() => setDeleteModalDoc(null)}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Confirmer la suppression</DialogTitle>
                     <DialogDescription>
-                        Êtes-vous sûr de vouloir supprimer le document "{modalState.doc.documentName}"? Cette action est irréversible.
+                        Êtes-vous sûr de vouloir supprimer le document "{deleteModalDoc.documentName}"? Cette action est irréversible.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="ghost" onClick={handleCloseModal}>Annuler</Button>
-                    <Button variant="destructive" onClick={() => handleDelete(modalState.doc!.id)}>Supprimer</Button>
+                    <Button variant="ghost" onClick={() => setDeleteModalDoc(null)}>Annuler</Button>
+                    <Button variant="destructive" onClick={() => handleDelete(deleteModalDoc.id)}>Supprimer</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
