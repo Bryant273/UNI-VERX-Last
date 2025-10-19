@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { SidebarProvider, Sidebar } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
+import CourseFormModal from '@/components/dashboard/course-form-modal';
 
 export default function DashboardLayout({
   children,
@@ -19,6 +20,7 @@ export default function DashboardLayout({
             {children}
           </main>
         </div>
+        <CourseFormModal />
       </div>
     </SidebarProvider>
   );
