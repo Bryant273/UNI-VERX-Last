@@ -62,7 +62,7 @@ export default function CourseFormModal() {
 
     return (
          <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
+            <DialogContent className="sm:max-w-xl">
                  <DialogHeader>
                     <DialogTitle>{initialData ? 'Modifier le cours' : 'Ajouter un cours'}</DialogTitle>
                     <DialogDescription>Remplissez les informations ci-dessous.</DialogDescription>
