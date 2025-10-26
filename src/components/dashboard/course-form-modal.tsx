@@ -1,10 +1,8 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import {
-  UploadCloud,
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { UploadCloud, File as FileIcon, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
@@ -43,7 +41,19 @@ const modules = [
 export default function CourseFormModal() {
     const { isOpen, onClose, initialData } = useCourseModal();
     const [courses, setCourses] = useState<CourseDocument[]>(courseDocuments);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+    useEffect(() => {
+        // Reset file when modal opens or closes, or when initialData changes
+        setSelectedFile(null);
+    }, [isOpen, initialData]);
+
+    const handleFileChange = (files: FileList | null) => {
+        if (files && files.length > 0) {
+            setSelectedFile(files[0]);
+        }
+    };
+    
     const handleSave = (formData: Omit<CourseDocument, 'id' | 'date'> & { id?: number }) => {
         if(initialData && formData.id) {
             setCourses(prev => prev.map(c => c.id === formData.id ? { ...c, ...formData, date: new Date().toLocaleDateString('fr-FR') } : c));
@@ -73,9 +83,9 @@ export default function CourseFormModal() {
                      const data = {
                          id: initialData?.id,
                          module: formData.get('module') as string,
-                         documentName: formData.get('title') as string,
+                         documentName: selectedFile?.name || initialData?.documentName || 'Nouveau document',
                          description: formData.get('description') as string,
-                         type: 'pdf' as DocumentType,
+                         type: (selectedFile?.name.split('.').pop() as DocumentType) || initialData?.type || 'pdf',
                          uploader: 'Dr. Claire Dubois',
                          level: formData.get('level') as string,
                          class: formData.get('class') as string,
@@ -83,7 +93,7 @@ export default function CourseFormModal() {
                      }
                      handleSave(data);
                  }}>
-                     <div className="space-y-4 py-4">
+                     <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
                         <div className="grid grid-cols-2 gap-4">
                            <div className="space-y-2">
                                 <Label htmlFor="level">Niveau</Label>
@@ -121,19 +131,34 @@ export default function CourseFormModal() {
                             </Select>
                          </div>
                          <div className="space-y-2">
-                             <Label htmlFor="title">Titre du document</Label>
-                             <Input id="title" name="title" defaultValue={initialData?.documentName || ''} required />
-                         </div>
-                         <div className="space-y-2">
                              <Label htmlFor="description">Description</Label>
-                             <Textarea id="description" name="description" defaultValue={initialData?.description || ''} />
+                             <Textarea id="description" name="description" defaultValue={initialData?.description || ''} placeholder="Brève description du contenu du document..." />
                          </div>
                           <div className="space-y-2">
                              <Label>Fichier</Label>
-                              <div className="p-8 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors">
-                                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                                <p className="mt-2 text-sm text-muted-foreground">Glissez-déposez ou cliquez pour parcourir</p>
-                            </div>
+                             {selectedFile ? (
+                                <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                                    <div className="flex items-center gap-3">
+                                        <FileIcon className="h-6 w-6 text-muted-foreground" />
+                                        <div>
+                                            <p className="text-sm font-medium">{selectedFile.name}</p>
+                                            <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                                        </div>
+                                    </div>
+                                    <Button variant="ghost" size="icon" onClick={() => setSelectedFile(null)}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                             ) : (
+                                <div 
+                                    className="p-6 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors"
+                                    onClick={() => document.getElementById('file-upload')?.click()}
+                                >
+                                    <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground" />
+                                    <p className="mt-2 text-sm text-muted-foreground">Cliquez ou glissez-déposez pour téléverser</p>
+                                    <Input id="file-upload" type="file" className="hidden" onChange={(e) => handleFileChange(e.target.files)} />
+                                </div>
+                             )}
                          </div>
                      </div>
                      <DialogFooter>
