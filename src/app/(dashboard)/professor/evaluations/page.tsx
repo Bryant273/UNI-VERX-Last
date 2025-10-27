@@ -22,7 +22,8 @@ import {
   Download,
   Search,
   Plus,
-  Ban
+  Ban,
+  Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -79,12 +80,15 @@ export default function ProfessorEvaluationsPage() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="interrogations" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="interrogations">
             <ClipboardList className="mr-2" /> Interrogations QCM
           </TabsTrigger>
           <TabsTrigger value="devoirs">
             <FileText className="mr-2" /> Devoirs
+          </TabsTrigger>
+          <TabsTrigger value="group-tds">
+            <Users className="mr-2" /> TDs de groupe
           </TabsTrigger>
         </TabsList>
 
@@ -241,6 +245,28 @@ export default function ProfessorEvaluationsPage() {
                     </Table>
                 </div>
             </Card>
+        </TabsContent>
+
+        <TabsContent value="group-tds" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader className="flex-row items-center justify-between">
+              <div>
+                <CardTitle>Gérer les TD de Groupe</CardTitle>
+                <CardDescription>Créez des groupes, assignez des travaux et suivez leur progression.</CardDescription>
+              </div>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Créer un groupe / TD
+              </Button>
+            </CardHeader>
+          </Card>
+          <Card>
+             <CardContent className="pt-6 text-center text-muted-foreground">
+                <Users className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" />
+                <h3 className="mt-4 text-lg font-semibold">Section en construction</h3>
+                <p className="mt-1 text-sm">La fonctionnalité de gestion des travaux dirigés de groupe sera bientôt disponible ici.</p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
