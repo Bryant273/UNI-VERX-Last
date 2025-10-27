@@ -165,6 +165,16 @@ const formatTime = (seconds: number) => {
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 };
 
+const shuffleArray = <T>(array: T[]): T[] => {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+};
+
 const getDailyQcms = (): Qcm[] => {
     const now = new Date();
     const todayDay = now.toLocaleString('fr-FR', { weekday: 'long' }).toLowerCase();
@@ -194,7 +204,7 @@ const getDailyQcms = (): Qcm[] => {
             difficulty: difficulty,
             startTime,
             endTime,
-            questions: generateQuestions(event.course, 20),
+            questions: shuffleArray(generateQuestions(event.course, 50)).slice(0, 20),
         };
     });
 };
@@ -359,7 +369,7 @@ export default function EvaluationsPage() {
                 difficulty: 'Moyenne' as 'Moyenne',
                 startTime: new Date(),
                 endTime: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48h from now
-                questions: h.questions,
+                questions: shuffleArray(h.questions).slice(0, 20),
                 isRattrapage: true,
             }));
     }, [rattrapageActive, allQcmHistory]);
@@ -971,3 +981,4 @@ export default function EvaluationsPage() {
     </div>
   );
 }
+

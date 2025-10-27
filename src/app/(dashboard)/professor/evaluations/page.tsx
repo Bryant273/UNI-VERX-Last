@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -559,7 +560,7 @@ export default function EvaluationsPage() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="interrogations" className="space-y-6 mt-6">
-            {['admin', 'professor'].includes(role) && (
+            {['admin', 'academic-advisor'].includes(role) && (
                 <Card>
                     <CardHeader>
                         <CardTitle>Zone Administrateur</CardTitle>

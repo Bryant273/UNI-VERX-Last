@@ -108,6 +108,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '#', label: 'Gestion des utilisateurs', icon: Users },
     { href: '/admin/courses', label: 'Gestion des cours', icon: BookOpen },
+    { href: '/admin/evaluations', label: 'Gestion des évaluations', icon: ClipboardCheck },
     { href: '#', label: 'Statistiques', icon: PieChart },
     { href: '#', label: 'Sécurité', icon: Shield },
   ],
@@ -351,6 +352,7 @@ export const messages = [
   { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
   { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
 ];
+
 
 
 
