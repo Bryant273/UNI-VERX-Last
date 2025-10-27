@@ -65,6 +65,7 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCourseModal } from '@/hooks/use-course-modal';
 import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -614,3 +615,5 @@ export default function ProfessorCoursesPage() {
     </div>
   );
 }
+
+    
