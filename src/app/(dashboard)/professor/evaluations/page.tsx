@@ -66,6 +66,15 @@ const statusColors: { [key: string]: string } = {
 export default function ProfessorEvaluationsPage() {
     const [isQcmModalOpen, setIsQcmModalOpen] = useState(false);
     const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+    const [isQcmResultsModalOpen, setIsQcmResultsModalOpen] = useState(false);
+    const [isAssignmentSubmissionsModalOpen, setIsAssignmentSubmissionsModalOpen] = useState(false);
+    const [isEditDeadlineModalOpen, setIsEditDeadlineModalOpen] = useState(false);
+    const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
+    
+    const openModal = (modalSetter: React.Dispatch<React.SetStateAction<boolean>>, data?: any) => {
+        setSelectedEvaluation(data);
+        modalSetter(true);
+    };
     
   return (
     <div className="space-y-6">
@@ -145,7 +154,7 @@ export default function ProfessorEvaluationsPage() {
                                 </TableCell>
                                 <TableCell><Badge variant="outline" className={statusColors['Terminé']}>Terminé</Badge></TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => openModal(setIsQcmResultsModalOpen, {title: 'QCM SQL Avancé'})}><Eye className="h-4 w-4" /></Button>
                                     <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
                                     <Button variant="ghost" size="icon"><Ban className="h-4 w-4" /></Button>
                                 </TableCell>
@@ -164,7 +173,7 @@ export default function ProfessorEvaluationsPage() {
                                 </TableCell>
                                 <TableCell><Badge variant="outline" className={statusColors['Programmé']}>Programmé</Badge></TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => openModal(setIsQcmResultsModalOpen, {title: 'QCM Algorithmes de tri'})}><Eye className="h-4 w-4" /></Button>
                                     <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
                                     <Button variant="ghost" size="icon"><Ban className="h-4 w-4" /></Button>
                                 </TableCell>
@@ -223,9 +232,9 @@ export default function ProfessorEvaluationsPage() {
                                 </TableCell>
                                 <TableCell><Badge variant="outline" className={statusColors['En cours']}>En cours</Badge></TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => openModal(setIsAssignmentSubmissionsModalOpen, {title: 'TP1 - Site responsive'})}><Eye className="h-4 w-4" /></Button>
                                     <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
-                                    <Button variant="ghost" size="icon"><Clock className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => openModal(setIsEditDeadlineModalOpen, {title: 'TP1 - Site responsive', deadline: '2025-05-17T23:59'})}><Clock className="h-4 w-4" /></Button>
                                 </TableCell>
                             </TableRow>
                         </TableBody>
@@ -235,7 +244,9 @@ export default function ProfessorEvaluationsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Modals */}
+      {/* --- Modals --- */}
+
+      {/* Création QCM */}
         <Dialog open={isQcmModalOpen} onOpenChange={setIsQcmModalOpen}>
             <DialogContent className="max-w-4xl">
                 <DialogHeader>
@@ -265,6 +276,7 @@ export default function ProfessorEvaluationsPage() {
             </DialogContent>
         </Dialog>
         
+      {/* Création Devoir */}
         <Dialog open={isAssignmentModalOpen} onOpenChange={setIsAssignmentModalOpen}>
              <DialogContent className="max-w-3xl">
                 <DialogHeader>
@@ -294,7 +306,103 @@ export default function ProfessorEvaluationsPage() {
                 </form>
             </DialogContent>
         </Dialog>
+
+        {/* Visualisation Résultats QCM */}
+        <Dialog open={isQcmResultsModalOpen} onOpenChange={setIsQcmResultsModalOpen}>
+            <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                    <DialogTitle>Résultats - {selectedEvaluation?.title}</DialogTitle>
+                </DialogHeader>
+                 <div className="overflow-x-auto my-6">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Étudiant</TableHead><TableHead>Moyenne</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow><TableCell>Martin Dubois</TableCell><TableCell>16/20</TableCell></TableRow>
+                            <TableRow><TableCell>Sophie Laurent</TableCell><TableCell>18/20</TableCell></TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+                <DialogFooter>
+                    <Button type="button" variant="ghost" onClick={() => setIsQcmResultsModalOpen(false)}>Fermer</Button>
+                    <Button type="button"><Download className="mr-2 h-4 w-4" /> Télécharger</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        
+        {/* Visualisation Rendus Devoir */}
+        <Dialog open={isAssignmentSubmissionsModalOpen} onOpenChange={setIsAssignmentSubmissionsModalOpen}>
+            <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                    <DialogTitle>Rendus - {selectedEvaluation?.title}</DialogTitle>
+                </DialogHeader>
+                 <div className="overflow-x-auto my-6">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Étudiant</TableHead>
+                                <TableHead>Date de rendu</TableHead>
+                                <TableHead>Fichier</TableHead>
+                                <TableHead>Note (/20)</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                           <TableRow>
+                                <TableCell>Martin Dubois</TableCell>
+                                <TableCell>15/05/2025 14:30</TableCell>
+                                <TableCell><Button variant="link" className="p-0 h-auto">martin_dubois_tp1.zip</Button></TableCell>
+                                <TableCell><Input type="number" className="w-20" /></TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
+                                </TableCell>
+                           </TableRow>
+                           <TableRow>
+                                <TableCell>Sophie Laurent</TableCell>
+                                <TableCell>16/05/2025 09:15</TableCell>
+                                <TableCell><Button variant="link" className="p-0 h-auto">sophie_laurent_tp1.zip</Button></TableCell>
+                                <TableCell><Input type="number" className="w-20" defaultValue="17.5" /></TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
+                                </TableCell>
+                           </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+                <DialogFooter>
+                    <Button type="button" variant="ghost" onClick={() => setIsAssignmentSubmissionsModalOpen(false)}>Fermer</Button>
+                    <Button type="button">Sauvegarder les notes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        {/* Modification Deadline */}
+        <Dialog open={isEditDeadlineModalOpen} onOpenChange={setIsEditDeadlineModalOpen}>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Modifier la date limite</DialogTitle>
+                </DialogHeader>
+                <form>
+                    <div className="space-y-4 my-6">
+                        <div className="space-y-2">
+                            <Label>Titre du devoir</Label>
+                            <Input readOnly defaultValue={selectedEvaluation?.title} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="new-deadline">Nouvelle date limite</Label>
+                            <Input id="new-deadline" type="datetime-local" defaultValue={selectedEvaluation?.deadline} />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="ghost" onClick={() => setIsEditDeadlineModalOpen(false)}>Annuler</Button>
+                        <Button type="submit">Modifier</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
-
