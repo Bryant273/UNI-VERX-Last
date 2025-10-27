@@ -104,6 +104,7 @@ const formatTime = (seconds: number) => {
 
 const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const viewerRef = useRef<HTMLDivElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -119,10 +120,16 @@ const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
 
         video.addEventListener('timeupdate', updateProgress);
         video.addEventListener('loadedmetadata', setVideoDuration);
+
+         const handleFullScreenChange = () => {
+            setIsFullScreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullScreenChange);
         
         return () => {
             video.removeEventListener('timeupdate', updateProgress);
             video.removeEventListener('loadedmetadata', setVideoDuration);
+            document.removeEventListener('fullscreenchange', handleFullScreenChange);
         };
     }, []);
 
@@ -150,18 +157,20 @@ const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
         }
     };
     
-    const toggleFullScreen = () => {
-        const videoContainer = videoRef.current?.parentElement;
+    const toggleFullScreen = (elementRef: React.RefObject<HTMLElement>) => {
+        const element = elementRef.current;
+        if (!element) return;
+
         if (!document.fullscreenElement) {
-            videoContainer?.requestFullscreen().then(() => setIsFullScreen(true)).catch(err => console.log(err));
+            element.requestFullscreen().catch(err => console.log(err));
         } else {
-            document.exitFullscreen().then(() => setIsFullScreen(false));
+            document.exitFullscreen();
         }
     };
 
     if (doc.type === 'mp4') {
         return (
-            <div className="relative group bg-black rounded-lg">
+            <div ref={viewerRef} className="relative group bg-black rounded-lg">
                 <video ref={videoRef} src={doc.fileUrl} className="w-full rounded-lg" onClick={togglePlay} />
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Button variant="ghost" size="icon" onClick={togglePlay} className="h-16 w-16 text-white hover:bg-white/20">
@@ -182,7 +191,10 @@ const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
                                 <Slider value={[volume]} onValueChange={handleVolumeChange} max={1} step={0.1} className="w-24" />
                              </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={toggleFullScreen} className="text-white hover:bg-white/20"><span className="sr-only">Fullscreen</span>{isFullScreen ? <Minimize/> : <Maximize/>}</Button>
+                        <Button variant="ghost" size="icon" onClick={() => toggleFullScreen(viewerRef)} className="text-white hover:bg-white/20">
+                            <span className="sr-only">Fullscreen</span>
+                            {isFullScreen ? <Minimize/> : <Maximize/>}
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -195,13 +207,17 @@ const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
         case 'docx':
             previewContent = (
                  <div className="text-center text-muted-foreground bg-muted/30 p-4 rounded-lg">
-                    <div className="w-full bg-background p-6 rounded-md shadow-sm h-[350px] flex flex-col">
+                    <div ref={viewerRef} className="w-full bg-background p-6 rounded-md shadow-sm h-[350px] flex flex-col">
                         <div className="flex justify-between items-center border-b pb-2 mb-4">
                             <span className="text-sm font-medium">{doc.documentName}</span>
                             <TooltipProvider>
                                 <Tooltip>
-                                    <TooltipTrigger asChild><Button variant="ghost" size="icon"><Maximize className="h-4 w-4" /></Button></TooltipTrigger>
-                                    <TooltipContent><p>Plein écran (non disponible)</p></TooltipContent>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={() => toggleFullScreen(viewerRef)}>
+                                            {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Plein écran</p></TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
                         </div>
@@ -220,7 +236,20 @@ const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
         case 'xlsx':
              previewContent = (
                  <div className="text-center text-muted-foreground bg-muted/30 p-4 rounded-lg">
-                    <div className="w-full bg-background p-4 rounded-md shadow-sm h-[350px] flex flex-col">
+                    <div ref={viewerRef} className="w-full bg-background p-4 rounded-md shadow-sm h-[350px] flex flex-col">
+                        <div className="flex justify-between items-center pb-2 mb-2">
+                             <h4 className="font-semibold">Aperçu Tableur</h4>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={() => toggleFullScreen(viewerRef)}>
+                                            {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Plein écran</p></TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                         <div className="flex-grow border rounded-md p-2 overflow-hidden relative">
                             <FileSpreadsheet className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-24 w-24 text-green-500/10"/>
                             <p className="text-sm text-left text-muted-foreground/50 blur-sm select-none">
@@ -236,15 +265,27 @@ const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
                            <Button variant="ghost" size="sm" className="h-7">Feuille 3</Button>
                         </div>
                     </div>
-                    <p className="mt-4 font-semibold text-foreground">Aperçu du tableur</p>
-                    <p className="text-sm">Le contenu serait affiché ici.</p>
+                    <p className="mt-4 text-sm">Le contenu serait affiché ici.</p>
                 </div>
              );
             break;
         case 'pptx':
             previewContent = (
                  <div className="text-center text-muted-foreground bg-muted/30 p-4 rounded-lg">
-                    <div className="w-full bg-background p-4 rounded-md shadow-sm h-[350px] flex flex-col">
+                    <div ref={viewerRef} className="w-full bg-background p-4 rounded-md shadow-sm h-[350px] flex flex-col">
+                         <div className="flex justify-between items-center pb-2">
+                             <h4 className="font-semibold">Aperçu Présentation</h4>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={() => toggleFullScreen(viewerRef)}>
+                                            {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Plein écran</p></TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                          <div className="flex-grow border rounded-md p-2 flex items-center justify-center relative bg-slate-900 overflow-hidden">
                             <Presentation className="h-24 w-24 text-orange-500/30"/>
                              <p className="absolute text-xl font-bold text-white z-10">Titre de la Diapositive</p>
@@ -255,8 +296,7 @@ const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
                            <Button variant="outline" size="icon"><ChevronRight className="h-4 w-4" /></Button>
                         </div>
                     </div>
-                    <p className="mt-4 font-semibold text-foreground">Aperçu de la présentation</p>
-                    <p className="text-sm">Le contenu serait affiché ici.</p>
+                    <p className="mt-4 text-sm">Le contenu serait affiché ici.</p>
                 </div>
             );
             break;
@@ -615,5 +655,7 @@ export default function ProfessorCoursesPage() {
     </div>
   );
 }
+
+    
 
     
