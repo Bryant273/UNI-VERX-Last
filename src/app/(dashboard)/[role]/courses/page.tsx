@@ -318,6 +318,7 @@ export default function ProfessorCoursesPage() {
   const [courses, setCourses] = useState<CourseDocument[]>(courseDocuments);
   const [levelFilter, setLevelFilter] = useState('L3');
   const [classFilter, setClassFilter] = useState('INFO');
+  const [moduleFilter, setModuleFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewModalDoc, setViewModalDoc] = useState<CourseDocument | null>(null);
   const [deleteModalDoc, setDeleteModalDoc] = useState<CourseDocument | null>(null);
@@ -336,18 +337,33 @@ export default function ProfessorCoursesPage() {
     }
   };
 
-  const filteredDocuments = useMemo(() => {
-    if (role === 'student') {
-        const studentLevel = studentData.level.split(' ')[1]; // "L1", "M1", etc.
-        const studentMajor = 'INFO'; // This should come from student data, assuming 'INFO' for now.
-        return courses
-            .filter((doc) => doc.level === studentLevel)
-            .filter((doc) => doc.class === studentMajor);
-    }
+  const studentCourses = useMemo(() => {
+    const studentLevel = studentData.level.split(' ')[1]; // "L1", "M1", etc.
+    const studentMajor = 'INFO'; // This should come from student data
     return courses
-      .filter((doc) => levelFilter === 'all' || doc.level === levelFilter)
-      .filter((doc) => classFilter === 'all' || doc.class === classFilter);
-  }, [courses, levelFilter, classFilter, role]);
+      .filter((doc) => doc.level === studentLevel)
+      .filter((doc) => doc.class === studentMajor);
+  }, [courses]);
+
+  const filteredDocuments = useMemo(() => {
+    let documents = role === 'student' ? studentCourses : courses;
+    
+    if (role === 'student') {
+        if (moduleFilter !== 'all') {
+            documents = documents.filter((doc) => doc.module === moduleFilter);
+        }
+    } else {
+        documents = documents
+            .filter((doc) => levelFilter === 'all' || doc.level === levelFilter)
+            .filter((doc) => classFilter === 'all' || doc.class === classFilter);
+    }
+    return documents;
+  }, [courses, studentCourses, levelFilter, classFilter, moduleFilter, role]);
+
+  const studentModules = useMemo(() => {
+    const modules = new Set(studentCourses.map(doc => doc.module));
+    return ['all', ...Array.from(modules)];
+  }, [studentCourses]);
 
   const totalPages = Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE);
   const paginatedDocuments = filteredDocuments.slice(
@@ -384,12 +400,35 @@ export default function ProfessorCoursesPage() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Gestion des cours</CardTitle>
-          <CardDescription>Ajoutez, modifiez et consultez les documents de cours pour vos classes.</CardDescription>
+          <CardTitle>
+            {role === 'student' ? 'Mes Cours' : 'Gestion des cours'}
+          </CardTitle>
+          <CardDescription>
+            {role === 'student' 
+              ? 'Retrouvez ici tous les documents et supports partagés par vos enseignants.'
+              : 'Ajoutez, modifiez et consultez les documents de cours pour vos classes.'
+            }
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            {role !== 'student' && (
+            {role === 'student' ? (
+                <div>
+                  <label htmlFor="selectModule" className="text-sm font-medium">Module</label>
+                  <Select value={moduleFilter} onValueChange={setModuleFilter}>
+                    <SelectTrigger id="selectModule" className="w-full sm:w-[240px] mt-1">
+                      <SelectValue placeholder="Tous les modules" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {studentModules.map(mod => (
+                        <SelectItem key={mod} value={mod}>
+                          {mod === 'all' ? 'Tous les modules' : mod}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+            ) : (
               <div className="flex flex-col sm:flex-row gap-3">
                 <div>
                   <label htmlFor="selectLevel" className="text-sm font-medium">Niveau</label>
@@ -668,5 +707,7 @@ export default function ProfessorCoursesPage() {
     </div>
   );
 }
+
+    
 
     
