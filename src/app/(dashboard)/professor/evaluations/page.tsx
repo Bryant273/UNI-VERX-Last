@@ -53,6 +53,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const statusColors: { [key: string]: string } = {
   'Terminé': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
@@ -62,6 +64,8 @@ const statusColors: { [key: string]: string } = {
 
 
 export default function ProfessorEvaluationsPage() {
+    const [isQcmModalOpen, setIsQcmModalOpen] = useState(false);
+    const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
     
   return (
     <div className="space-y-6">
@@ -82,7 +86,7 @@ export default function ProfessorEvaluationsPage() {
                         <CardTitle>Gérer les interrogations QCM</CardTitle>
                         <CardDescription>Créez et programmez des interrogations QCM pour vos classes.</CardDescription>
                     </div>
-                     <Button>
+                     <Button onClick={() => setIsQcmModalOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Créer une interrogation
                     </Button>
@@ -178,7 +182,7 @@ export default function ProfessorEvaluationsPage() {
                         <CardTitle>Gérer les devoirs</CardTitle>
                         <CardDescription>Programmez des devoirs avec date limite pour vos classes.</CardDescription>
                     </div>
-                     <Button>
+                     <Button onClick={() => setIsAssignmentModalOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Programmer un devoir
                     </Button>
@@ -230,6 +234,67 @@ export default function ProfessorEvaluationsPage() {
             </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modals */}
+        <Dialog open={isQcmModalOpen} onOpenChange={setIsQcmModalOpen}>
+            <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                    <DialogTitle>Créer une interrogation QCM</DialogTitle>
+                </DialogHeader>
+                <form>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                        <div className="space-y-2"><Label>Titre</Label><Input placeholder="Ex: QCM SQL Avancé - Chapitre 8" /></div>
+                        <div className="space-y-2"><Label>Matière</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner une matière" /></SelectTrigger><SelectContent><SelectItem value="bdd">Bases de Données</SelectItem></SelectContent></Select></div>
+                        <div className="space-y-2"><Label>Classe</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner une classe" /></SelectTrigger><SelectContent><SelectItem value="l3-info">L3 Informatique</SelectItem></SelectContent></Select></div>
+                        <div className="space-y-2"><Label>Date de publication</Label><Input type="datetime-local" /></div>
+                        <div className="space-y-2"><Label>Durée (minutes)</Label><Input type="number" defaultValue="15" /></div>
+                    </div>
+                     <div className="space-y-2 mb-6"><Label>Description/Consignes</Label><Textarea placeholder="Instructions pour les étudiants..." /></div>
+                     <div className="space-y-2 mb-6">
+                        <h3 className="text-lg font-semibold">Questions (50)</h3>
+                        <p className="text-sm text-muted-foreground">Créez une banque de 50 questions. Le système en sélectionnera 20 au hasard pour chaque étudiant.</p>
+                        <div className="text-center p-8 border-2 border-dashed rounded-lg">
+                           <p className="text-muted-foreground">La section de création de questions sera implémentée ici.</p>
+                        </div>
+                     </div>
+                     <DialogFooter>
+                        <Button type="button" variant="ghost" onClick={() => setIsQcmModalOpen(false)}>Annuler</Button>
+                        <Button type="submit">Créer l'interrogation</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+        
+        <Dialog open={isAssignmentModalOpen} onOpenChange={setIsAssignmentModalOpen}>
+             <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Programmer un devoir</DialogTitle>
+                </DialogHeader>
+                <form>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                        <div className="space-y-2"><Label>Titre</Label><Input placeholder="Ex: TP1 - Création d'un site responsive" /></div>
+                        <div className="space-y-2"><Label>Matière</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner une matière" /></SelectTrigger><SelectContent><SelectItem value="web">Développement Web</SelectItem></SelectContent></Select></div>
+                        <div className="space-y-2"><Label>Classe</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner une classe" /></SelectTrigger><SelectContent><SelectItem value="l3-info">L3 Informatique</SelectItem></SelectContent></Select></div>
+                        <div className="space-y-2"><Label>Date de publication</Label><Input type="datetime-local" /></div>
+                        <div className="space-y-2"><Label>Date limite de rendu</Label><Input type="datetime-local" /></div>
+                    </div>
+                    <div className="space-y-2 mb-6"><Label>Consignes</Label><Textarea rows={6} placeholder="Décrivez les consignes, les livrables attendus, les critères d'évaluation..." /></div>
+                    <div className="space-y-2 mb-6">
+                        <Label>Fichier sujet (optionnel)</Label>
+                        <div className="p-6 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors">
+                            <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">Glissez-déposez un fichier ici ou cliquez pour parcourir.</p>
+                            <Input id="file-upload" type="file" className="hidden" />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="ghost" onClick={() => setIsAssignmentModalOpen(false)}>Annuler</Button>
+                        <Button type="submit">Programmer le devoir</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
+
