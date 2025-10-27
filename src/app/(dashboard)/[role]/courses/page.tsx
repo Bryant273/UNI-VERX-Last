@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   File as FileIcon,
   FileText,
@@ -19,16 +19,16 @@ import {
   Pause,
   Rewind,
   FastForward,
-  SkipBack,
-  SkipForward,
-  Maximize,
-  Minimize,
   UploadCloud,
   X,
   Plus,
   Trash2,
   Edit,
-  Info
+  Info,
+  Maximize,
+  Minimize,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -64,6 +64,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCourseModal } from '@/hooks/use-course-modal';
+import { Slider } from '@/components/ui/slider';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -104,6 +105,12 @@ const FileTypeIcon: React.FC<{ type: DocumentType, showLabel?: boolean }> = ({ t
   );
 };
 
+const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+};
+
 export default function ProfessorCoursesPage() {
   const [courses, setCourses] = useState<CourseDocument[]>(courseDocuments);
   const [levelFilter, setLevelFilter] = useState('L3');
@@ -112,6 +119,68 @@ export default function ProfessorCoursesPage() {
   const [viewModalDoc, setViewModalDoc] = useState<CourseDocument | null>(null);
   const [deleteModalDoc, setDeleteModalDoc] = useState<CourseDocument | null>(null);
   const { onOpen } = useCourseModal();
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const updateProgress = () => {
+      setProgress((video.currentTime / video.duration) * 100);
+    };
+    const setVideoDuration = () => {
+      setDuration(video.duration);
+    };
+
+    video.addEventListener('timeupdate', updateProgress);
+    video.addEventListener('loadedmetadata', setVideoDuration);
+    
+    return () => {
+      video.removeEventListener('timeupdate', updateProgress);
+      video.removeEventListener('loadedmetadata', setVideoDuration);
+    };
+  }, [viewModalDoc]);
+
+  const togglePlay = () => {
+    if (videoRef.current?.paused) {
+      videoRef.current?.play();
+      setIsPlaying(true);
+    } else {
+      videoRef.current?.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (videoRef.current) {
+        const newTime = (value[0] / 100) * videoRef.current.duration;
+        videoRef.current.currentTime = newTime;
+    }
+  };
+  
+  const handleVolumeChange = (value: number[]) => {
+    if(videoRef.current) {
+        setVolume(value[0]);
+        videoRef.current.volume = value[0];
+    }
+  };
+  
+  const toggleFullScreen = () => {
+    const videoContainer = videoRef.current?.parentElement;
+    if (!document.fullscreenElement) {
+        videoContainer?.requestFullscreen();
+        setIsFullScreen(true);
+    } else {
+        document.exitFullscreen();
+        setIsFullScreen(false);
+    }
+  };
   
   const filteredDocuments = useMemo(() => {
     return courses
@@ -268,33 +337,62 @@ export default function ProfessorCoursesPage() {
         </CardFooter>
       </Card>
       
-      {/* View Modal */}
       {viewModalDoc && (
         <Dialog open={!!viewModalDoc} onOpenChange={() => setViewModalDoc(null)}>
-            <DialogContent className="sm:max-w-2xl">
-                 <DialogHeader>
-                     <DialogTitle className="flex items-center gap-3">
-                        <FileTypeIcon type={viewModalDoc.type} showLabel />
-                        <span>{viewModalDoc.documentName}</span>
-                    </DialogTitle>
-                     <DialogDescription>{viewModalDoc.module}</DialogDescription>
-                 </DialogHeader>
-                 <div className="py-4 space-y-2 text-sm">
-                    <p><strong className="text-muted-foreground">Date :</strong> {viewModalDoc.date}</p>
-                    <p><strong className="text-muted-foreground">Description :</strong> {viewModalDoc.description || 'N/A'}</p>
-                 </div>
-                 <div className="py-4 my-4 bg-muted/50 rounded-lg flex items-center justify-center min-h-[300px]">
+          <DialogContent className="sm:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <FileTypeIcon type={viewModalDoc.type} showLabel />
+                <span>{viewModalDoc.documentName}</span>
+              </DialogTitle>
+              <DialogDescription>{viewModalDoc.module}</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2 text-sm">
+              <p><strong className="text-muted-foreground">Date :</strong> {viewModalDoc.date}</p>
+              <p><strong className="text-muted-foreground">Description :</strong> {viewModalDoc.description || 'N/A'}</p>
+            </div>
+            
+            {viewModalDoc.type === 'mp4' ? (
+                <div className="relative group bg-black rounded-lg">
+                    <video ref={videoRef} src={viewModalDoc.fileUrl} className="w-full rounded-lg" onClick={togglePlay} />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button variant="ghost" size="icon" onClick={togglePlay} className="h-16 w-16 text-white hover:bg-white/20">
+                            {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
+                        </Button>
+                    </div>
+                     <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-3">
+                            <span className="text-white text-xs">{formatTime(videoRef.current?.currentTime || 0)}</span>
+                            <Slider value={[progress]} onValueChange={handleSeek} className="w-full" />
+                            <span className="text-white text-xs">{formatTime(duration)}</span>
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                            <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" onClick={togglePlay} className="text-white hover:bg-white/20"><span className="sr-only">Play/Pause</span>{isPlaying ? <Pause /> : <Play />}</Button>
+                                 <div className="flex items-center gap-2 text-white">
+                                    <Button variant="ghost" size="icon" onClick={() => handleVolumeChange([0])} className="text-white hover:bg-white/20">{volume === 0 ? <VolumeX/> : <Volume2/>}</Button>
+                                    <Slider value={[volume]} onValueChange={handleVolumeChange} max={1} step={0.1} className="w-24" />
+                                 </div>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={toggleFullScreen} className="text-white hover:bg-white/20"><span className="sr-only">Fullscreen</span>{isFullScreen ? <Minimize/> : <Maximize/>}</Button>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="py-4 my-4 bg-muted/50 rounded-lg flex items-center justify-center min-h-[300px]">
                     <div className="text-center text-muted-foreground">
                         <FileText className="mx-auto h-16 w-16" />
                         <p className="mt-4 font-semibold">Prévisualisation non disponible</p>
                         <p className="text-sm">Le contenu du fichier serait affiché ici.</p>
                     </div>
                 </div>
-                 <DialogFooter>
-                     <Button variant="ghost" onClick={() => setViewModalDoc(null)}>Fermer</Button>
-                     <Button><Download className="mr-2 h-4 w-4" /> Télécharger</Button>
-                 </DialogFooter>
-            </DialogContent>
+            )}
+
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setViewModalDoc(null)}>Fermer</Button>
+              <Button><Download className="mr-2 h-4 w-4" /> Télécharger</Button>
+            </DialogFooter>
+          </DialogContent>
         </Dialog>
       )}
 
@@ -319,3 +417,5 @@ export default function ProfessorCoursesPage() {
     </div>
   );
 }
+
+    
