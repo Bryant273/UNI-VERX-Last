@@ -2,38 +2,32 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import {
   File as FileIcon,
   FileText,
-  FileCode2,
   FileSpreadsheet,
+  Presentation,
   FileArchive,
-  Search,
   ChevronLeft,
   ChevronRight,
   Eye,
   Download,
-  Loader2,
   Video,
   Play,
   Pause,
-  Rewind,
-  FastForward,
+  Maximize,
+  Minimize,
+  Volume2,
+  VolumeX,
   UploadCloud,
   X,
   Plus,
   Trash2,
   Edit,
   Info,
-  Maximize,
-  Minimize,
-  Volume2,
-  VolumeX,
-  Sheet,
-  Presentation,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -61,6 +55,7 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { courseDocuments, type CourseDocument, type DocumentType } from '@/lib/course-data';
+import { studentData } from '@/lib/static-data';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCourseModal } from '@/hooks/use-course-modal';
@@ -317,6 +312,9 @@ const DocumentViewer = ({ doc }: { doc: CourseDocument }) => {
 
 
 export default function ProfessorCoursesPage() {
+  const params = useParams();
+  const role = params.role as 'student' | 'professor';
+
   const [courses, setCourses] = useState<CourseDocument[]>(courseDocuments);
   const [levelFilter, setLevelFilter] = useState('L3');
   const [classFilter, setClassFilter] = useState('INFO');
@@ -339,10 +337,17 @@ export default function ProfessorCoursesPage() {
   };
 
   const filteredDocuments = useMemo(() => {
+    if (role === 'student') {
+        const studentLevel = studentData.level.split(' ')[1]; // "L1", "M1", etc.
+        const studentMajor = 'INFO'; // This should come from student data, assuming 'INFO' for now.
+        return courses
+            .filter((doc) => doc.level === studentLevel)
+            .filter((doc) => doc.class === studentMajor);
+    }
     return courses
       .filter((doc) => levelFilter === 'all' || doc.level === levelFilter)
       .filter((doc) => classFilter === 'all' || doc.class === classFilter);
-  }, [courses, levelFilter, classFilter]);
+  }, [courses, levelFilter, classFilter, role]);
 
   const totalPages = Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE);
   const paginatedDocuments = filteredDocuments.slice(
@@ -384,42 +389,46 @@ export default function ProfessorCoursesPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div>
-                <label htmlFor="selectLevel" className="text-sm font-medium">Niveau</label>
-                <Select value={levelFilter} onValueChange={setLevelFilter}>
-                  <SelectTrigger id="selectLevel" className="w-full sm:w-[180px] mt-1">
-                    <SelectValue placeholder="Tous les niveaux" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les niveaux</SelectItem>
-                    <SelectItem value="L1">Licence 1</SelectItem>
-                    <SelectItem value="L2">Licence 2</SelectItem>
-                    <SelectItem value="L3">Licence 3</SelectItem>
-                    <SelectItem value="M1">Master 1</SelectItem>
-                    <SelectItem value="M2">Master 2</SelectItem>
-                  </SelectContent>
-                </Select>
+            {role !== 'student' && (
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div>
+                  <label htmlFor="selectLevel" className="text-sm font-medium">Niveau</label>
+                  <Select value={levelFilter} onValueChange={setLevelFilter}>
+                    <SelectTrigger id="selectLevel" className="w-full sm:w-[180px] mt-1">
+                      <SelectValue placeholder="Tous les niveaux" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les niveaux</SelectItem>
+                      <SelectItem value="L1">Licence 1</SelectItem>
+                      <SelectItem value="L2">Licence 2</SelectItem>
+                      <SelectItem value="L3">Licence 3</SelectItem>
+                      <SelectItem value="M1">Master 1</SelectItem>
+                      <SelectItem value="M2">Master 2</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label htmlFor="selectClass" className="text-sm font-medium">Filière</label>
+                  <Select value={classFilter} onValueChange={setClassFilter}>
+                    <SelectTrigger id="selectClass" className="w-full sm:w-[180px] mt-1">
+                      <SelectValue placeholder="Toutes les filières" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les filières</SelectItem>
+                      <SelectItem value="INFO">Informatique</SelectItem>
+                      <SelectItem value="MATH">Mathématiques</SelectItem>
+                      <SelectItem value="PHYS">Physique</SelectItem>
+                      <SelectItem value="ELEC">Électronique</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div>
-                <label htmlFor="selectClass" className="text-sm font-medium">Filière</label>
-                <Select value={classFilter} onValueChange={setClassFilter}>
-                  <SelectTrigger id="selectClass" className="w-full sm:w-[180px] mt-1">
-                    <SelectValue placeholder="Toutes les filières" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Toutes les filières</SelectItem>
-                    <SelectItem value="INFO">Informatique</SelectItem>
-                    <SelectItem value="MATH">Mathématiques</SelectItem>
-                    <SelectItem value="PHYS">Physique</SelectItem>
-                    <SelectItem value="ELEC">Électronique</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Button onClick={() => onOpen()}>
-              <Plus className="mr-2 h-4 w-4" /> Ajouter un cours
-            </Button>
+            )}
+            {role !== 'student' && (
+                <Button onClick={() => onOpen()}>
+                <Plus className="mr-2 h-4 w-4" /> Ajouter un cours
+                </Button>
+            )}
           </div>
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center">
@@ -464,18 +473,22 @@ export default function ProfessorCoursesPage() {
                             </TooltipTrigger>
                             <TooltipContent><p>Voir</p></TooltipContent>
                         </Tooltip>
-                         <Tooltip>
-                            <TooltipTrigger asChild>
-                               <Button variant="ghost" size="icon" onClick={() => onOpen(doc)}><Edit className="h-4 w-4" /></Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Modifier</p></TooltipContent>
-                        </Tooltip>
-                         <Tooltip>
-                            <TooltipTrigger asChild>
-                               <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteModalDoc(doc)}><Trash2 className="h-4 w-4" /></Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Supprimer</p></TooltipContent>
-                        </Tooltip>
+                        {role !== 'student' && (
+                            <>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" onClick={() => onOpen(doc)}><Edit className="h-4 w-4" /></Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Modifier</p></TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteModalDoc(doc)}><Trash2 className="h-4 w-4" /></Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Supprimer</p></TooltipContent>
+                                </Tooltip>
+                            </>
+                        )}
                      </TooltipProvider>
                   </TableCell>
                 </TableRow>
@@ -655,7 +668,5 @@ export default function ProfessorCoursesPage() {
     </div>
   );
 }
-
-    
 
     
