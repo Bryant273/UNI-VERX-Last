@@ -86,7 +86,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '/professor/courses', label: 'Mes cours', icon: BookOpen },
     { href: '/professor/timetable', label: 'Planning', icon: Calendar },
     { href: '/professor/evaluations', label: 'Évaluations', icon: ClipboardCheck },
-    { href: '#', label: 'Notes & Résultats', icon: GraduationCap },
+    { href: '/professor/results', label: 'Notes & Résultats', icon: GraduationCap },
     {
       title: 'Pédagogique',
       links: [
@@ -352,6 +352,7 @@ export const messages = [
   { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
   { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
 ];
+
 
 
 
