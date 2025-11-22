@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -86,7 +87,6 @@ export default function ProfessorEvaluationsPage() {
     const [isAssignmentSubmissionsModalOpen, setIsAssignmentSubmissionsModalOpen] = useState(false);
     const [isEditDeadlineModalOpen, setIsEditDeadlineModalOpen] = useState(false);
     const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
-    const [selectedClassForTd, setSelectedClassForTd] = useState<string | null>(null);
 
     const [availableStudents, setAvailableStudents] = useState(studentsList);
     const [currentGroup, setCurrentGroup] = useState<typeof studentsList>([]);
@@ -428,34 +428,8 @@ export default function ProfessorEvaluationsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
                           <div className="space-y-2 md:col-span-2"><Label>Titre du TD</Label><Input placeholder="Ex: Projet de fin de semestre" /></div>
                           <div className="space-y-2"><Label>Matière</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger><SelectContent><SelectItem value="bdd">Bases de Données</SelectItem></SelectContent></Select></div>
-                          
-                          <div className="space-y-2">
-                              <Label>Classe</Label>
-                              <Select onValueChange={setSelectedClassForTd}>
-                                  <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                                  <SelectContent>
-                                      <SelectItem value="l3-info">L3 Informatique</SelectItem>
-                                      <SelectItem value="l2-info">L2 Informatique</SelectItem>
-                                  </SelectContent>
-                              </Select>
-                          </div>
-                           <div className="space-y-2">
-                              <Label>Groupe</Label>
-                              <Select disabled={!selectedClassForTd}>
-                                  <SelectTrigger><SelectValue placeholder="Choisir un groupe" /></SelectTrigger>
-                                  <SelectContent>
-                                      {selectedClassForTd === 'l3-info' && <>
-                                          <SelectItem value="g1">Groupe A</SelectItem>
-                                          <SelectItem value="g2">Groupe B</SelectItem>
-                                      </>}
-                                      {selectedClassForTd === 'l2-info' && <>
-                                          <SelectItem value="g3">Équipe Alpha</SelectItem>
-                                          <SelectItem value="g4">Équipe Beta</SelectItem>
-                                      </>}
-                                  </SelectContent>
-                              </Select>
-                          </div>
-                          <div className="space-y-2"><Label>Date limite</Label><Input type="date"/></div>
+                          <div className="space-y-2"><Label>Classe</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger><SelectContent><SelectItem value="l3-info">L3 Informatique</SelectItem></SelectContent></Select></div>
+                          <div className="space-y-2 md:col-span-2"><Label>Date limite</Label><Input type="date"/></div>
                       </div>
                       <div className="space-y-2 mb-6"><Label>Consignes</Label><Textarea rows={4} placeholder="Décrivez les consignes du travail de groupe..." /></div>
                       <div className="space-y-2 mb-6">
