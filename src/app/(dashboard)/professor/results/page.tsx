@@ -59,6 +59,9 @@ const allStudentsData = {
         { id: 4, name: "SIMON Julie", number: "22505903", class: "l2-info", grades: { bdd: { examen: 15.5 }, python: { examen: 17 }, algo: { examen: 16 } }, absence: {} },
         { id: 5, name: "DURAND Marc", number: "22505904", class: "l2-info", grades: { bdd: { examen: 13 }, python: { examen: 14.5 }, algo: { examen: 12.5 } }, absence: {} },
     ],
+    'l1-info': [
+        { id: 6, name: "PETIT Chloe", number: "22506001", class: "l1-info", grades: { algo: { examen: 11.5 }, python: { examen: 12 } }, absence: {} },
+    ],
 };
 
 const getGradeClass = (grade?: number | null) => {
@@ -70,6 +73,7 @@ const getGradeClass = (grade?: number | null) => {
 };
 
 const calculateSubjectAverage = (grades: any) => {
+    if (!grades) return null;
     let total = 0;
     let totalCoeff = 0;
     for (const [type, grade] of Object.entries(grades)) {
@@ -79,78 +83,126 @@ const calculateSubjectAverage = (grades: any) => {
             totalCoeff += coeff;
         }
     }
-    return totalCoeff > 0 ? (total / totalCoeff) : 0;
+    return totalCoeff > 0 ? (total / totalCoeff) : null;
 }
+
+const calculateGeneralAverage = (studentGrades: any) => {
+    let total = 0;
+    let count = 0;
+    if (!studentGrades) return null;
+
+    Object.keys(studentGrades).forEach(subject => {
+        const avg = calculateSubjectAverage(studentGrades[subject]);
+        if (avg !== null) {
+            total += avg;
+            count++;
+        }
+    });
+
+    return count > 0 ? total / count : null;
+};
 
 
 export default function ProfessorResultsPage() {
     const [activeTab, setActiveTab] = useState('saisie');
+    
+    // State for Saisie tab
     const [selectedClass, setSelectedClass] = useState('l3-info');
     const [selectedSubject, setSelectedSubject] = useState('bdd');
     const [selectedEvalType, setSelectedEvalType] = useState('examen');
     
-    const [students, setStudents] = useState(allStudentsData[selectedClass as keyof typeof allStudentsData]);
+    // State for Résultats tab
+    const [resultClassFilter, setResultClassFilter] = useState('all');
+    const [resultSubjectFilter, setResultSubjectFilter] = useState('all');
+    const [resultSortFilter, setResultSortFilter] = useState('rank');
 
-    useEffect(() => {
-        setStudents(allStudentsData[selectedClass as keyof typeof allStudentsData] || []);
-    }, [selectedClass]);
+    const [studentsData, setStudentsData] = useState(allStudentsData);
+
+    const studentsForSaisie = studentsData[selectedClass as keyof typeof studentsData] || [];
 
     const handleGradeChange = (studentId: number, newGrade: string) => {
-        setStudents(prevStudents => prevStudents.map(student => {
-            if (student.id === studentId) {
-                const updatedGrades = { ...student.grades };
-                if (!updatedGrades[selectedSubject]) {
-                    updatedGrades[selectedSubject] = {};
+        setStudentsData(prevData => {
+            const newData = JSON.parse(JSON.stringify(prevData));
+            const student = newData[selectedClass as keyof typeof newData]?.find((s: any) => s.id === studentId);
+            if (student) {
+                 if (!student.grades[selectedSubject]) {
+                    student.grades[selectedSubject] = {};
                 }
-                updatedGrades[selectedSubject][selectedEvalType] = newGrade === '' ? null : parseFloat(newGrade);
-                return { ...student, grades: updatedGrades };
+                student.grades[selectedSubject][selectedEvalType] = newGrade === '' ? null : parseFloat(newGrade);
             }
-            return student;
-        }));
+            return newData;
+        });
     };
     
     const handleAbsenceChange = (studentId: number, isAbsent: boolean) => {
-        setStudents(prevStudents => prevStudents.map(student => {
-            if (student.id === studentId) {
-                const updatedAbsence = { ...student.absence };
-                updatedAbsence[`${selectedSubject}_${selectedEvalType}`] = isAbsent;
+        setStudentsData(prevData => {
+            const newData = JSON.parse(JSON.stringify(prevData));
+            const student = newData[selectedClass as keyof typeof newData]?.find((s: any) => s.id === studentId);
+            if (student) {
+                if (!student.absence) student.absence = {};
+                student.absence[`${selectedSubject}_${selectedEvalType}`] = isAbsent;
                  if (isAbsent) {
-                    const updatedGrades = { ...student.grades };
-                    if(updatedGrades[selectedSubject]) {
-                        updatedGrades[selectedSubject][selectedEvalType] = null;
-                    }
-                    return { ...student, grades: updatedGrades, absence: updatedAbsence };
+                    if(!student.grades[selectedSubject]) student.grades[selectedSubject] = {};
+                    student.grades[selectedSubject][selectedEvalType] = null;
                 }
-                return { ...student, absence: updatedAbsence };
             }
-            return student;
-        }));
+            return newData;
+        });
     }
 
     const savedCount = useMemo(() => {
-        return students.filter(s => {
+        return studentsForSaisie.filter(s => {
             const grade = s.grades[selectedSubject]?.[selectedEvalType];
             return grade !== null && grade !== undefined;
         }).length;
-    }, [students, selectedSubject, selectedEvalType]);
+    }, [studentsForSaisie, selectedSubject, selectedEvalType]);
+    
+    const studentsForResults = useMemo(() => {
+        let students = (resultClassFilter === 'all')
+            ? Object.values(studentsData).flat()
+            : studentsData[resultClassFilter as keyof typeof studentsData] || [];
+
+        let studentsWithAverages = students.map(student => {
+             const average = resultSubjectFilter === 'all'
+                ? calculateGeneralAverage(student.grades)
+                : calculateSubjectAverage(student.grades[resultSubjectFilter]);
+            return {
+                ...student,
+                average: average || 0,
+                formattedAverage: average ? average.toFixed(2) : 'N/A'
+            };
+        });
+
+        switch (resultSortFilter) {
+            case 'rank':
+            case 'average_desc':
+                studentsWithAverages.sort((a, b) => b.average - a.average);
+                break;
+            case 'average_asc':
+                studentsWithAverages.sort((a, b) => a.average - b.average);
+                break;
+            case 'alphabetical':
+                studentsWithAverages.sort((a, b) => a.name.localeCompare(b.name));
+                break;
+        }
+
+        return studentsWithAverages;
+    }, [studentsData, resultClassFilter, resultSubjectFilter, resultSortFilter]);
+
 
     const stats = useMemo(() => {
-        const classStudents = allStudentsData[selectedClass as keyof typeof allStudentsData];
-        const averages = classStudents
-            .map(s => {
-                const subjectGrades = s.grades[selectedSubject];
-                return subjectGrades ? calculateSubjectAverage(subjectGrades) : null;
-            })
-            .filter((g): g is number => g !== null);
+        const validAverages = studentsForResults
+            .map(s => s.average)
+            .filter((g): g is number => g > 0);
         
-        if (averages.length === 0) return { avg: 0, min: 0, max: 0 };
+        if (validAverages.length === 0) return { count: studentsForResults.length, avg: 0, min: 0, max: 0 };
         
-        const avg = averages.reduce((a, b) => a + b, 0) / averages.length;
-        const min = Math.min(...averages);
-        const max = Math.max(...averages);
+        const avg = validAverages.reduce((a, b) => a + b, 0) / validAverages.length;
+        const min = Math.min(...validAverages);
+        const max = Math.max(...validAverages);
         
-        return { avg, min, max };
-    }, [selectedClass, selectedSubject]);
+        return { count: studentsForResults.length, avg, min, max };
+    }, [studentsForResults]);
 
 
     return (
@@ -158,7 +210,7 @@ export default function ProfessorResultsPage() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="saisie"><Edit className="mr-2 h-4 w-4" />Saisie des notes</TabsTrigger>
-                  <TabsTrigger value="resultats"><ChartBar className="mr-2 h-4 w-4" />Résultats & Statistiques</TabsTrigger>
+                  <TabsTrigger value="resultats"><ChartBar className="mr-2 h-4 w-4" />Résultats &amp; Statistiques</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="saisie" className="mt-6 space-y-6">
@@ -169,7 +221,7 @@ export default function ProfessorResultsPage() {
                         </CardHeader>
                         <CardContent>
                              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div><Label>Classe</Label><Select value={selectedClass} onValueChange={setSelectedClass}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="l3-info">L3 Informatique</SelectItem><SelectItem value="l2-info">L2 Informatique</SelectItem></SelectContent></Select></div>
+                                <div><Label>Classe</Label><Select value={selectedClass} onValueChange={setSelectedClass}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="l1-info">L1 Informatique</SelectItem><SelectItem value="l2-info">L2 Informatique</SelectItem><SelectItem value="l3-info">L3 Informatique</SelectItem></SelectContent></Select></div>
                                 <div><Label>Matière</Label><Select value={selectedSubject} onValueChange={setSelectedSubject}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="bdd">Bases de Données</SelectItem><SelectItem value="python">Programmation Python</SelectItem><SelectItem value="algo">Algorithmique</SelectItem></SelectContent></Select></div>
                                 <div><Label>Type d'évaluation</Label><Select value={selectedEvalType} onValueChange={setSelectedEvalType}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent>{Object.keys(coefficients).map(k => <SelectItem key={k} value={k}>{k.charAt(0).toUpperCase() + k.slice(1)}</SelectItem>)}</SelectContent></Select></div>
                                 <div><Label>Coefficient</Label><Input readOnly value={coefficients[selectedEvalType as keyof typeof coefficients]} /></div>
@@ -183,9 +235,9 @@ export default function ProfessorResultsPage() {
 
                     <Card>
                         <CardHeader>
-                             <CardTitle>Notes - {students.length > 0 ? students[0].class : ''}</CardTitle>
+                             <CardTitle>Notes - {studentsForSaisie.length > 0 ? selectedClass.toUpperCase().replace('-', ' ') : ''}</CardTitle>
                              <CardDescription>Matière: {selectedSubject.toUpperCase()} | Évaluation: {selectedEvalType}</CardDescription>
-                             <div className="text-sm text-muted-foreground pt-2">{savedCount} / {students.length} notes saisies</div>
+                             <div className="text-sm text-muted-foreground pt-2">{savedCount} / {studentsForSaisie.length} notes saisies</div>
                         </CardHeader>
                         <div className="overflow-x-auto">
                             <Table>
@@ -197,7 +249,7 @@ export default function ProfessorResultsPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {students.map(student => {
+                                    {studentsForSaisie.map(student => {
                                         const grade = student.grades[selectedSubject]?.[selectedEvalType];
                                         const isAbsent = student.absence[`${selectedSubject}_${selectedEvalType}`] || false;
                                         return (
@@ -235,15 +287,33 @@ export default function ProfessorResultsPage() {
                 </TabsContent>
                 
                 <TabsContent value="resultats" className="mt-6 space-y-6">
+                    <Card>
+                        <CardHeader>
+                             <CardTitle>Statistiques globales du professeur</CardTitle>
+                             <CardDescription>Vue d'ensemble de la performance de vos étudiants.</CardDescription>
+                        </CardHeader>
+                         <CardContent>
+                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><Label>Filtrer par Classe</Label><Select value={resultClassFilter} onValueChange={setResultClassFilter}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">Toutes les classes</SelectItem><SelectItem value="l1-info">L1 Informatique</SelectItem><SelectItem value="l2-info">L2 Informatique</SelectItem><SelectItem value="l3-info">L3 Informatique</SelectItem></SelectContent></Select></div>
+                                <div><Label>Filtrer par Matière</Label><Select value={resultSubjectFilter} onValueChange={setResultSubjectFilter}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">Moyenne générale</SelectItem><SelectItem value="bdd">Bases de Données</SelectItem><SelectItem value="python">Programmation Python</SelectItem><SelectItem value="algo">Algorithmique</SelectItem></SelectContent></Select></div>
+                                <div><Label>Trier par</Label><Select value={resultSortFilter} onValueChange={setResultSortFilter}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="rank">Classement</SelectItem><SelectItem value="average_desc">Moyenne (décroissant)</SelectItem><SelectItem value="average_asc">Moyenne (croissant)</SelectItem><SelectItem value="alphabetical">Ordre alphabétique</SelectItem></SelectContent></Select></div>
+                            </div>
+                        </CardContent>
+                    </Card>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <Card><CardHeader><CardTitle className="text-sm font-medium">Étudiants</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{students.length}</p></CardContent></Card>
-                        <Card><CardHeader><CardTitle className="text-sm font-medium">Moyenne classe</CardTitle></CardHeader><CardContent><p className={cn("text-2xl font-bold", getGradeClass(stats.avg))}>{stats.avg.toFixed(2)}</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle className="text-sm font-medium">Étudiants</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{stats.count}</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle className="text-sm font-medium">Moyenne Globale</CardTitle></CardHeader><CardContent><p className={cn("text-2xl font-bold", getGradeClass(stats.avg))}>{stats.avg.toFixed(2)}</p></CardContent></Card>
                         <Card><CardHeader><CardTitle className="text-sm font-medium">Note minimale</CardTitle></CardHeader><CardContent><p className={cn("text-2xl font-bold", getGradeClass(stats.min))}>{stats.min.toFixed(2)}</p></CardContent></Card>
                         <Card><CardHeader><CardTitle className="text-sm font-medium">Note maximale</CardTitle></CardHeader><CardContent><p className={cn("text-2xl font-bold", getGradeClass(stats.max))}>{stats.max.toFixed(2)}</p></CardContent></Card>
                     </div>
                      <Card>
                         <CardHeader>
                             <CardTitle>Classement des étudiants</CardTitle>
+                            <CardDescription>
+                                {resultClassFilter === 'all' ? 'Toutes classes confondues' : `Classe: ${resultClassFilter.toUpperCase().replace('-', ' ')}`}
+                                {' | '}
+                                {resultSubjectFilter === 'all' ? 'Moyenne générale' : `Matière: ${resultSubjectFilter.toUpperCase()}`}
+                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                              <div className="overflow-x-auto">
@@ -251,18 +321,26 @@ export default function ProfessorResultsPage() {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Rang</TableHead><TableHead>Étudiant</TableHead>
-                                            <TableHead>Moyenne ({selectedSubject.toUpperCase()})</TableHead><TableHead>Actions</TableHead>
+                                            <TableHead>Moyenne</TableHead><TableHead>Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {students
-                                            .map(s => ({ ...s, avg: calculateSubjectAverage(s.grades[selectedSubject] || {}) }))
-                                            .sort((a,b) => b.avg - a.avg)
-                                            .map((student, index) => (
+                                        {studentsForResults.map((student, index) => (
                                             <TableRow key={student.id}>
-                                                <TableCell className="font-bold">{index + 1}</TableCell>
-                                                <TableCell>{student.name}</TableCell>
-                                                <TableCell className={cn("font-semibold", getGradeClass(student.avg))}>{student.avg.toFixed(2)} / 20</TableCell>
+                                                <TableCell className="font-bold">{resultSortFilter.startsWith('average') || resultSortFilter === 'rank' ? index + 1 : '-'}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className="h-9 w-9">
+                                                            <AvatarImage src={`https://i.pravatar.cc/40?u=${student.id}`} />
+                                                            <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div>
+                                                            <span className="font-medium">{student.name}</span>
+                                                            <p className="text-xs text-muted-foreground">{student.class.toUpperCase().replace('-', ' ')}</p>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className={cn("font-semibold", getGradeClass(student.average))}>{student.formattedAverage} / 20</TableCell>
                                                 <TableCell><Button variant="outline" size="sm"><Eye className="mr-2"/>Voir détails</Button></TableCell>
                                             </TableRow>
                                         ))}
