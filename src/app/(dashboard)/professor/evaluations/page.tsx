@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -415,86 +414,88 @@ export default function ProfessorEvaluationsPage() {
       </Dialog>
       
       <Dialog open={isGroupTdModalOpen} onOpenChange={setIsGroupTdModalOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-2xl">
             <DialogHeader>
                 <DialogTitle>Créer un nouveau TD de Groupe</DialogTitle>
                 <DialogDescription>
                     Étape {groupTdStep} sur 2: {groupTdStep === 1 ? 'Définition du travail' : 'Constitution des groupes'}
                 </DialogDescription>
             </DialogHeader>
-            {groupTdStep === 1 && (
-                <form onSubmit={(e) => { e.preventDefault(); setGroupTdStep(2); }}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
-                        <div className="space-y-2"><Label>Titre du TD</Label><Input placeholder="Ex: Projet de fin de semestre" /></div>
-                        <div className="space-y-2"><Label>Matière</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner une matière" /></SelectTrigger><SelectContent><SelectItem value="bdd">Bases de Données</SelectItem></SelectContent></Select></div>
-                        <div className="space-y-2 md:col-span-2"><Label>Classe</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner une classe" /></SelectTrigger><SelectContent><SelectItem value="l3-info">L3 Informatique</SelectItem></SelectContent></Select></div>
-                        <div className="space-y-2"><Label>Date limite</Label><Input type="date"/></div>
-                    </div>
-                    <div className="space-y-2 mb-6"><Label>Consignes</Label><Textarea rows={4} placeholder="Décrivez les consignes du travail de groupe..." /></div>
-                    <div className="space-y-2 mb-6">
-                        <Label>Fichier sujet (optionnel)</Label>
-                        <div className="p-4 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors">
-                            <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
-                            <p className="mt-2 text-xs text-muted-foreground">Glissez-déposez un fichier ici ou cliquez pour parcourir.</p>
-                            <Input type="file" className="hidden" />
-                        </div>
-                    </div>
-                     <DialogFooter>
-                        <Button type="button" variant="ghost" onClick={() => setIsGroupTdModalOpen(false)}>Annuler</Button>
-                        <Button type="submit">Suivant</Button>
-                    </DialogFooter>
-                </form>
-            )}
-            {groupTdStep === 2 && (
-                <div className="my-6">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <h4 className="font-semibold">Étudiants disponibles ({availableStudents.length})</h4>
-                            <div className="h-64 overflow-y-auto border rounded-lg p-2 space-y-2">
-                                {availableStudents.map(student => (
-                                    <div key={student.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                                        <span>{student.name}</span>
-                                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleStudentToggle(student, 'available')}><Plus className="h-4 w-4 text-green-500"/></Button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <h4 className="font-semibold">Nouveau groupe</h4>
-                            <div className="space-y-2">
-                                <Input placeholder="Nom du groupe (ex: Groupe A)" value={groupName} onChange={(e) => setGroupName(e.target.value)} />
-                                <div className="h-[188px] overflow-y-auto border rounded-lg p-2 space-y-2">
-                                     {currentGroup.map(student => (
-                                        <div key={student.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                                            <span>{student.name}</span>
-                                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleStudentToggle(student, 'group')}><Trash2 className="h-4 w-4 text-red-500"/></Button>
-                                        </div>
-                                    ))}
-                                    {currentGroup.length === 0 && <p className="text-center text-xs text-muted-foreground p-4">Ajoutez des étudiants depuis la liste de gauche.</p>}
-                                </div>
-                                <Button className="w-full" disabled={!groupName || currentGroup.length === 0} onClick={handleCreateGroup}>Créer ce groupe</Button>
-                            </div>
-                        </div>
-                    </div>
-                     <Separator className="my-6" />
-                     <div className="space-y-4">
-                         <h4 className="font-semibold">Groupes constitués ({groups.length})</h4>
-                         <div className="space-y-2">
-                            {groups.map((group, index) => (
-                                <div key={index} className="p-3 border rounded-lg">
-                                    <p className="font-bold">{group.name}</p>
-                                    <p className="text-sm text-muted-foreground">{group.members.map(m => m.name).join(', ')}</p>
-                                </div>
-                            ))}
-                            {groups.length === 0 && <p className="text-center text-xs text-muted-foreground p-4">Aucun groupe constitué pour le moment.</p>}
-                         </div>
-                     </div>
-                     <DialogFooter className="mt-8">
-                        <Button type="button" variant="ghost" onClick={() => setGroupTdStep(1)}>Précédent</Button>
-                        <Button type="button" onClick={() => setIsGroupTdModalOpen(false)}>Assigner le TD aux groupes</Button>
-                    </DialogFooter>
-                </div>
-            )}
+            <div className="max-h-[70vh] overflow-y-auto p-1">
+              {groupTdStep === 1 && (
+                  <form onSubmit={(e) => { e.preventDefault(); setGroupTdStep(2); }}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
+                          <div className="space-y-2 md:col-span-2"><Label>Titre du TD</Label><Input placeholder="Ex: Projet de fin de semestre" /></div>
+                          <div className="space-y-2"><Label>Matière</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger><SelectContent><SelectItem value="bdd">Bases de Données</SelectItem></SelectContent></Select></div>
+                          <div className="space-y-2"><Label>Classe</Label><Select><SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger><SelectContent><SelectItem value="l3-info">L3 Informatique</SelectItem></SelectContent></Select></div>
+                          <div className="space-y-2 md:col-span-2"><Label>Date limite</Label><Input type="date"/></div>
+                      </div>
+                      <div className="space-y-2 mb-6"><Label>Consignes</Label><Textarea rows={4} placeholder="Décrivez les consignes du travail de groupe..." /></div>
+                      <div className="space-y-2 mb-6">
+                          <Label>Fichier sujet (optionnel)</Label>
+                          <div className="p-4 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors">
+                              <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
+                              <p className="mt-2 text-xs text-muted-foreground">Glissez-déposez un fichier</p>
+                              <Input type="file" className="hidden" />
+                          </div>
+                      </div>
+                       <DialogFooter className="pt-4 border-t">
+                          <Button type="button" variant="ghost" onClick={() => setIsGroupTdModalOpen(false)}>Annuler</Button>
+                          <Button type="submit">Suivant</Button>
+                      </DialogFooter>
+                  </form>
+              )}
+              {groupTdStep === 2 && (
+                  <div className="my-4">
+                      <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                              <h4 className="font-semibold">Étudiants disponibles ({availableStudents.length})</h4>
+                              <div className="h-64 overflow-y-auto border rounded-lg p-2 space-y-2">
+                                  {availableStudents.map(student => (
+                                      <div key={student.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
+                                          <span>{student.name}</span>
+                                          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleStudentToggle(student, 'available')}><Plus className="h-4 w-4 text-green-500"/></Button>
+                                      </div>
+                                  ))}
+                              </div>
+                          </div>
+                          <div className="space-y-4">
+                              <h4 className="font-semibold">Nouveau groupe</h4>
+                              <div className="space-y-2">
+                                  <Input placeholder="Nom du groupe (ex: Groupe A)" value={groupName} onChange={(e) => setGroupName(e.target.value)} />
+                                  <div className="h-[188px] overflow-y-auto border rounded-lg p-2 space-y-2">
+                                       {currentGroup.map(student => (
+                                          <div key={student.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
+                                              <span>{student.name}</span>
+                                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleStudentToggle(student, 'group')}><Trash2 className="h-4 w-4 text-red-500"/></Button>
+                                          </div>
+                                      ))}
+                                      {currentGroup.length === 0 && <p className="text-center text-xs text-muted-foreground p-4">Ajoutez des étudiants.</p>}
+                                  </div>
+                                  <Button className="w-full" disabled={!groupName || currentGroup.length === 0} onClick={handleCreateGroup}>Créer ce groupe</Button>
+                              </div>
+                          </div>
+                      </div>
+                       <Separator className="my-6" />
+                       <div className="space-y-4">
+                           <h4 className="font-semibold">Groupes constitués ({groups.length})</h4>
+                           <div className="space-y-2">
+                              {groups.map((group, index) => (
+                                  <div key={index} className="p-3 border rounded-lg">
+                                      <p className="font-bold">{group.name}</p>
+                                      <p className="text-sm text-muted-foreground">{group.members.map(m => m.name).join(', ')}</p>
+                                  </div>
+                              ))}
+                              {groups.length === 0 && <p className="text-center text-xs text-muted-foreground p-4">Aucun groupe constitué.</p>}
+                           </div>
+                       </div>
+                       <DialogFooter className="mt-8 pt-4 border-t">
+                          <Button type="button" variant="ghost" onClick={() => setGroupTdStep(1)}>Précédent</Button>
+                          <Button type="button" onClick={() => setIsGroupTdModalOpen(false)}>Assigner le TD</Button>
+                      </DialogFooter>
+                  </div>
+              )}
+            </div>
         </DialogContent>
       </Dialog>
 
@@ -594,4 +595,3 @@ export default function ProfessorEvaluationsPage() {
     </div>
   );
 }
-
