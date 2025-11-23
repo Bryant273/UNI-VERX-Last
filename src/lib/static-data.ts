@@ -90,7 +90,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     {
       title: 'Pédagogique',
       links: [
-        { href: '#', label: 'Mes étudiants', icon: Users },
+        { href: '/professor/students', label: 'Mes étudiants', icon: Users },
         { href: '/professor/messages', label: 'Messages', icon: MessageSquare },
         { href: '#', label: 'Ressources', icon: FolderOpen },
       ],
@@ -352,6 +352,7 @@ export const messages = [
   { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
   { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
 ];
+
 
 
 
