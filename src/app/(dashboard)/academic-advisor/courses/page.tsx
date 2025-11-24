@@ -189,7 +189,7 @@ export default function AcademicAdvisorCoursesPage() {
                         {paginatedCourses.map((course) => {
                             const status = statusConfig[course.status];
                             return (
-                                <TableRow key={course.id}>
+                                <TableRow key={course.id} className="even:bg-muted/40">
                                     <TableCell className="text-sm text-muted-foreground">{course.date}</TableCell>
                                     <TableCell className="font-medium">{course.uploader}</TableCell>
                                     <TableCell>{course.level} {course.class}</TableCell>
