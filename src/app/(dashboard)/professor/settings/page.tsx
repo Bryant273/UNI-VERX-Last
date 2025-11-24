@@ -14,6 +14,8 @@ import {
   Sun,
   Moon,
   Monitor,
+  BookUser,
+  Database,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,9 +39,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const TABS = [
   { id: 'profile', label: 'Profil', icon: User },
-  { id: 'security', label: 'Compte & Sécurité', icon: Shield },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'appearance', label: 'Apparence', icon: Palette },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'security', label: 'Compte & Sécurité', icon: Shield },
+  { id: 'pedagogy', label: 'Pédagogie', icon: BookUser },
+  { id: 'data', label: 'Données', icon: Database },
   { id: 'privacy', label: 'Confidentialité', icon: Lock },
   { id: 'integrations', label: 'Intégrations', icon: Plug },
 ];
@@ -393,6 +397,17 @@ const IntegrationsSection = () => {
     );
 };
 
+const ComingSoonSection = ({ title }: { title: string }) => (
+    <Card>
+        <CardHeader>
+            <CardTitle>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <p>Section en cours de construction.</p>
+        </CardContent>
+    </Card>
+);
+
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -401,27 +416,22 @@ export default function SettingsPage() {
     switch (activeTab) {
       case 'profile':
         return <ProfileSection />;
-      case 'security':
-        return <SecuritySection />;
-      case 'notifications':
-        return <NotificationsSection />;
       case 'appearance':
         return <AppearanceSection />;
+      case 'notifications':
+        return <NotificationsSection />;
+      case 'security':
+        return <SecuritySection />;
+      case 'pedagogy':
+        return <ComingSoonSection title="Pédagogie" />;
+      case 'data':
+        return <ComingSoonSection title="Données" />;
       case 'privacy':
         return <PrivacySection />;
       case 'integrations':
         return <IntegrationsSection />;
       default:
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>{TABS.find(t => t.id === activeTab)?.label}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Section en cours de construction.</p>
-            </CardContent>
-          </Card>
-        );
+        return <ComingSoonSection title={TABS.find(t => t.id === activeTab)?.label || 'Paramètres'} />;
     }
   };
 
