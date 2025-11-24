@@ -292,7 +292,7 @@ export default function ProfessorStudentsPage() {
             </TableHeader>
             <TableBody>
                 {paginatedStudents.map((student) => (
-                    <TableRow key={student.id}>
+                    <TableRow key={student.id} className="even:bg-muted/40">
                         <TableCell className="px-6"><Checkbox /></TableCell>
                         <TableCell>
                             <div className="flex items-center gap-3">
@@ -332,11 +332,15 @@ export default function ProfessorStudentsPage() {
             </p>
              {totalPages > 1 && (
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><ChevronLeft/></Button>
-                    {[...Array(totalPages)].map((_, i) => (
-                        <Button key={i} variant={currentPage === i + 1 ? 'default' : 'outline'} size="icon" onClick={() => handlePageChange(i + 1)}>{i + 1}</Button>
-                    ))}
-                    <Button variant="outline" size="icon" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><ChevronRight/></Button>
+                    <Button variant="outline" size="icon" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="h-8 w-8">
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium">
+                        Page {currentPage} sur {totalPages}
+                    </span>
+                    <Button variant="outline" size="icon" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="h-8 w-8">
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
                 </div>
             )}
         </CardFooter>
