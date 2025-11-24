@@ -12,10 +12,9 @@ import {
   UploadCloud,
   FileQuestion,
   BookOpen,
-  FileCheck2,
-  FileArchive,
-  FlaskConical,
-  Clipboard,
+  Award,
+  GraduationCap,
+  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,22 +49,23 @@ import {
 } from '@/lib/documents-data';
 
 // Mock data specific to professor
-const pedagogicalDocuments: Document[] = [
-    { id: 'ped-1', type: 'releve-notes', name: 'Cours_BDD_Avance_L3.pdf', description: 'Support de cours sur les bases de données avancées.', status: 'uploaded', category: 'pedagogical', date: '10/05/2025' },
-    { id: 'ped-2', type: 'certificat-scolarite', name: 'Examen_Python_L2_2025.docx', description: 'Sujet d\'examen pour le cours de Python en L2.', status: 'uploaded', category: 'pedagogical', date: '08/05/2025' },
-    { id: 'ped-3', type: 'convention-stage', name: 'IA_Introduction_M1.pptx', description: 'Présentation d\'introduction à l\'Intelligence Artificielle pour les M1.', status: 'uploaded', category: 'pedagogical', date: '05/05/2025' },
+const personalDocuments: Document[] = [
+    { id: 'perso-1', type: 'cv', name: 'CV_Claire_Dubois_2025.pdf', description: 'CV académique et de recherche à jour.', status: 'uploaded', category: 'personal', date: '10/05/2025' },
+    { id: 'perso-2', type: 'lettre-motivation', name: 'Projet_ANR_2025.docx', description: 'Proposition de projet pour l\'appel ANR 2025.', status: 'uploaded', category: 'personal', date: '08/05/2025' },
+    { id: 'perso-3', type: 'autre-perso', name: 'Article_ML_Education_2024.pdf', description: 'Version finale de l\'article "Machine Learning in Education".', status: 'uploaded', category: 'personal', date: '28/02/2025' },
+    
 ];
 
-const researchDocuments: Document[] = [
-    { id: 'res-1', type: 'releve-notes', name: 'Article_ML_Education_2024.pdf', description: 'Version finale de l\'article "Machine Learning in Education".', status: 'uploaded', category: 'research', date: '28/02/2025' },
-    { id: 'res-2', type: 'facture', name: 'Student_Performance_Data.xlsx', description: 'Jeu de données sur les performances des étudiants 2020-2024.', status: 'uploaded', category: 'research', date: '15/01/2025' },
-    { id: 'res-3', type: 'autre-perso', name: 'Projet_ANR_2025.docx', description: 'Proposition de projet pour l\'appel ANR 2025.', status: 'missing', category: 'research' },
+const diplomaDocuments: Document[] = [
+    { id: 'diplo-1', type: 'diplome', name: 'Doctorat_Informatique_2012.pdf', description: 'Diplôme de Doctorat en Informatique, Université Paris-Sud.', status: 'uploaded', category: 'academic', date: '15/07/2012' },
+    { id: 'diplo-2', type: 'certificat', name: 'AWS_Certified_Architect.pdf', description: 'Certification AWS Certified Solutions Architect - Associate.', status: 'uploaded', category: 'professional', date: '18/11/2023' },
+    { id: 'diplo-3', type: 'attestation', name: 'Attestation_Habilitation_HDR.pdf', description: 'Attestation d\'Habilitation à Diriger des Recherches.', status: 'missing', category: 'academic' },
 ];
 
-const administrativeDocuments: Document[] = [
-    { id: 'adm-1', type: 'releve-notes', name: 'Contrat_Enseignant_2024.pdf', description: 'Contrat d\'enseignement pour l\'année académique 2024-2025.', status: 'uploaded', category: 'administrative', date: '01/09/2024' },
-    { id: 'adm-2', type: 'facture', name: 'Fiche_Paie_Fevrier_2025.pdf', description: 'Bulletin de salaire pour Février 2025.', status: 'uploaded', category: 'administrative', date: '28/02/2025' },
-    { id: 'adm-3', type: 'certificat-scolarite', name: 'Certificat_Travail_2024.pdf', description: 'Certificat de travail officiel de l\'année précédente.', status: 'uploaded', category: 'administrative', date: '31/08/2024' },
+const universityDocuments: Document[] = [
+    { id: 'uni-1', type: 'contrat-stage', name: 'Contrat_Enseignant_2024.pdf', description: 'Contrat d\'enseignement pour l\'année académique 2024-2025.', status: 'uploaded', category: 'administrative', date: '01/09/2024' },
+    { id: 'uni-2', type: 'facture', name: 'Fiche_Paie_Fevrier_2025.pdf', description: 'Bulletin de salaire pour Février 2025.', status: 'uploaded', category: 'administrative', date: '28/02/2025' },
+    { id: 'uni-3', type: 'certificat-scolarite', name: 'Certificat_Travail_2024.pdf', description: 'Certificat de travail officiel de l\'année précédente.', status: 'uploaded', category: 'administrative', date: '31/08/2024' },
 ];
 
 
@@ -77,7 +77,8 @@ const DocumentRow: React.FC<{
   onDelete: (doc: Document) => void,
   onUpload: (doc: Document) => void
 }> = ({ doc, index, onView, onEdit, onDelete, onUpload }) => {
-  const { icon: Icon, color, label } = documentConfig[doc.type];
+  const config = doc.type ? documentConfig[doc.type] : documentConfig['autre-perso'];
+  const { icon: Icon, color, label } = config;
 
   return (
     <TableRow>
@@ -111,12 +112,12 @@ const DocumentRow: React.FC<{
 
 export default function ProfessorDocumentsPage() {
     const [docs, setDocs] = useState({
-        pedagogical: pedagogicalDocuments,
-        research: researchDocuments,
-        administrative: administrativeDocuments,
+        personal: personalDocuments,
+        diplomas: diplomaDocuments,
+        university: universityDocuments,
     });
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState('pedagogical');
+    const [activeTab, setActiveTab] = useState('personal');
 
     const [modalState, setModalState] = useState<{
         type: 'upload' | 'delete' | 'view' | 'edit' | null;
@@ -171,12 +172,12 @@ export default function ProfessorDocumentsPage() {
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="pedagogical"><BookOpen className="mr-2"/>Pédagogiques</TabsTrigger>
-          <TabsTrigger value="research"><FlaskConical className="mr-2"/>Recherche</TabsTrigger>
-          <TabsTrigger value="administrative"><Clipboard className="mr-2"/>Administratifs</TabsTrigger>
+          <TabsTrigger value="personal"><User className="mr-2"/>Personnels</TabsTrigger>
+          <TabsTrigger value="diplomas"><Award className="mr-2"/>Diplômes</TabsTrigger>
+          <TabsTrigger value="university"><GraduationCap className="mr-2"/>Université</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="pedagogical">
+        <TabsContent value="personal">
             <Card>
                 <CardContent className="p-0">
                     <Table>
@@ -196,7 +197,7 @@ export default function ProfessorDocumentsPage() {
                 </CardContent>
             </Card>
         </TabsContent>
-        <TabsContent value="research">
+        <TabsContent value="diplomas">
              <Card>
                 <CardContent className="p-0">
                     <Table>
@@ -216,7 +217,7 @@ export default function ProfessorDocumentsPage() {
                 </CardContent>
             </Card>
         </TabsContent>
-        <TabsContent value="administrative">
+        <TabsContent value="university">
              <Card>
                 <CardContent className="p-0">
                     <Table>
