@@ -16,9 +16,11 @@ import {
   TrendingUp,
   CalendarCheck,
   Cog,
-  Scale
+  Scale,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -172,7 +174,7 @@ export default function ReportsPage() {
                             {reportsData.map((report) => {
                                 const status = statusConfig[report.status];
                                 return (
-                                    <TableRow key={report.id}>
+                                    <TableRow key={report.id} className="even:bg-muted/40">
                                         <TableCell>
                                             <div className="font-medium">{report.title}</div>
                                             <div className="text-xs text-muted-foreground">{report.description}</div>
@@ -197,6 +199,32 @@ export default function ReportsPage() {
                         </TableBody>
                     </Table>
                 </div>
+                 <CardFooter className="flex items-center justify-between p-4">
+                    <p className="text-sm text-muted-foreground">
+                        Affichage de {reportsData.length} sur {reportsData.length} rapports
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            disabled
+                            className="h-8 w-8"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <span className="text-sm font-medium">
+                            Page 1 sur 1
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            disabled
+                            className="h-8 w-8"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </CardFooter>
             </Card>
 
             <Dialog open={previewModalOpen} onOpenChange={setPreviewModalOpen}>
