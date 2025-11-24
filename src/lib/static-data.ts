@@ -92,7 +92,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       links: [
         { href: '/professor/students', label: 'Mes étudiants', icon: Users },
         { href: '/professor/messages', label: 'Messages', icon: MessageSquare },
-        { href: '#', label: 'Ressources', icon: FolderOpen },
+        { href: '/professor/resources', label: 'Ressources', icon: FolderOpen },
       ],
     },
     {
