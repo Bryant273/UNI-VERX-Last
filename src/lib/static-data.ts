@@ -98,7 +98,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     {
       title: 'Administratif',
       links: [
-        { href: '#', label: 'Présences', icon: UserCheck },
+        { href: '/professor/presence', label: 'Présences', icon: UserCheck },
         { href: '#', label: 'Rapports', icon: FileText },
         { href: '#', label: 'Paramètres', icon: Settings },
       ],
@@ -352,3 +352,4 @@ export const messages = [
   { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
   { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
 ];
+
