@@ -99,7 +99,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       title: 'Administratif',
       links: [
         { href: '/professor/presence', label: 'Présences', icon: UserCheck },
-        { href: '#', label: 'Rapports', icon: FileText },
+        { href: '/professor/reports', label: 'Rapports', icon: FileText },
         { href: '#', label: 'Paramètres', icon: Settings },
       ],
     },
