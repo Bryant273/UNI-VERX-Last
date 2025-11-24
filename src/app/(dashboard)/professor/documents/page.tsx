@@ -53,7 +53,8 @@ const personalDocuments: Document[] = [
     { id: 'perso-1', type: 'cv', name: 'CV_Claire_Dubois_2025.pdf', description: 'CV académique et de recherche à jour.', status: 'uploaded', category: 'personal', date: '10/05/2025' },
     { id: 'perso-2', type: 'lettre-motivation', name: 'Projet_ANR_2025.docx', description: 'Proposition de projet pour l\'appel ANR 2025.', status: 'uploaded', category: 'personal', date: '08/05/2025' },
     { id: 'perso-3', type: 'autre-perso', name: 'Article_ML_Education_2024.pdf', description: 'Version finale de l\'article "Machine Learning in Education".', status: 'uploaded', category: 'personal', date: '28/02/2025' },
-    
+    { id: 'perso-4', type: 'cni', name: 'CNI_Claire_Dubois.pdf', description: 'Carte Nationale d\'Identité (scan).', status: 'uploaded', category: 'personal', date: '05/01/2023'},
+    { id: 'perso-5', type: 'photo-identite', name: 'Photo_CD.jpg', description: 'Photo d\'identité officielle.', status: 'missing', category: 'personal'},
 ];
 
 const diplomaDocuments: Document[] = [
