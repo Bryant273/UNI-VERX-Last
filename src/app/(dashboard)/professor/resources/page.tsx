@@ -50,16 +50,12 @@ const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: s
 
 export default function ProfessorResourcesPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [subjectFilter, setSubjectFilter] = useState('all');
-    const [categoryFilter, setCategoryFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
 
     const filteredResources = useMemo(() => {
         return allResources
-            .filter(res => searchTerm === '' || res.name.toLowerCase().includes(searchTerm.toLowerCase()))
-            .filter(res => subjectFilter === 'all' || res.subject === subjectFilter)
-            .filter(res => categoryFilter === 'all' || res.category === categoryFilter);
-    }, [searchTerm, subjectFilter, categoryFilter]);
+            .filter(res => searchTerm === '' || res.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [searchTerm]);
 
     const paginatedResources = useMemo(() => {
         const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -67,20 +63,6 @@ export default function ProfessorResourcesPage() {
     }, [filteredResources, currentPage]);
 
     const totalPages = Math.ceil(filteredResources.length / ITEMS_PER_PAGE);
-
-    const getCategoryTag = (category: ResourceCategory) => {
-        const config = {
-            course: { label: 'Cours', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
-            exercise: { label: 'Exercice', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
-            exam: { label: 'Examen', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
-            correction: { label: 'Correction', className: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300' },
-            reference: { label: 'Référence', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' },
-            '': { label: '', className: '' }
-        };
-        const catConfig = config[category];
-        if (!catConfig || !catConfig.label) return null;
-        return <Badge variant="outline" className={cn('border-0', catConfig.className)}>{catConfig.label}</Badge>
-    }
 
     return (
         <div className="space-y-6 animate-fadeIn">
@@ -96,7 +78,7 @@ export default function ProfessorResourcesPage() {
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                         <div>
                             <CardTitle>Mes ressources pédagogiques</CardTitle>
-                            <CardDescription>Gérez et partagez vos documents, vidéos et liens</CardDescription>
+                            <CardDescription>Gérez et partagez vos documents, vidéos et liens, organisés par matière</CardDescription>
                         </div>
                          <div className="flex flex-wrap gap-3">
                             <Button variant="outline"><FolderPlus className="mr-2"/>Nouveau dossier</Button>
@@ -106,49 +88,27 @@ export default function ProfessorResourcesPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="md:col-span-2 relative">
+                        <div className="md:col-span-4 relative">
                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                             <Input placeholder="Rechercher dans les ressources..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                             <Input placeholder="Rechercher un dossier de matière..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                         </div>
-                        <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-                            <SelectTrigger><SelectValue placeholder="Toutes les matières"/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Toutes les matières</SelectItem>
-                                <SelectItem value="bdd">Bases de Données</SelectItem>
-                                <SelectItem value="python">Programmation Python</SelectItem>
-                                <SelectItem value="algo">Algorithmique</SelectItem>
-                                <SelectItem value="web">Développement Web</SelectItem>
-                            </SelectContent>
-                        </Select>
-                         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                            <SelectTrigger><SelectValue placeholder="Toutes les catégories"/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Toutes les catégories</SelectItem>
-                                <SelectItem value="course">Cours</SelectItem>
-                                <SelectItem value="exercise">Exercices/TD</SelectItem>
-                                <SelectItem value="exam">Examens</SelectItem>
-                                <SelectItem value="correction">Corrections</SelectItem>
-                                <SelectItem value="reference">Références</SelectItem>
-                            </SelectContent>
-                        </Select>
                     </div>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Liste des ressources</CardTitle>
-                    <CardDescription>{filteredResources.length} ressources trouvées</CardDescription>
+                    <CardTitle>Dossiers par matière</CardTitle>
+                    <CardDescription>{filteredResources.length} matières trouvées</CardDescription>
                 </CardHeader>
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Nom</TableHead>
+                                <TableHead>Nom du dossier</TableHead>
                                 <TableHead>Matière</TableHead>
-                                <TableHead>Catégorie</TableHead>
-                                <TableHead>Taille</TableHead>
-                                <TableHead>Vues</TableHead>
+                                <TableHead>Nombre de fichiers</TableHead>
+                                <TableHead>Taille totale</TableHead>
                                 <TableHead>Modifié le</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -166,21 +126,19 @@ export default function ProfessorResourcesPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">{resource.name}</p>
-                                                    {resource.description && <p className="text-xs text-muted-foreground">{resource.description}</p>}
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{resource.subject.toUpperCase()}</TableCell>
-                                        <TableCell>{getCategoryTag(resource.category)}</TableCell>
+                                        <TableCell className="font-mono text-xs uppercase p-2 rounded-full bg-muted/50 w-fit">{resource.subject}</TableCell>
+                                        <TableCell>{resource.fileCount}</TableCell>
                                         <TableCell>{resource.size}</TableCell>
-                                        <TableCell>{resource.views > 0 ? resource.views : '-'}</TableCell>
                                         <TableCell>{resource.modified}</TableCell>
                                         <TableCell className="text-right">
                                              <TooltipProvider>
-                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Eye/></Button></TooltipTrigger><TooltipContent><p>Aperçu</p></TooltipContent></Tooltip>
-                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Download/></Button></TooltipTrigger><TooltipContent><p>Télécharger</p></TooltipContent></Tooltip>
+                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Eye/></Button></TooltipTrigger><TooltipContent><p>Ouvrir</p></TooltipContent></Tooltip>
+                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Download/></Button></TooltipTrigger><TooltipContent><p>Télécharger tout</p></TooltipContent></Tooltip>
                                                 <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Share2/></Button></TooltipTrigger><TooltipContent><p>Partager</p></TooltipContent></Tooltip>
-                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Edit/></Button></TooltipTrigger><TooltipContent><p>Modifier</p></TooltipContent></Tooltip>
+                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Edit/></Button></TooltipTrigger><TooltipContent><p>Renommer</p></TooltipContent></Tooltip>
                                                 <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2/></Button></TooltipTrigger><TooltipContent><p>Supprimer</p></TooltipContent></Tooltip>
                                             </TooltipProvider>
                                         </TableCell>
@@ -192,11 +150,11 @@ export default function ProfessorResourcesPage() {
                 </div>
                  <CardFooter className="flex items-center justify-between p-4 border-t">
                     <p className="text-sm text-muted-foreground">
-                        Affichage de {paginatedResources.length} sur {filteredResources.length} ressources
+                        Affichage de {paginatedResources.length} sur {filteredResources.length} dossiers
                     </p>
                     {totalPages > 1 && (
-                        <div className="flex items-center gap-2">
-                             <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8">
+                         <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8">
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
