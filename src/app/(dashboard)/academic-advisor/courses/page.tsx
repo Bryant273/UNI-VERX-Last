@@ -66,6 +66,8 @@ import { useCourseModal } from '@/hooks/use-course-modal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { semesterResults } from '@/lib/results-data';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -245,6 +247,8 @@ const CoursesTab = () => {
 
 const ProgrammesTab = () => {
     const [semesterFilter, setSemesterFilter] = useState('annual');
+    const [classFilter, setClassFilter] = useState('info-l3');
+    const [isAddModuleModalOpen, setIsAddModuleModalOpen] = useState(false);
 
     const programData = useMemo(() => {
         let courses = [];
@@ -262,7 +266,13 @@ const ProgrammesTab = () => {
             acc[course.ue].push(course);
             return acc;
         }, {} as Record<string, typeof semesterResults.s1.courses>);
-    }, [semesterFilter]);
+    }, [semesterFilter, classFilter]);
+    
+    const handleAddModule = (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log("Adding new module");
+        setIsAddModuleModalOpen(false);
+    }
 
     return (
         <div className="space-y-6 mt-6">
@@ -271,9 +281,16 @@ const ProgrammesTab = () => {
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div>
                             <CardTitle>Maquettes des Programmes</CardTitle>
-                            <CardDescription>Consultez les Unités d'Enseignement (UE) et les modules par semestre.</CardDescription>
+                            <CardDescription>Consultez les Unités d'Enseignement (UE) et les modules par semestre et par filière.</CardDescription>
                         </div>
-                         <div className="flex flex-wrap gap-3">
+                         <div className="flex flex-wrap items-center gap-3">
+                            <Select value={classFilter} onValueChange={setClassFilter}>
+                                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="info-l3">Info L3</SelectItem>
+                                    <SelectItem value="math-l2">Math L2</SelectItem>
+                                </SelectContent>
+                             </Select>
                              <Select value={semesterFilter} onValueChange={setSemesterFilter}>
                                 <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
                                 <SelectContent>
@@ -282,10 +299,15 @@ const ProgrammesTab = () => {
                                     <SelectItem value="s2">Semestre 2</SelectItem>
                                 </SelectContent>
                              </Select>
-                             <Button><Download className="mr-2 h-4 w-4" /> Exporter la maquette</Button>
+                             <Button onClick={() => setIsAddModuleModalOpen(true)}><Plus className="mr-2 h-4 w-4"/> Ajouter un module</Button>
                          </div>
                     </div>
                 </CardHeader>
+                <CardFooter className="flex-col items-start gap-2 border-t pt-4">
+                    <p className="text-sm font-medium">Exportation</p>
+                    <p className="text-xs text-muted-foreground">Téléchargez la maquette pour la filière et la période sélectionnée.</p>
+                    <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Exporter la maquette (.pdf)</Button>
+                </CardFooter>
             </Card>
 
             <Accordion type="multiple" defaultValue={Object.keys(programData)} className="w-full space-y-4">
@@ -309,6 +331,7 @@ const ProgrammesTab = () => {
                                                 <TableHead>Module</TableHead>
                                                 <TableHead>Crédits</TableHead>
                                                 <TableHead>Syllabus</TableHead>
+                                                <TableHead className="text-right">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -321,6 +344,10 @@ const ProgrammesTab = () => {
                                                             Voir le syllabus
                                                         </Button>
                                                     </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8"><Edit/></Button>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2/></Button>
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -331,6 +358,45 @@ const ProgrammesTab = () => {
                     </AccordionItem>
                 ))}
             </Accordion>
+             <Dialog open={isAddModuleModalOpen} onOpenChange={setIsAddModuleModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Ajouter un nouveau module</DialogTitle>
+                        <DialogDescription>Remplissez les informations pour créer un nouveau module dans la maquette.</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleAddModule} className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="module-name">Nom du module</Label>
+                            <Input id="module-name" placeholder="Ex: Systèmes d'Exploitation Avancés"/>
+                        </div>
+                        <div className="space-y-2">
+                             <Label htmlFor="module-ue">Unité d'Enseignement (UE)</Label>
+                            <Select>
+                                <SelectTrigger id="module-ue"><SelectValue placeholder="Sélectionnez une UE" /></SelectTrigger>
+                                <SelectContent>
+                                    {Object.keys(programData).map(ue => <SelectItem key={ue} value={ue}>{ue}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="module-credits">Crédits ECTS</Label>
+                            <Input id="module-credits" type="number" placeholder="Ex: 6"/>
+                        </div>
+                        <div className="space-y-2">
+                             <Label htmlFor="module-syllabus">Syllabus (PDF)</Label>
+                             <div className="p-4 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary">
+                                <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
+                                <p className="mt-2 text-xs text-muted-foreground">Cliquez ou glissez-déposez le fichier</p>
+                                <Input id="module-syllabus" type="file" className="hidden" />
+                             </div>
+                        </div>
+                         <DialogFooter className="pt-4">
+                            <Button type="button" variant="ghost" onClick={() => setIsAddModuleModalOpen(false)}>Annuler</Button>
+                            <Button type="submit">Ajouter le module</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
