@@ -467,7 +467,7 @@ let conversations: Conversation[] = [];
 
 export default function MessagesPage() {
     const [localConversations, setLocalConversations] = useState<Conversation[]>(initialConversationsData);
-    const [selectedConversationId, setSelectedConversationId] = useState<string | null>('course-bdd-l3');
+    const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [isNewConversationModalOpen, setIsNewConversationModalOpen] = useState(false);
 
     useEffect(() => {
