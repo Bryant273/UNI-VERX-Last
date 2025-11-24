@@ -15,7 +15,7 @@ import {
   ChartBar,
   TrendingUp,
   CalendarCheck,
-  Cogs,
+  Cog,
   Scale
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -99,7 +99,7 @@ export default function ReportsPage() {
         { type: 'grades', title: "Rapport de notes", description: "Statistiques complètes des résultats et évaluations", lastGenerated: "Aujourd'hui", average: "14.7/20", icon: ChartBar, color: { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-500' } },
         { type: 'progress', title: "Rapport de progression", description: "Évolution des performances par cours et période", lastGenerated: "Hier", average: "↗ Positive", icon: TrendingUp, color: { bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-500' } },
         { type: 'activities', title: "Rapport d'activités", description: "Récapitulatif des cours, TD et évaluations", lastGenerated: "Il y a 1 jour", average: "47/semaine", icon: CalendarCheck, color: { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-500' } },
-        { type: 'custom', title: "Rapport personnalisé", description: "Créez un rapport avec vos critères spécifiques", lastGenerated: "N/A", average: "8 modèles", icon: Cogs, color: { bg: 'bg-primary-50 dark:bg-primary-900/20', text: 'text-primary-500' } },
+        { type: 'custom', title: "Rapport personnalisé", description: "Créez un rapport avec vos critères spécifiques", lastGenerated: "N/A", average: "8 modèles", icon: Cog, color: { bg: 'bg-primary-50 dark:bg-primary-900/20', text: 'text-primary-500' } },
         { type: 'comparative', title: "Rapport comparatif", description: "Comparaison entre classes, semestres ou années", lastGenerated: "Il y a 3 jours", average: "4 classes", icon: Scale, color: { bg: 'bg-teal-50 dark:bg-teal-900/20', text: 'text-teal-500' } },
     ];
 
