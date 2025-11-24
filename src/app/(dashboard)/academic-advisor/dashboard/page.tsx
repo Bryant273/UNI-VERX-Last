@@ -115,15 +115,15 @@ export default function AcademicAdvisorDashboard() {
             <CardDescription>Répartition des moyennes générales du semestre en cours.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ChartContainer config={{}} className="h-[250px] w-full">
               <RechartsBarChart data={performanceChartData}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" />
                 <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltipContent />} />
+                <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} />
               </RechartsBarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
@@ -135,18 +135,18 @@ export default function AcademicAdvisorDashboard() {
             <CardDescription>Inscriptions mensuelles par niveau pour l'année 2024.</CardDescription>
           </CardHeader>
           <CardContent>
-             <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={enrollmentChartConfig} className="h-[300px] w-full">
                <RechartsLineChart data={enrollmentChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltipContent indicator="dot" />} />
+                <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
                 <Legend />
                 {Object.entries(enrollmentChartConfig).map(([key, config]) => (
                     <Line key={key} type="monotone" dataKey={key} stroke={config.color} strokeWidth={2} dot={{r:4}} activeDot={{r:6}} />
                 ))}
               </RechartsLineChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
         
