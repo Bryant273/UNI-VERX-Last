@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -29,6 +28,8 @@ import {
   XCircle,
   Clock,
   Globe,
+  BookOpen,
+  LayoutGrid,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -62,6 +63,9 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { useCourseModal } from '@/hooks/use-course-modal';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { semesterResults } from '@/lib/results-data';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -96,161 +100,264 @@ const coursesWithStatus = courseDocuments.map((doc, index) => ({
 }));
 
 
+const CoursesTab = () => {
+    const [courses, setCourses] = useState(coursesWithStatus);
+    const [levelFilter, setLevelFilter] = useState('all');
+    const [classFilter, setClassFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [teacherFilter, setTeacherFilter] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const { onOpen } = useCourseModal();
+    const [actionState, setActionState] = useState<{type: 'delete' | 'validate' | 'reject' | null, course: any}>({type: null, course: null});
+
+    const filteredCourses = useMemo(() => {
+        return courses.filter(c => 
+            (levelFilter === 'all' || c.level === levelFilter) &&
+            (classFilter === 'all' || c.class === classFilter) &&
+            (statusFilter === 'all' || c.status === statusFilter) &&
+            (teacherFilter === 'all' || c.uploader === teacherFilter)
+        );
+    }, [courses, levelFilter, classFilter, statusFilter, teacherFilter]);
+
+    const paginatedCourses = useMemo(() => {
+        return filteredCourses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+    }, [filteredCourses, currentPage]);
+
+    const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
+
+    const uniqueTeachers = useMemo(() => ['all', ...Array.from(new Set(courses.map(c => c.uploader)))], [courses]);
+
+    const handleAction = (course: any, type: 'delete' | 'validate' | 'reject') => {
+        setActionState({ type, course });
+    };
+    
+    const handleConfirmAction = () => {
+        console.log(`Action: ${actionState.type} on course ${actionState.course.id}`);
+        setActionState({type: null, course: null});
+    }
+
+    return (
+        <div className="space-y-6 mt-6">
+            <Card>
+                <CardHeader>
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div>
+                            <CardTitle>Gestion des documents de cours</CardTitle>
+                            <CardDescription>Validez, modifiez et gérez les documents de cours de toute l'université.</CardDescription>
+                        </div>
+                        <Button onClick={() => onOpen()}>
+                            <Plus className="mr-2" /> Ajouter un document
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <Select value={teacherFilter} onValueChange={setTeacherFilter}><SelectTrigger><SelectValue placeholder="Tous les enseignants"/></SelectTrigger><SelectContent>{uniqueTeachers.map(t => <SelectItem key={t} value={t}>{t === 'all' ? 'Tous les enseignants' : t}</SelectItem>)}</SelectContent></Select>
+                        <Select value={levelFilter} onValueChange={setLevelFilter}><SelectTrigger><SelectValue placeholder="Tous les niveaux"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les niveaux</SelectItem><SelectItem value="L1">Licence 1</SelectItem><SelectItem value="L2">Licence 2</SelectItem><SelectItem value="L3">Licence 3</SelectItem><SelectItem value="M1">Master 1</SelectItem><SelectItem value="M2">Master 2</SelectItem></SelectContent></Select>
+                        <Select value={classFilter} onValueChange={setClassFilter}><SelectTrigger><SelectValue placeholder="Toutes les filières"/></SelectTrigger><SelectContent><SelectItem value="all">Toutes les filières</SelectItem><SelectItem value="INFO">Informatique</SelectItem><SelectItem value="MATH">Mathématiques</SelectItem><SelectItem value="PHYS">Physique</SelectItem><SelectItem value="ELEC">Électronique</SelectItem></SelectContent></Select>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger><SelectValue placeholder="Tous les statuts"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem>{Object.entries(statusConfig).map(([key, {text}]) => <SelectItem key={key} value={key}>{text}</SelectItem>)}</SelectContent></Select>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Publication</TableHead>
+                                <TableHead>Enseignant</TableHead>
+                                <TableHead>Niveau/Filière</TableHead>
+                                <TableHead>Module</TableHead>
+                                <TableHead>Document</TableHead>
+                                <TableHead>Statut</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedCourses.map((course) => {
+                                const status = statusConfig[course.status];
+                                return (
+                                    <TableRow key={course.id} className="even:bg-muted/40">
+                                        <TableCell className="text-sm text-muted-foreground">{course.date}</TableCell>
+                                        <TableCell className="font-medium">{course.uploader}</TableCell>
+                                        <TableCell>{course.level} {course.class}</TableCell>
+                                        <TableCell>{course.module}</TableCell>
+                                        <TableCell><div className="flex items-center gap-2"><FileTypeIcon type={course.type} /> <span>{course.documentName}</span></div></TableCell>
+                                        <TableCell><Badge variant="outline" className={cn("border-0", status.color)}><status.icon className="mr-1.5 h-3.5 w-3.5" />{status.text}</Badge></TableCell>
+                                        <TableCell className="text-right">
+                                            <TooltipProvider>
+                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Eye/></Button></TooltipTrigger><TooltipContent><p>Voir</p></TooltipContent></Tooltip>
+                                                {course.status === 'pending' && (
+                                                    <>
+                                                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'validate')}><Check/></Button></TooltipTrigger><TooltipContent><p>Valider</p></TooltipContent></Tooltip>
+                                                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'reject')} className="text-destructive hover:text-destructive"><XCircle/></Button></TooltipTrigger><TooltipContent><p>Rejeter</p></TooltipContent></Tooltip>
+                                                    </>
+                                                )}
+                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => onOpen(course)}><Edit/></Button></TooltipTrigger><TooltipContent><p>Modifier</p></TooltipContent></Tooltip>
+                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'delete')} className="text-destructive hover:text-destructive"><Trash2/></Button></TooltipTrigger><TooltipContent><p>Supprimer</p></TooltipContent></Tooltip>
+                                            </TooltipProvider>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
+                        </TableBody>
+                    </Table>
+                </div>
+                <CardFooter className="p-4 flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">Affichage de {paginatedCourses.length} sur {filteredCourses.length} cours</p>
+                    {totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
+                            <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
+                        </div>
+                    )}
+                </CardFooter>
+            </Card>
+            
+            <Dialog open={!!actionState.type} onOpenChange={() => setActionState({type: null, course: null})}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Confirmer l'action</DialogTitle>
+                        <DialogDescription>
+                        {actionState.type === 'delete' && `Êtes-vous sûr de vouloir supprimer le document "${actionState.course?.documentName}" ?`}
+                        {actionState.type === 'validate' && `Êtes-vous sûr de vouloir valider le document "${actionState.course?.documentName}" ?`}
+                        {actionState.type === 'reject' && `Êtes-vous sûr de vouloir rejeter le document "${actionState.course?.documentName}" ?`}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setActionState({type: null, course: null})}>Annuler</Button>
+                        <Button 
+                            variant={actionState.type === 'delete' || actionState.type === 'reject' ? 'destructive' : 'default'}
+                            onClick={handleConfirmAction}
+                        >
+                        {actionState.type === 'delete' && 'Supprimer'}
+                        {actionState.type === 'validate' && 'Valider'}
+                        {actionState.type === 'reject' && 'Rejeter'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    )
+}
+
+const ProgrammesTab = () => {
+    const [semesterFilter, setSemesterFilter] = useState('annual');
+
+    const programData = useMemo(() => {
+        let courses = [];
+        if (semesterFilter === 's1' || semesterFilter === 'annual') {
+            courses.push(...semesterResults.s1.courses);
+        }
+        if (semesterFilter === 's2' || semesterFilter === 'annual') {
+            courses.push(...semesterResults.s2.courses);
+        }
+        
+        return courses.reduce((acc, course) => {
+            if (!acc[course.ue]) {
+                acc[course.ue] = [];
+            }
+            acc[course.ue].push(course);
+            return acc;
+        }, {} as Record<string, typeof semesterResults.s1.courses>);
+    }, [semesterFilter]);
+
+    return (
+        <div className="space-y-6 mt-6">
+             <Card>
+                <CardHeader>
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div>
+                            <CardTitle>Maquettes des Programmes</CardTitle>
+                            <CardDescription>Consultez les Unités d'Enseignement (UE) et les modules par semestre.</CardDescription>
+                        </div>
+                         <div className="flex flex-wrap gap-3">
+                             <Select value={semesterFilter} onValueChange={setSemesterFilter}>
+                                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="annual">Annuel</SelectItem>
+                                    <SelectItem value="s1">Semestre 1</SelectItem>
+                                    <SelectItem value="s2">Semestre 2</SelectItem>
+                                </SelectContent>
+                             </Select>
+                             <Button><Download className="mr-2 h-4 w-4" /> Exporter la maquette</Button>
+                         </div>
+                    </div>
+                </CardHeader>
+            </Card>
+
+            <Accordion type="multiple" defaultValue={Object.keys(programData)} className="w-full space-y-4">
+                {Object.entries(programData).map(([ue, courses]) => (
+                    <AccordionItem key={ue} value={ue} className="border-0">
+                        <Card>
+                            <AccordionTrigger className="p-6 hover:no-underline">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-primary/10 rounded-lg text-primary"><BookOpen /></div>
+                                    <div>
+                                        <h3 className="text-base font-semibold text-left">{ue}</h3>
+                                        <p className="text-sm text-muted-foreground text-left">{courses.length} modules</p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Module</TableHead>
+                                                <TableHead>Crédits</TableHead>
+                                                <TableHead>Syllabus</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {courses.map(course => (
+                                                <TableRow key={course.id}>
+                                                    <TableCell className="font-medium">{course.module}</TableCell>
+                                                    <TableCell>{course.creditsToValidate}</TableCell>
+                                                    <TableCell>
+                                                        <Button variant="link" className="p-0 h-auto">
+                                                            Voir le syllabus
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </AccordionContent>
+                        </Card>
+                    </AccordionItem>
+                ))}
+            </Accordion>
+        </div>
+    )
+}
+
+
 export default function AcademicAdvisorCoursesPage() {
-  const [courses, setCourses] = useState(coursesWithStatus);
-  const [levelFilter, setLevelFilter] = useState('all');
-  const [classFilter, setClassFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [teacherFilter, setTeacherFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const { onOpen } = useCourseModal();
-  const [actionState, setActionState] = useState<{type: 'delete' | 'validate' | 'reject' | null, course: any}>({type: null, course: null});
-
-  const filteredCourses = useMemo(() => {
-    return courses.filter(c => 
-        (levelFilter === 'all' || c.level === levelFilter) &&
-        (classFilter === 'all' || c.class === classFilter) &&
-        (statusFilter === 'all' || c.status === statusFilter) &&
-        (teacherFilter === 'all' || c.uploader === teacherFilter)
-    );
-  }, [courses, levelFilter, classFilter, statusFilter, teacherFilter]);
-
-  const paginatedCourses = useMemo(() => {
-      return filteredCourses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  }, [filteredCourses, currentPage]);
-
-  const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
-
-  const uniqueTeachers = useMemo(() => ['all', ...Array.from(new Set(courses.map(c => c.uploader)))], [courses]);
-
-  const stats = useMemo(() => ({
-    total: courses.length,
-    pending: courses.filter(c => c.status === 'pending').length,
-    published: courses.filter(c => c.status === 'published').length,
-    teachers: uniqueTeachers.length - 1
-  }), [courses, uniqueTeachers]);
-
-  const handleAction = (course: any, type: 'delete' | 'validate' | 'reject') => {
-    setActionState({ type, course });
-  };
-  
-  const handleConfirmAction = () => {
-      // In a real app, you would perform the action here
-      console.log(`Action: ${actionState.type} on course ${actionState.course.id}`);
-      setActionState({type: null, course: null});
-  }
-
   return (
     <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total des cours</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{stats.total}</p></CardContent></Card>
-            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">En attente</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-amber-600">{stats.pending}</p></CardContent></Card>
-            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Publiés</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{stats.published}</p></CardContent></Card>
-            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Enseignants actifs</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-600">{stats.teachers}</p></CardContent></Card>
+            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total des cours</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">247</p></CardContent></Card>
+            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">En attente</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-amber-600">15</p></CardContent></Card>
+            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Publiés</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">218</p></CardContent></Card>
+            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Enseignants actifs</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-600">23</p></CardContent></Card>
         </div>
 
-        <Card>
-            <CardHeader>
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div>
-                        <CardTitle>Gestion des cours</CardTitle>
-                        <CardDescription>Validez, modifiez et gérez les documents de cours de toute l'université.</CardDescription>
-                    </div>
-                    <Button onClick={() => onOpen()}>
-                        <Plus className="mr-2" /> Ajouter un cours
-                    </Button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <Select value={teacherFilter} onValueChange={setTeacherFilter}><SelectTrigger><SelectValue placeholder="Tous les enseignants"/></SelectTrigger><SelectContent>{uniqueTeachers.map(t => <SelectItem key={t} value={t}>{t === 'all' ? 'Tous les enseignants' : t}</SelectItem>)}</SelectContent></Select>
-                    <Select value={levelFilter} onValueChange={setLevelFilter}><SelectTrigger><SelectValue placeholder="Tous les niveaux"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les niveaux</SelectItem><SelectItem value="L1">Licence 1</SelectItem><SelectItem value="L2">Licence 2</SelectItem><SelectItem value="L3">Licence 3</SelectItem><SelectItem value="M1">Master 1</SelectItem><SelectItem value="M2">Master 2</SelectItem></SelectContent></Select>
-                    <Select value={classFilter} onValueChange={setClassFilter}><SelectTrigger><SelectValue placeholder="Toutes les filières"/></SelectTrigger><SelectContent><SelectItem value="all">Toutes les filières</SelectItem><SelectItem value="INFO">Informatique</SelectItem><SelectItem value="MATH">Mathématiques</SelectItem><SelectItem value="PHYS">Physique</SelectItem><SelectItem value="ELEC">Électronique</SelectItem></SelectContent></Select>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger><SelectValue placeholder="Tous les statuts"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem>{Object.entries(statusConfig).map(([key, {text}]) => <SelectItem key={key} value={key}>{text}</SelectItem>)}</SelectContent></Select>
-                </div>
-            </CardContent>
-        </Card>
-
-        <Card>
-             <div className="overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Publication</TableHead>
-                            <TableHead>Enseignant</TableHead>
-                            <TableHead>Niveau/Filière</TableHead>
-                            <TableHead>Module</TableHead>
-                            <TableHead>Document</TableHead>
-                            <TableHead>Statut</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {paginatedCourses.map((course) => {
-                            const status = statusConfig[course.status];
-                            return (
-                                <TableRow key={course.id} className="even:bg-muted/40">
-                                    <TableCell className="text-sm text-muted-foreground">{course.date}</TableCell>
-                                    <TableCell className="font-medium">{course.uploader}</TableCell>
-                                    <TableCell>{course.level} {course.class}</TableCell>
-                                    <TableCell>{course.module}</TableCell>
-                                    <TableCell><div className="flex items-center gap-2"><FileTypeIcon type={course.type} /> <span>{course.documentName}</span></div></TableCell>
-                                    <TableCell><Badge variant="outline" className={cn("border-0", status.color)}><status.icon className="mr-1.5 h-3.5 w-3.5" />{status.text}</Badge></TableCell>
-                                    <TableCell className="text-right">
-                                        <TooltipProvider>
-                                            <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Eye/></Button></TooltipTrigger><TooltipContent><p>Voir</p></TooltipContent></Tooltip>
-                                            {course.status === 'pending' && (
-                                                <>
-                                                 <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'validate')}><Check/></Button></TooltipTrigger><TooltipContent><p>Valider</p></TooltipContent></Tooltip>
-                                                 <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'reject')} className="text-destructive hover:text-destructive"><XCircle/></Button></TooltipTrigger><TooltipContent><p>Rejeter</p></TooltipContent></Tooltip>
-                                                </>
-                                            )}
-                                            <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => onOpen(course)}><Edit/></Button></TooltipTrigger><TooltipContent><p>Modifier</p></TooltipContent></Tooltip>
-                                            <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'delete')} className="text-destructive hover:text-destructive"><Trash2/></Button></TooltipTrigger><TooltipContent><p>Supprimer</p></TooltipContent></Tooltip>
-                                        </TooltipProvider>
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        })}
-                    </TableBody>
-                </Table>
-             </div>
-             <CardFooter className="p-4 flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Affichage de {paginatedCourses.length} sur {filteredCourses.length} cours</p>
-                {totalPages > 1 && (
-                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
-                        <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
-                        <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
-                    </div>
-                )}
-             </CardFooter>
-        </Card>
-
-        {/* Action confirmation modals */}
-        <Dialog open={!!actionState.type} onOpenChange={() => setActionState({type: null, course: null})}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Confirmer l'action</DialogTitle>
-                    <DialogDescription>
-                       {actionState.type === 'delete' && `Êtes-vous sûr de vouloir supprimer le document "${actionState.course?.documentName}" ?`}
-                       {actionState.type === 'validate' && `Êtes-vous sûr de vouloir valider le document "${actionState.course?.documentName}" ?`}
-                       {actionState.type === 'reject' && `Êtes-vous sûr de vouloir rejeter le document "${actionState.course?.documentName}" ?`}
-                    </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                    <Button variant="ghost" onClick={() => setActionState({type: null, course: null})}>Annuler</Button>
-                    <Button 
-                        variant={actionState.type === 'delete' || actionState.type === 'reject' ? 'destructive' : 'default'}
-                        onClick={handleConfirmAction}
-                    >
-                       {actionState.type === 'delete' && 'Supprimer'}
-                       {actionState.type === 'validate' && 'Valider'}
-                       {actionState.type === 'reject' && 'Rejeter'}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        <Tabs defaultValue="courses" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="courses"><LayoutGrid className="mr-2" />Gestion des cours</TabsTrigger>
+                <TabsTrigger value="programmes"><BookOpen className="mr-2" />Programmes &amp; Maquettes</TabsTrigger>
+            </TabsList>
+            <TabsContent value="courses">
+                <CoursesTab />
+            </TabsContent>
+            <TabsContent value="programmes">
+                <ProgrammesTab />
+            </TabsContent>
+        </Tabs>
     </div>
   );
 }
