@@ -228,3 +228,5 @@ for (let i = 6; i <= 185; i++) {
         juryComments: 'Résultats en ligne avec la moyenne de la promotion.'
     });
 }
+
+    

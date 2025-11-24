@@ -1,3 +1,4 @@
+
 // This is a placeholder file for the new page.
 // The user can ask to build this page in a subsequent request.
 
@@ -11,3 +12,5 @@ export default function AcademicAdvisorCoursesPage() {
     </div>
   );
 }
+
+    
