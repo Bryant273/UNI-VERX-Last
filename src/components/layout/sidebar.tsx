@@ -105,16 +105,20 @@ export default function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-2">
         <SidebarMenu>
-          {bottomNavLinks.map((link) => (
-            <SidebarMenuItem key={link.label}>
-              <SidebarMenuButton asChild className="justify-start">
-                <Link href={link.href}>
-                  <link.icon className="mr-2 h-4 w-4" />
-                  {link.label}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {bottomNavLinks.map((link) => {
+            // Make the settings link dynamic
+            const href = link.href === '/settings' ? `/${currentRole}/settings` : link.href;
+            return (
+              <SidebarMenuItem key={link.label}>
+                <SidebarMenuButton asChild className="justify-start" isActive={pathname === href}>
+                  <Link href={href}>
+                    <link.icon className="mr-2 h-4 w-4" />
+                    {link.label}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarFooter>
     </UISidebar>

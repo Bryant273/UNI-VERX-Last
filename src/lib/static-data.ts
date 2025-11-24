@@ -162,7 +162,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
 };
 
 export const bottomNavLinks: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: '/student/settings', label: 'Paramètres', icon: Settings },
+  { href: '/settings', label: 'Paramètres', icon: Settings },
   { href: '/', label: 'Déconnexion', icon: LogOut },
 ];
 
