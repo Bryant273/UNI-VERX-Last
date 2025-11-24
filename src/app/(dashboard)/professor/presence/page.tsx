@@ -89,25 +89,6 @@ export default function ProfessorPresencePage() {
         setSelectedAbsence(item);
         setIsJustificationModalOpen(true);
     };
-    
-    const renderPagination = () => {
-        const pages = [];
-        if (totalPages <= 1) return null;
-        for (let i = 1; i <= totalPages; i++) {
-            pages.push(
-                <Button
-                    key={i}
-                    variant={currentPage === i ? 'default' : 'outline'}
-                    size="icon"
-                    onClick={() => setCurrentPage(i)}
-                    className="h-8 w-8"
-                >
-                    {i}
-                </Button>
-            );
-        }
-        return pages;
-    };
 
 
     return (
@@ -229,7 +210,9 @@ export default function ProfessorPresencePage() {
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
-                            {renderPagination()}
+                            <span className="text-sm font-medium">
+                                Page {currentPage} sur {totalPages}
+                            </span>
                             <Button
                                 variant="outline"
                                 size="icon"
