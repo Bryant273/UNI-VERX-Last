@@ -32,6 +32,7 @@ import {
   DoorOpen,
   Megaphone,
   FolderOpen,
+  FileArchive,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
@@ -100,6 +101,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       links: [
         { href: '/professor/presence', label: 'Présences', icon: UserCheck },
         { href: '/professor/reports', label: 'Rapports', icon: FileText },
+        { href: '/professor/documents', label: 'Documents', icon: FileArchive },
       ],
     },
   ],
