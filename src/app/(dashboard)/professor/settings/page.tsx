@@ -16,6 +16,8 @@ import {
   Monitor,
   BookUser,
   Database,
+  Trash2,
+  FileCog
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,6 +38,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Slider } from '@/components/ui/slider';
 
 const TABS = [
   { id: 'profile', label: 'Profil', icon: User },
@@ -397,15 +400,103 @@ const IntegrationsSection = () => {
     );
 };
 
-const ComingSoonSection = ({ title }: { title: string }) => (
-    <Card>
-        <CardHeader>
-            <CardTitle>{title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <p>Section en cours de construction.</p>
-        </CardContent>
-    </Card>
+const PedagogySection = () => (
+    <div className="space-y-6">
+        <Card>
+            <CardHeader>
+                <CardTitle>Préférences d'évaluation</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                    <Label htmlFor="grading-system">Système de notation par défaut</Label>
+                    <Select defaultValue="20">
+                        <SelectTrigger id="grading-system"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="20">Sur 20</SelectItem>
+                            <SelectItem value="100">Sur 100</SelectItem>
+                            <SelectItem value="letter">Lettres (A, B, C...)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="rounding">Arrondir les notes finales au demi-point supérieur</Label>
+                    <Switch id="rounding" defaultChecked />
+                </div>
+                 <div className="flex items-center justify-between">
+                    <Label htmlFor="anonymize">Anonymiser les soumissions par défaut</Label>
+                    <Switch id="anonymize" />
+                </div>
+            </CardContent>
+        </Card>
+         <Card>
+            <CardHeader>
+                <CardTitle>Gestion des cours</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div>
+                    <Label>Seuil d'alerte pour absence</Label>
+                     <div className="flex items-center gap-4">
+                         <Slider defaultValue={[20]} max={50} step={5} />
+                         <span className="text-sm font-medium">20%</span>
+                     </div>
+                     <p className="text-xs text-muted-foreground mt-1">Recevoir une alerte si le taux d'absence d'un étudiant dépasse ce seuil.</p>
+                </div>
+                 <div className="flex items-center justify-between">
+                    <Label htmlFor="auto-attendance">Activer l'appel automatique 5min après le début du cours</Label>
+                    <Switch id="auto-attendance" />
+                </div>
+            </CardContent>
+        </Card>
+         <div className="flex justify-end">
+            <Button>Enregistrer les préférences pédagogiques</Button>
+        </div>
+    </div>
+);
+
+const DataSection = () => (
+    <div className="space-y-6">
+        <Card>
+            <CardHeader>
+                <CardTitle>Sauvegarde des Données</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="flex items-center justify-between">
+                    <Label htmlFor="auto-backup">Sauvegarde automatique quotidienne</Label>
+                    <Switch id="auto-backup" defaultChecked />
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium">Dernière sauvegarde : Aujourd'hui à 02:00</p>
+                        <p className="text-xs text-muted-foreground">Taille : 15.8 MB</p>
+                    </div>
+                    <Button variant="ghost" size="sm">Télécharger</Button>
+                </div>
+                 <Button className="w-full" variant="outline">Lancer une sauvegarde manuelle</Button>
+            </CardContent>
+        </Card>
+         <Card>
+            <CardHeader>
+                <CardTitle>Exportation des Données</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                    <Label htmlFor="export-format">Format d'export par défaut</Label>
+                    <Select defaultValue="pdf">
+                        <SelectTrigger id="export-format"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="pdf">PDF</SelectItem>
+                            <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                            <SelectItem value="csv">CSV</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <Button className="w-full">
+                    <FileCog className="mr-2"/>
+                    Télécharger une archive de toutes mes données
+                </Button>
+            </CardContent>
+        </Card>
+    </div>
 );
 
 
@@ -423,15 +514,24 @@ export default function SettingsPage() {
       case 'security':
         return <SecuritySection />;
       case 'pedagogy':
-        return <ComingSoonSection title="Pédagogie" />;
+        return <PedagogySection />;
       case 'data':
-        return <ComingSoonSection title="Données" />;
+        return <DataSection />;
       case 'privacy':
         return <PrivacySection />;
       case 'integrations':
         return <IntegrationsSection />;
       default:
-        return <ComingSoonSection title={TABS.find(t => t.id === activeTab)?.label || 'Paramètres'} />;
+        return (
+             <Card>
+                <CardHeader>
+                    <CardTitle>{TABS.find(t => t.id === activeTab)?.label || 'Paramètres'}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>Section en cours de construction.</p>
+                </CardContent>
+            </Card>
+        );
     }
   };
 
@@ -465,3 +565,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+
