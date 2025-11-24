@@ -37,6 +37,7 @@ import {
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
 import type { DemoUser } from './messages-data';
+import { advisorNavLinks } from './advisor-data';
 
 export const VALID_ROLES: UserRole[] = [
   'student', 
@@ -114,39 +115,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '#', label: 'Statistiques', icon: PieChart },
     { href: '#', label: 'Sécurité', icon: Shield },
   ],
-  'academic-advisor': [
-    { href: '/academic-advisor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-    { href: '#', label: 'Étudiants', icon: Users },
-    { href: '#', label: 'Enseignants', icon: UserCheck },
-    { href: '/academic-advisor/courses', label: 'Cours & Programmes', icon: BookOpen },
-    { href: '#', label: 'Planning Global', icon: Calendar },
-    {
-      title: 'Gestion',
-      links: [
-        { href: '#', label: 'Validations', icon: Vote },
-        { href: '#', label: 'Alertes', icon: AlertTriangle },
-        { href: '#', label: 'Salles', icon: DoorOpen },
-        { href: '#', label: 'Inscriptions', icon: UserPlus },
-        { href: '#', label: 'Scolarité', icon: CreditCard },
-        { href: '#', label: 'Bulletins & Résultats', icon: FileStack },
-      ],
-    },
-    {
-      title: 'Communication',
-      links: [
-        { href: '#', label: 'Messagerie', icon: MessageSquare },
-        { href: '#', label: 'Annonces', icon: Megaphone },
-      ],
-    },
-     {
-      title: 'Rapports',
-      links: [
-        { href: '#', label: 'Statistiques', icon: PieChart },
-        { href: '#', label: 'Rapports', icon: FileBarChart },
-        { href: '#', label: 'Exports', icon: Download },
-      ],
-    },
-  ],
+  'academic-advisor': advisorNavLinks,
   secretariat: [
     { href: '/secretariat/dashboard', label: 'Secrétariat', icon: LayoutDashboard },
     { href: '#', label: 'Inscriptions', icon: ClipboardCheck },
@@ -354,4 +323,3 @@ export const messages = [
   { id: 2, sender: 'Administration', subject: 'Annonce importante : Fermeture du campus', time: 'Hier' },
   { id: 3, sender: 'Club de Robotique', subject: 'Prochaine réunion : Projet Mars Rover', time: 'Hier' },
 ];
-
