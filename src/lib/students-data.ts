@@ -191,42 +191,43 @@ const firstNames = ["Léa", "Manon", "Chloé", "Louis", "Gabriel", "Jules", "Hug
 const lastNames = ["Garcia", "Rodriguez", "Gomez", "Fernandez", "Lopez", "Martinez", "Sanchez", "Perez", "Gonzalez", "Martin", "Bernard", "Dubois"];
 
 for (let i = 6; i <= 185; i++) {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const firstName = firstNames[i % firstNames.length];
+    const lastName = lastNames[i % lastNames.length];
     const name = `${firstName} ${lastName}`;
-    const average = 8 + Math.random() * 10;
-    const attendance = 70 + Math.random() * 30;
+    
+    // Deterministic generation based on ID 'i' to avoid hydration errors
+    const average = parseFloat((8 + (i * 13) % 12 + ((i * 7) % 100) / 100).toFixed(2));
+    const attendance = 70 + (i * 17) % 31;
+    
     let status: Student['status'] = 'average';
     if (average >= 16) status = 'excellent';
     else if (average >= 13) status = 'good';
     else if (average < 10 || attendance < 80) status = 'difficulty';
 
     const classOptions = ['l1-info', 'l2-info', 'l3-info', 'm1-info', 'm2-info'];
-    const randomClass = classOptions[Math.floor(Math.random() * classOptions.length)];
+    const randomClass = classOptions[i % classOptions.length];
 
     studentsData.push({
         id: i,
         name: name,
-        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@etudiant.univers.fr`,
-        phone: `06 ${String(Math.floor(10 + Math.random() * 90))} ${String(Math.floor(10 + Math.random() * 90))} ${String(Math.floor(10 + Math.random() * 90))} ${String(Math.floor(10 + Math.random() * 90))}`,
-        birthdate: `${String(Math.floor(1+Math.random()*28)).padStart(2,'0')}/${String(Math.floor(1+Math.random()*12)).padStart(2,'0')}/${2000 + Math.floor(Math.random()*5)}`,
+        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@etudiant.univers.fr`,
+        phone: `06 ${String(10 + (i % 90)).padStart(2, '0')} ${String(10 + ((i+10) % 90)).padStart(2, '0')} ${String(10 + ((i+20) % 90)).padStart(2, '0')} ${String(10 + ((i+30) % 90)).padStart(2, '0')}`,
+        birthdate: `${String(1 + (i % 28)).padStart(2,'0')}/${String(1 + (i % 12)).padStart(2,'0')}/${2000 + (i % 5)}`,
         class: randomClass,
         className: randomClass.replace('-', ' ').toUpperCase(),
         average: average,
         attendance: attendance,
         status: status,
-        lastLogin: `Il y a ${Math.floor(Math.random()*5)+1} jours`,
+        lastLogin: `Il y a ${1 + (i % 5)} jours`,
         photo: `https://i.pravatar.cc/100?img=${i}`,
-        enrollment: `Sept ${2020 + Math.floor(Math.random()*5)}`,
-        studentId: `${20+Math.floor(Math.random()*5)}${String(Math.floor(10000+Math.random()*90000))}`,
+        enrollment: `Sept ${2020 + (i % 5)}`,
+        studentId: `${20+ (i % 5)}${String(10000+i).padStart(5, '0')}`,
         totalCredits: 60,
-        validatedCredits: average >= 10 ? 60 : 30 + Math.floor(Math.random()*20),
-        ranking: Math.floor(2 + Math.random() * 80),
+        validatedCredits: average >= 10 ? 60 : 30 + (i % 20),
+        ranking: 2 + (i % 80),
         totalStudents: 82,
         passStatus: average >= 10 ? 'Admis' : 'Ajournement',
         academicResults: {s1:[], s2:[]},
         juryComments: 'Résultats en ligne avec la moyenne de la promotion.'
     });
 }
-
-    
