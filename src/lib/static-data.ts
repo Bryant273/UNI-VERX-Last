@@ -84,6 +84,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   ],
   professor: [
     { href: '/professor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/professor/payments', label: 'Paiements', icon: CreditCard },
     { href: '/professor/courses', label: 'Mes cours', icon: BookOpen },
     { href: '/professor/timetable', label: 'Planning', icon: Calendar },
     { href: '/professor/evaluations', label: 'Évaluations', icon: ClipboardCheck },
