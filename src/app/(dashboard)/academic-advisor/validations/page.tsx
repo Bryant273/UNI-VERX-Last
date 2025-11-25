@@ -19,6 +19,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -128,7 +129,7 @@ export default function ValidationsPage() {
     };
 
     const handleSelectAll = (checked: boolean | 'indeterminate') => {
-        if (checked) {
+        if (checked === true) {
             setSelectedRows(new Set(paginatedValidations.map(v => v.id)));
         } else {
             setSelectedRows(new Set());
@@ -151,7 +152,7 @@ export default function ValidationsPage() {
             course: 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300',
             absence: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
         };
-        return <Badge variant="outline" className={cn("border-0", config[type])}>{type}</Badge>;
+        return <Badge variant="outline" className={cn("border-0", config[type])}>{type.charAt(0).toUpperCase() + type.slice(1)}</Badge>;
     };
 
     const modalData = useMemo(() => {
@@ -173,7 +174,7 @@ export default function ValidationsPage() {
                          <div className="flex items-center space-x-3">
                             <Checkbox 
                                 id="selectAll" 
-                                checked={selectedRows.size > 0 && selectedRows.size === paginatedValidations.length} 
+                                checked={selectedRows.size > 0 && paginatedValidations.length > 0 && selectedRows.size === paginatedValidations.length} 
                                 onCheckedChange={handleSelectAll}
                             />
                              <label htmlFor="selectAll" className="text-sm text-gray-700 dark:text-gray-300">Tout sélectionner</label>
@@ -203,7 +204,7 @@ export default function ValidationsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-12"><Checkbox onCheckedChange={handleSelectAll} checked={selectedRows.size > 0 && selectedRows.size === paginatedValidations.length} /></TableHead>
+                                    <TableHead className="w-12"><Checkbox onCheckedChange={handleSelectAll} checked={selectedRows.size > 0 && paginatedValidations.length > 0 && selectedRows.size === paginatedValidations.length} /></TableHead>
                                     <TableHead>Demande</TableHead>
                                     <TableHead>Type/Priorité</TableHead>
                                     <TableHead>Demandeur</TableHead>
@@ -226,7 +227,7 @@ export default function ValidationsPage() {
                                             <div className="text-sm text-muted-foreground">{v.time}</div>
                                         </TableCell>
                                         <TableCell>{v.deadline}</TableCell>
-                                        <TableCell><Badge variant="outline" className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-0">{v.status}</Badge></TableCell>
+                                        <TableCell><Badge variant="outline" className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-0">{v.status.charAt(0).toUpperCase() + v.status.slice(1)}</Badge></TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="ghost" size="icon" onClick={() => setSelectedValidation(v)}><Eye /></Button>
                                             <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => handleValidationAction([v.id], 'reject')}><X /></Button>
@@ -291,11 +292,12 @@ export default function ValidationsPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setSelectedValidation(null)}>Fermer</Button>
-                        <Button variant="destructive" onClick={() => handleValidationAction([selectedValidation!.id], 'reject')}><X className="mr-2 h-4 w-4"/> Rejeter</Button>
-                        <Button onClick={() => handleValidationAction([selectedValidation!.id], 'approve')}><Check className="mr-2 h-4 w-4"/> Approuver</Button>
+                        <Button variant="destructive" onClick={() => selectedValidation && handleValidationAction([selectedValidation.id], 'reject')}><X className="mr-2 h-4 w-4"/> Rejeter</Button>
+                        <Button onClick={() => selectedValidation && handleValidationAction([selectedValidation.id], 'approve')}><Check className="mr-2 h-4 w-4"/> Approuver</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
     );
 }
+
