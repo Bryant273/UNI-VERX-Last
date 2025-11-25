@@ -12,6 +12,7 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -109,6 +110,7 @@ export default function ValidationsPage() {
         pending: pendingValidations.length,
         urgent: pendingValidations.filter(v => v.priority === 'urgent').length,
         approvedToday: validations.filter(v => v.status === 'approved' && new Date(v.actionDate || 0).toDateString() === new Date().toDateString()).length,
+        rejected: validations.filter(v => v.status === 'rejected').length,
     }), [validations, pendingValidations]);
 
     const handleValidationAction = (ids: number[], action: 'approve' | 'reject') => {
@@ -166,7 +168,7 @@ export default function ValidationsPage() {
                 <StatCard title="Total en attente" value={stats.pending} icon={Clock} color="text-amber-500" />
                 <StatCard title="Urgent" value={stats.urgent} icon={AlertTriangle} color="text-red-500" />
                 <StatCard title="Validées aujourd'hui" value={stats.approvedToday} icon={Check} color="text-green-500" />
-                <StatCard title="Temps moyen" value="2.3h" icon={Clock} color="text-blue-500" />
+                <StatCard title="Rejetées" value={stats.rejected} icon={XCircle} color="text-red-500" />
             </div>
 
             <Card>
@@ -301,4 +303,3 @@ export default function ValidationsPage() {
         </div>
     );
 }
-
