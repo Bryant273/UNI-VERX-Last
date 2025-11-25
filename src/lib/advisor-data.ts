@@ -15,6 +15,7 @@ import {
   PieChart,
   FileBarChart,
   Download,
+  CheckCheck,
 } from 'lucide-react';
 import type { NavItem } from './data';
 
@@ -27,7 +28,7 @@ export const advisorNavLinks: NavItem[] = [
     {
       title: 'Gestion',
       links: [
-        { href: '/academic-advisor/validations', label: 'Validations', icon: Vote },
+        { href: '/academic-advisor/validations', label: 'Validations', icon: CheckCheck },
         { href: '/academic-advisor/alerts', label: 'Alertes', icon: AlertTriangle },
         { href: '/academic-advisor/rooms', label: 'Salles', icon: DoorOpen },
         { href: '/academic-advisor/enrollments', label: 'Inscriptions', icon: UserPlus },
