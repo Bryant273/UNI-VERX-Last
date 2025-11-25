@@ -57,6 +57,7 @@ import { getInitials } from '@/lib/messages-data';
 import { newInscriptionsData, enrolledStudentsData, getStatusLabel, getStatusColor, type NewEnrollment, type EnrolledStudent } from '@/lib/enrollments-data';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
 
 
 const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: string | number; icon: React.ElementType; color: string; }) => (
@@ -247,6 +248,19 @@ export default function EnrollmentsPage() {
     };
 
     const handleNewInscription = () => setIsNewInscriptionModalOpen(true);
+    
+    const getNextLevel = (currentLevel: string) => {
+        if (currentLevel.startsWith('L')) {
+            const levelNum = parseInt(currentLevel.charAt(1));
+            if (levelNum < 3) return `L${levelNum + 1}`;
+            return 'M1';
+        }
+        if (currentLevel.startsWith('M')) {
+            const levelNum = parseInt(currentLevel.charAt(1));
+            if (levelNum < 2) return `M${levelNum + 1}`;
+        }
+        return 'Diplômé';
+    }
 
     return (
         <div className="space-y-6">
@@ -263,15 +277,70 @@ export default function EnrollmentsPage() {
                 </TabsContent>
             </Tabs>
             
-            {/* --- Modals --- */}
-            {/* Add new student modal */}
+            {/* New Inscription Modal */}
             <Dialog open={isNewInscriptionModalOpen} onOpenChange={setIsNewInscriptionModalOpen}>
-                {/* Content similar to HTML, to be implemented */}
+                <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+                     <DialogHeader>
+                        <DialogTitle>Nouvelle Inscription</DialogTitle>
+                        <DialogDescription>Remplir les informations de l'étudiant</DialogDescription>
+                    </DialogHeader>
+                    <form className="space-y-6">
+                        <div className="bg-muted/50 rounded-lg p-4">
+                            <h4 className="font-semibold mb-4">Informations personnelles</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><Label>Prénom *</Label><Input name="firstName" required /></div>
+                                <div><Label>Nom *</Label><Input name="lastName" required /></div>
+                                <div><Label>Date de naissance *</Label><Input type="date" name="birthDate" required /></div>
+                                <div><Label>Lieu de naissance *</Label><Input name="birthPlace" required /></div>
+                                <div><Label>Email *</Label><Input type="email" name="email" required /></div>
+                                <div><Label>Téléphone *</Label><Input type="tel" name="phone" required /></div>
+                                <div className="md:col-span-2"><Label>Adresse *</Label><Textarea name="address" required /></div>
+                            </div>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-4">
+                            <h4 className="font-semibold mb-4">Formation demandée</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><Label>Niveau *</Label><Select name="level" required><SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger><SelectContent><SelectItem value="L1">Licence 1</SelectItem><SelectItem value="M1">Master 1</SelectItem></SelectContent></Select></div>
+                                <div><Label>Département *</Label><Select name="department" required><SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger><SelectContent><SelectItem value="informatique">Informatique</SelectItem><SelectItem value="mathematiques">Mathématiques</SelectItem></SelectContent></Select></div>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="ghost" onClick={() => setIsNewInscriptionModalOpen(false)}>Annuler</Button>
+                            <Button type="submit">Enregistrer l'inscription</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
             </Dialog>
 
-            {/* Re-enroll student modal */}
+            {/* Re-inscription Modal */}
             <Dialog open={isReinscriptionModalOpen} onOpenChange={setIsReinscriptionModalOpen}>
-                {/* Content similar to HTML, to be implemented */}
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Réinscription Étudiant</DialogTitle>
+                        <DialogDescription>Confirmez le passage au niveau supérieur.</DialogDescription>
+                    </DialogHeader>
+                    {selectedStudent && (
+                        <form className="space-y-4 py-4">
+                             <div className="bg-muted/50 rounded-lg p-4">
+                                <h4 className="font-semibold mb-2">Informations de l'étudiant</h4>
+                                <p><strong>Nom:</strong> {selectedStudent.firstName} {selectedStudent.lastName}</p>
+                                <p><strong>Niveau actuel:</strong> {selectedStudent.currentLevel}</p>
+                                <p><strong>Moyenne:</strong> {selectedStudent.gpa}/20</p>
+                             </div>
+                             <div className="bg-muted/50 rounded-lg p-4">
+                                <h4 className="font-semibold mb-2">Nouvelle Formation</h4>
+                                <div>
+                                    <Label>Nouveau niveau</Label>
+                                    <Input value={getNextLevel(selectedStudent.currentLevel)} readOnly />
+                                </div>
+                             </div>
+                             <DialogFooter>
+                                <Button type="button" variant="ghost" onClick={() => setIsReinscriptionModalOpen(false)}>Annuler</Button>
+                                <Button type="submit">Confirmer la réinscription</Button>
+                            </DialogFooter>
+                        </form>
+                    )}
+                </DialogContent>
             </Dialog>
 
              {/* Student File Modal */}
@@ -279,13 +348,37 @@ export default function EnrollmentsPage() {
                <DialogContent className="sm:max-w-3xl">
                   {selectedStudent && (
                     <>
-                    <DialogHeader>
-                      <DialogTitle>Dossier Étudiant: {selectedStudent.firstName} {selectedStudent.lastName}</DialogTitle>
-                    </DialogHeader>
-                    {/* Content will be generated based on student data */}
-                    <div className="py-4">
-                        <p>Détails pour {selectedStudent.firstName}...</p>
-                    </div>
+                        <DialogHeader>
+                            <DialogTitle>Dossier Étudiant</DialogTitle>
+                            <DialogDescription>Année universitaire 2023-2024</DialogDescription>
+                        </DialogHeader>
+                        <div className="max-h-[70vh] overflow-y-auto pr-4 space-y-6 py-4">
+                            <div className="flex items-center space-x-4">
+                                <Avatar className="h-20 w-20"><AvatarImage src={`https://i.pravatar.cc/80?img=${selectedStudent.id}`} /><AvatarFallback>{getInitials(`${selectedStudent.firstName} ${selectedStudent.lastName}`)}</AvatarFallback></Avatar>
+                                <div>
+                                    <h3 className="text-xl font-bold">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
+                                    <p className="text-muted-foreground">N° {selectedStudent.studentNumber}</p>
+                                    <p className="text-sm">{selectedStudent.currentLevel} {selectedStudent.currentProgram}</p>
+                                </div>
+                            </div>
+                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div className="bg-muted/50 rounded-lg p-4">
+                                    <h4 className="font-semibold mb-3">Progression des crédits</h4>
+                                    <Progress value={(selectedStudent.credits / selectedStudent.totalCredits) * 100} className="mb-2" />
+                                    <p className="text-sm text-center">{selectedStudent.credits}/{selectedStudent.totalCredits} ECTS validés</p>
+                                </div>
+                                <div className="bg-muted/50 rounded-lg p-4">
+                                    <h4 className="font-semibold mb-3">Moyenne & Statut</h4>
+                                    <div className="flex justify-around">
+                                        <div className="text-center"><p className="text-lg font-bold">{selectedStudent.gpa}/20</p><p className="text-xs">Moyenne</p></div>
+                                        <div className="text-center"><Badge className={cn(getStatusColor(selectedStudent.canProgress))}>{getStatusLabel(selectedStudent.canProgress)}</Badge><p className="text-xs mt-1">Statut</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="ghost" onClick={() => setIsStudentFileModalOpen(false)}>Fermer</Button>
+                        </DialogFooter>
                     </>
                   )}
                </DialogContent>
@@ -293,20 +386,27 @@ export default function EnrollmentsPage() {
 
             {/* Credentials Modal */}
             <Dialog open={isCredentialsModalOpen} onOpenChange={setIsCredentialsModalOpen}>
-                <DialogContent className="sm:max-w-2xl">
+                <DialogContent className="sm:max-w-xl">
                     {newInscriptionData && (
                         <>
                         <DialogHeader>
                             <DialogTitle>Fiche d'inscription - {newInscriptionData.firstName} {newInscriptionData.lastName}</DialogTitle>
                         </DialogHeader>
-                        <div className="py-4">
-                            {/* Simplified view */}
-                             <p><strong>Identifiant:</strong> {newInscriptionData.loginId}</p>
-                             <p><strong>Mot de passe temporaire:</strong> {newInscriptionData.password}</p>
+                        <div className="space-y-4 py-4">
+                            <p><strong>Formation:</strong> {newInscriptionData.level} - {newInscriptionData.program}</p>
+                            <Separator/>
+                            <div className="credentials-box p-4 rounded-lg">
+                                <h4 className="font-semibold mb-2">Identifiants de connexion</h4>
+                                <div className="space-y-2">
+                                     <div className="flex items-center justify-between"><Label>Identifiant:</Label><code className="font-mono bg-background p-1 rounded">{newInscriptionData.loginId}</code></div>
+                                     <div className="flex items-center justify-between"><Label>Mot de passe temporaire:</Label><code className="font-mono bg-background p-1 rounded">{newInscriptionData.password}</code></div>
+                                </div>
+                            </div>
                         </div>
                         <DialogFooter>
                             <Button variant="outline"><Printer className="mr-2"/>Imprimer</Button>
                             <Button><Mail className="mr-2"/>Envoyer par email</Button>
+                            <Button variant="secondary" onClick={() => setIsCredentialsModalOpen(false)}>Fermer</Button>
                         </DialogFooter>
                         </>
                     )}
