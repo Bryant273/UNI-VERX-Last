@@ -17,6 +17,7 @@ import {
   Check,
   TrendingDown,
   UserX,
+  MessageCircleWarning,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,14 @@ const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: s
 
 const getPriorityBadge = (priority: AlertPriority) => {
     const config = priorityConfig[priority];
+    if (priority === 'critical') {
+        return (
+            <Badge className="bg-red-500 hover:bg-red-500/80 text-white border-red-500">
+                 <AlertTriangle className="w-3 h-3 mr-1.5"/>
+                {config.text}
+            </Badge>
+        );
+    }
     return (
         <Badge variant="outline" className="border-0 font-medium">
             <span className={cn("w-2 h-2 rounded-full mr-2", config.color)}></span>
@@ -66,6 +75,7 @@ const getSubjectIcon = (type: Alert['subject']['type']) => {
         case 'student': return <User className="h-4 w-4 text-muted-foreground"/>;
         case 'course': return <BookOpen className="h-4 w-4 text-muted-foreground"/>;
         case 'system': return <Cog className="h-4 w-4 text-muted-foreground"/>;
+        case 'conversation': return <MessageCircleWarning className="h-4 w-4 text-muted-foreground"/>;
         default: return <Bell className="h-4 w-4 text-muted-foreground"/>;
     }
 }
@@ -137,6 +147,7 @@ export default function AlertsPage() {
                                     <SelectItem value="attendance">Assiduité</SelectItem>
                                     <SelectItem value="administrative">Administratif</SelectItem>
                                     <SelectItem value="technical">Technique</SelectItem>
+                                    <SelectItem value="content">Contenu</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -158,7 +169,7 @@ export default function AlertsPage() {
                         </TableHeader>
                         <TableBody>
                             {paginatedAlerts.map(alert => (
-                                <TableRow key={alert.id} className={cn(alert.isNew && 'bg-primary/5')}>
+                                <TableRow key={alert.id} className={cn('even:bg-muted/40', alert.isNew && 'bg-primary/5')}>
                                     <TableCell>{getPriorityBadge(alert.priority)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">

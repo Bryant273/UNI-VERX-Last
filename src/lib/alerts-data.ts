@@ -1,6 +1,6 @@
 
 export type AlertPriority = 'critical' | 'high' | 'medium' | 'low';
-export type AlertType = 'academic' | 'administrative' | 'technical' | 'attendance';
+export type AlertType = 'academic' | 'administrative' | 'technical' | 'attendance' | 'content';
 
 export interface Alert {
     id: number;
@@ -11,7 +11,7 @@ export interface Alert {
     type: AlertType;
     isNew: boolean;
     subject: {
-        type: 'student' | 'course' | 'system';
+        type: 'student' | 'course' | 'system' | 'conversation';
         name: string;
         id: string;
     };
@@ -27,6 +27,16 @@ export const alertsData: Alert[] = [
         type: "academic",
         isNew: true,
         subject: { type: "student", name: "Lucas Dupont", id: "ETU-2023-54321" }
+    },
+    {
+        id: 9,
+        title: "Contenu sensible détecté",
+        description: "Un numéro de téléphone a été détecté dans une conversation publique du groupe.",
+        date: "Il y a 5 heures",
+        priority: "high",
+        type: "content",
+        isNew: true,
+        subject: { type: "conversation", name: "Groupe: BDD L3", id: "MSG-GRP-001" }
     },
     {
         id: 2,
