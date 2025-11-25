@@ -7,7 +7,7 @@ import {
     Building, CaseSensitive, SortAsc, SortDesc, ChevronLeft, ChevronRight, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -166,7 +166,7 @@ export default function RoomsPage() {
                             {paginatedRooms.map(room => {
                                 const status = statusConfig[room.status];
                                 return (
-                                <TableRow key={room.id} className={cn('hover:bg-muted/40 cursor-pointer', `border-l-4 border-transparent room-row ${room.status}`)} onClick={() => setSelectedRoom(room)}>
+                                <TableRow key={room.id} className={cn('even:bg-muted/40 hover:bg-muted/50 cursor-pointer', `border-l-4 border-transparent room-row ${room.status}`)} onClick={() => setSelectedRoom(room)}>
                                     <TableCell>
                                         <div className="font-medium">{room.name}</div>
                                         <div className="text-xs text-muted-foreground">Étage {room.floor}</div>
@@ -187,6 +187,16 @@ export default function RoomsPage() {
                         </TableBody>
                     </Table>
                 </div>
+                <CardFooter className="flex items-center justify-between p-4 border-t">
+                    <p className="text-sm text-muted-foreground">Affichage de {paginatedRooms.length} sur {filteredRooms.length} salles</p>
+                    {totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
+                            <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
+                        </div>
+                    )}
+                </CardFooter>
             </Card>
             
             <Dialog open={!!selectedRoom} onOpenChange={() => setSelectedRoom(null)}>
