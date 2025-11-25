@@ -20,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
+  CardDescription,
 } from '@/components/ui/card';
 import {
   Table,
@@ -215,7 +216,7 @@ export default function ValidationsPage() {
                             </TableHeader>
                             <TableBody>
                                 {paginatedValidations.map(v => (
-                                    <TableRow key={v.id} data-state={selectedRows.has(v.id) ? "selected" : ""}>
+                                    <TableRow key={v.id} data-state={selectedRows.has(v.id) ? "selected" : ""} className="even:bg-muted/40">
                                         <TableCell><Checkbox checked={selectedRows.has(v.id)} onCheckedChange={() => handleSelectRow(v.id)} /></TableCell>
                                         <TableCell>
                                             <div className="font-medium">{v.title}</div>
