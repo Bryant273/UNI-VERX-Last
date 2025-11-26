@@ -65,7 +65,17 @@ const ConversationList = ({ conversations, onSelect, selectedId, onNewConversati
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle>Messagerie</CardTitle>
+        <div className="flex justify-between items-center">
+            <CardTitle>Messagerie</CardTitle>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={onNewConversation}><Plus className="h-4 w-4"/></Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Nouvelle discussion</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
         <div className="relative mt-4">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Rechercher..." className="pl-8" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
@@ -80,14 +90,6 @@ const ConversationList = ({ conversations, onSelect, selectedId, onNewConversati
                 <Button size="sm" variant={filter === 'teachers' ? 'secondary' : 'ghost'} onClick={() => setFilter('teachers')}>Profs</Button>
                 <Button size="sm" variant={filter === 'groups' ? 'secondary' : 'ghost'} onClick={() => setFilter('groups')}>Groupes</Button>
               </div>
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={onNewConversation}><Plus className="h-4 w-4"/></Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Nouvelle discussion</p></TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
