@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { reportsData, statusConfig } from '@/lib/reports-data';
+import { reportsData, statusConfig, type Report } from '@/lib/reports-data';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -34,7 +34,7 @@ const ITEMS_PER_PAGE = 10;
 
 export default function GlobalReportsPage() {
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
-    const [selectedReport, setSelectedReport] = useState(null);
+    const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationSuccess, setGenerationSuccess] = useState(false);
@@ -52,6 +52,11 @@ export default function GlobalReportsPage() {
             setIsGenerating(false);
             setGenerationSuccess(true);
         }, 2000);
+    };
+
+    const handleViewReport = (report: Report) => {
+      setSelectedReport(report);
+      setPreviewModalOpen(true);
     };
 
     return (
@@ -132,7 +137,7 @@ export default function GlobalReportsPage() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => {}} disabled={report.status !== 'available'}><Eye className="h-4 w-4"/></Button>
+                                            <Button variant="ghost" size="icon" onClick={() => handleViewReport(report)} disabled={report.status !== 'available'}><Eye className="h-4 w-4"/></Button>
                                             <Button variant="ghost" size="icon" onClick={() => {}} disabled={report.status !== 'available'}><Download className="h-4 w-4"/></Button>
                                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button>
                                         </TableCell>
@@ -175,11 +180,17 @@ export default function GlobalReportsPage() {
             <Dialog open={previewModalOpen} onOpenChange={setPreviewModalOpen}>
                 <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
                     <DialogHeader>
-                        <DialogTitle>Titre du rapport</DialogTitle>
-                        <DialogDescription>Sous-titre ou description</DialogDescription>
+                        <DialogTitle>{selectedReport?.title || 'Rapport'}</DialogTitle>
+                        <DialogDescription>{selectedReport?.description} - {selectedReport?.period}</DialogDescription>
                     </DialogHeader>
-                    <div className="flex-1 overflow-y-auto p-1 pr-4">
-                      Contenu du rapport...
+                    <div className="flex-1 overflow-y-auto p-4 border rounded-md my-4">
+                      <h3 className="text-lg font-semibold mb-4">Aperçu du contenu</h3>
+                      <p className="text-muted-foreground">
+                        Le contenu détaillé du rapport serait affiché ici. Pour cette démo, voici une représentation textuelle.
+                      </p>
+                      <pre className="mt-4 p-4 bg-muted rounded-md text-xs whitespace-pre-wrap">
+                        {JSON.stringify(selectedReport, null, 2)}
+                      </pre>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setPreviewModalOpen(false)}>Fermer</Button>
