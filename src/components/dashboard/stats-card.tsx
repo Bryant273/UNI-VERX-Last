@@ -1,3 +1,4 @@
+
 'use client';
 
 import { BarChart, Users } from 'lucide-react';
@@ -18,6 +19,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import {
+  ChartContainer,
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
@@ -54,7 +56,7 @@ export default function StatsCard() {
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <RechartsBarChart data={chartData}>
             <XAxis
               dataKey="year"
@@ -85,7 +87,7 @@ export default function StatsCard() {
               radius={[4, 4, 0, 0]}
             />
           </RechartsBarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
