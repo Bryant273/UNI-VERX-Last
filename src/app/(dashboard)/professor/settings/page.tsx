@@ -33,7 +33,6 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { getInitials } from '@/lib/messages-data';
-import { studentData } from '@/lib/static-data'; // Using studentData as placeholder for prof
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -565,4 +564,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
