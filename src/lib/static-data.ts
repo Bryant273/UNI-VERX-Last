@@ -121,7 +121,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   ],
   rectorate: [
       { href: '/rectorate/dashboard', label: 'Rectorat', icon: LayoutDashboard },
-      { href: '#', label: 'Statistiques Globales', icon: PieChart },
+      { href: '/academic-advisor/stats', label: 'Statistiques Globales', icon: PieChart },
       { href: '#', label: 'Administration', icon: Building },
   ],
   'erp-provider': [
@@ -295,7 +295,17 @@ export const allEvents: Record<UserRole, TimetableEvent[]> = {
   ],
   'academic-advisor': [],
   secretariat: [],
-  rectorate: [],
+  rectorate: [
+      { 
+      id: 10, 
+      time: '10:00 - 11:00', 
+      course: 'Conseil d\'administration', 
+      location: 'Salle du conseil', 
+      type: 'activité',
+      instructor: 'Le Recteur',
+      presenceStatus: 'na',
+    }
+  ],
   'erp-provider': [],
 };
 
