@@ -23,6 +23,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { userData } from '@/lib/static-data';
@@ -148,5 +149,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
-    
