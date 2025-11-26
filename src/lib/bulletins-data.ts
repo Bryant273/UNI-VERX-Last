@@ -43,20 +43,11 @@ const generateBulletinsData = (count: number): Bulletin[] => {
         const studentNumber = `225058${String(i).padStart(3, '0')}`;
         const classCode = classes[i % classes.length];
         const average = parseFloat((8 + (i * 13) % 12 + ((i * 7) % 100) / 100).toFixed(2));
-        const semester = Math.random() > 0.5 ? 'S1' : 'S2';
-        const lastUpdate = new Date(2025, 0, Math.floor(Math.random() * 31) + 1);
+        const semester = i % 2 === 0 ? 'S1' : 'S2';
+        const lastUpdate = new Date(2025, 0, (i % 30) + 1);
 
-        let randomValue = Math.random();
-        let statusIndex = 0;
-        let cumulativeWeight = 0;
-
-        for (let j = 0; j < statusWeights.length; j++) {
-            cumulativeWeight += statusWeights[j];
-            if (randomValue <= cumulativeWeight) {
-                statusIndex = j;
-                break;
-            }
-        }
+        // Make status generation deterministic to avoid hydration errors
+        const statusIndex = i % statuses.length;
         const status = statuses[statusIndex];
 
         bulletins.push({
