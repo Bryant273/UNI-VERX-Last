@@ -514,8 +514,13 @@ export default function MessagesPage() {
     };
 
     return (
-        <div className="h-full flex gap-6">
-            <div className={cn("w-full md:w-1/3 xl:w-1/4 flex-shrink-0", selectedConversationId && 'hidden md:block')}>
+        <div className="grid md:grid-cols-3 xl:grid-cols-4 h-full gap-6">
+            <div
+                className={cn(
+                'md:col-span-1 xl:col-span-1 h-full',
+                selectedConversationId && 'hidden md:block'
+                )}
+            >
               <ConversationList
                 conversations={localConversations}
                 onSelect={handleSelectConversation}
@@ -523,7 +528,12 @@ export default function MessagesPage() {
                 onNewConversation={() => setIsNewConversationModalOpen(true)}
               />
             </div>
-            <div className={cn("flex-1", !selectedConversationId && 'hidden md:block')}>
+            <div
+                className={cn(
+                'md:col-span-2 xl:col-span-3 h-full',
+                !selectedConversationId && 'hidden md:block'
+                )}
+            >
               <ChatView 
                 conversationId={selectedConversationId} 
                 onBack={() => setSelectedConversationId(null)}
