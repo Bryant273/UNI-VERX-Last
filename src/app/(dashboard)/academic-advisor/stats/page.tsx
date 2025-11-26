@@ -2,6 +2,8 @@
 'use client';
 
 import React, { useState, useMemo, useTransition } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   BarChart,
   GraduationCap,
@@ -13,6 +15,7 @@ import {
   BrainCircuit,
   Loader2,
   Star,
+  Download,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -42,13 +45,14 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { kpiData, performanceData, enrollmentData, demographicsData } from '@/lib/stats-data';
+import { getStatsDataForYear } from '@/lib/stats-data';
 import { getAiStatsReport } from '@/app/actions';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { GenerateStatsReportOutput } from '@/ai/flows/generate-stats-report';
 import { Separator } from '@/components/ui/separator';
+import AiReportPDF from '@/components/dashboard/ai-report-pdf';
 
 const StatCard = ({ title, value, change, icon: Icon, color }: { title: string; value: string; change: string; icon: React.ElementType; color: string }) => (
     <Card className="hover-lift">
@@ -97,7 +101,7 @@ const ChartWithComment = ({ title, comment, children }: { title: string, comment
   </div>
 );
 
-const PerformanceChart = () => (
+const PerformanceChart = ({ data }: { data: any[] }) => (
     <Card>
         <CardHeader>
             <CardTitle>Performance des étudiants</CardTitle>
@@ -105,7 +109,7 @@ const PerformanceChart = () => (
         </CardHeader>
         <CardContent>
             <ChartContainer config={{}} className="h-[300px] w-full">
-                <RechartsBarChart data={performanceData}>
+                <RechartsBarChart data={data}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
@@ -117,21 +121,21 @@ const PerformanceChart = () => (
     </Card>
 );
 
-const EnrollmentChart = () => (
+const EnrollmentChart = ({ data }: { data: any }) => (
     <Card>
         <CardHeader>
             <CardTitle>Évolution des inscriptions par niveau</CardTitle>
-            <CardDescription>Comparaison sur les 3 dernières années.</CardDescription>
+            <CardDescription>Comparaison sur les dernières années.</CardDescription>
         </CardHeader>
         <CardContent>
-            <ChartContainer config={enrollmentData.chartConfig} className="h-[400px] w-full">
-                <RechartsLineChart data={enrollmentData.chartData}>
+            <ChartContainer config={data.chartConfig} className="h-[400px] w-full">
+                <RechartsLineChart data={data.chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="year" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip content={<ChartTooltipContent indicator="dot" />} />
                     <Legend />
-                    {Object.entries(enrollmentData.chartConfig).map(([key, config]) => (
+                    {Object.entries(data.chartConfig).map(([key, config]: [string, any]) => (
                         <Line key={key} type="monotone" dataKey={key} stroke={config.color} strokeWidth={2} dot={{r:4}} activeDot={{r:6}} />
                     ))}
                 </RechartsLineChart>
@@ -140,7 +144,7 @@ const EnrollmentChart = () => (
     </Card>
 );
 
-const DemographicsChart = () => (
+const DemographicsChart = ({ data }: { data: any[] }) => (
     <Card>
         <CardHeader>
             <CardTitle>Démographie des étudiants</CardTitle>
@@ -151,7 +155,7 @@ const DemographicsChart = () => (
                 <RechartsPieChart>
                      <Tooltip content={<ChartTooltipContent />} />
                     <Pie
-                        data={demographicsData}
+                        data={data}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -159,7 +163,7 @@ const DemographicsChart = () => (
                         outerRadius={120}
                         dataKey="value"
                     >
-                        {demographicsData.map((entry, index) => (
+                        {data.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                     </Pie>
@@ -176,18 +180,21 @@ export default function StatsPage() {
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<GenerateStatsReportOutput | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const statsData = useMemo(() => getStatsDataForYear(yearFilter, semesterFilter), [yearFilter, semesterFilter]);
 
   const handleGenerateReport = () => {
     setError(null);
     setReport(null);
     startTransition(async () => {
-      const statsData = {
-        kpis: kpiData.map(({ icon, ...rest }) => rest),
-        performanceData: performanceData,
-        enrollmentData: enrollmentData.chartData,
-        demographicsData: demographicsData,
+      const dataForAi = {
+        kpis: statsData.kpiData.map(({ icon, ...rest }) => rest), // remove icon before sending
+        performanceData: statsData.performanceData,
+        enrollmentData: statsData.enrollmentData.chartData,
+        demographicsData: statsData.demographicsData,
       };
-      const result = await getAiStatsReport(statsData);
+      const result = await getAiStatsReport(dataForAi);
       if (result.error) {
         setError(result.error);
       } else if (result.report) {
@@ -197,8 +204,30 @@ export default function StatsPage() {
     });
   };
   
+  const handleDownloadPdf = async () => {
+    setIsDownloadingPdf(true);
+    const reportElement = document.getElementById('ai-report-pdf-content');
+    if (reportElement) {
+        html2canvas(reportElement, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+        }).then((canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'px', [canvas.width, canvas.height]);
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(`Rapport_Analyse_IA_${yearFilter}.pdf`);
+            setIsDownloadingPdf(false);
+        });
+    }
+  };
+  
   return (
     <div className="space-y-6">
+      <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+        {report && <AiReportPDF report={report} chartsData={statsData} year={yearFilter}/>}
+      </div>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <h1 className="text-2xl font-bold">Statistiques Générales</h1>
@@ -248,22 +277,22 @@ export default function StatsPage() {
       )}
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {kpiData.map(kpi => <StatCard key={kpi.title} {...kpi} />)}
+            {statsData.kpiData.map(kpi => <StatCard key={kpi.title} {...kpi} />)}
        </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PerformanceChart />
-            <DemographicsChart />
+            <PerformanceChart data={statsData.performanceData} />
+            <DemographicsChart data={statsData.demographicsData} />
        </div>
        
-        <EnrollmentChart />
+        <EnrollmentChart data={statsData.enrollmentData} />
 
       {report && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogContent className="sm:max-w-4xl max-h-[85vh]">
                 <DialogHeader>
                     <DialogTitle className="text-2xl">Analyse IA des Statistiques</DialogTitle>
-                    <DialogDescription>Rapport généré pour l'année académique {yearFilter}</DialogDescription>
+                    <DialogDescription>Rapport généré pour l'année académique {yearFilter} ({semesterFilter === 'all' ? 'Annuel' : `Semestre ${semesterFilter.substring(1)}`})</DialogDescription>
                 </DialogHeader>
                 <div className="max-h-[65vh] overflow-y-auto p-1 pr-4 space-y-4">
                   <ReportSection title="Résumé des Indicateurs Clés">
@@ -273,19 +302,19 @@ export default function StatsPage() {
                   <Separator />
 
                   <ChartWithComment title="Analyse de la Performance Étudiante" comment={report.performanceComment}>
-                      <div className="h-[250px]"><PerformanceChart /></div>
+                      <div className="h-[250px]"><PerformanceChart data={statsData.performanceData} /></div>
                   </ChartWithComment>
                   
                   <Separator />
 
                   <ChartWithComment title="Analyse des Inscriptions" comment={report.enrollmentComment}>
-                      <div className="h-[300px]"><EnrollmentChart /></div>
+                      <div className="h-[300px]"><EnrollmentChart data={statsData.enrollmentData} /></div>
                   </ChartWithComment>
 
                   <Separator />
 
                   <ChartWithComment title="Analyse Démographique" comment={report.demographicsComment}>
-                      <div className="h-[250px]"><DemographicsChart /></div>
+                      <div className="h-[250px]"><DemographicsChart data={statsData.demographicsData} /></div>
                   </ChartWithComment>
                   
                   <Separator />
@@ -296,6 +325,10 @@ export default function StatsPage() {
                 </div>
                  <DialogFooter>
                     <Button variant="outline" onClick={() => setIsModalOpen(false)}>Fermer</Button>
+                     <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
+                        {isDownloadingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                        Télécharger en PDF
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

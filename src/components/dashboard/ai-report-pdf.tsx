@@ -1,13 +1,19 @@
+
 'use client';
 
 import React from 'react';
 import type { GenerateStudentReportOutput } from '@/ai/flows/generate-student-report';
 import type { GenerateProfessorReportOutput } from '@/ai/flows/generate-professor-report';
+import type { GenerateStatsReportOutput } from '@/ai/flows/generate-stats-report';
 import Logo from '@/components/logo';
 
+type ReportType = GenerateStudentReportOutput | GenerateProfessorReportOutput | GenerateStatsReportOutput;
+
 interface AiReportPDFProps {
-  report: GenerateStudentReportOutput | GenerateProfessorReportOutput;
-  role: 'student' | 'professor' | 'admin';
+  report: ReportType;
+  role?: 'student' | 'professor' | 'admin';
+  chartsData?: any;
+  year?: string;
 }
 
 const ReportSectionPDF: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -115,11 +121,50 @@ const ProfessorReportPDF: React.FC<{ report: GenerateProfessorReportOutput }> = 
   )
 }
 
-export default function AiReportPDF({ report, role }: AiReportPDFProps) {
+const StatsReportPDF: React.FC<{ report: GenerateStatsReportOutput, year: string, chartsData: any }> = ({ report, year, chartsData }) => {
+    return (
+        <>
+             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #6A5ACD', paddingBottom: '15px', marginBottom: '30px' }}>
+                <div>
+                  <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Analyse IA des Statistiques</h1>
+                   <div style={{ fontSize: '11px', color: '#555' }}>
+                    <p style={{ margin: 0 }}><strong style={{ color: '#000' }}>Année académique :</strong> {year}</p>
+                  </div>
+                </div>
+                <Logo />
+            </header>
+            <main>
+                <ReportSectionPDF title="Résumé des Indicateurs Clés">{report.kpiSummary}</ReportSectionPDF>
+                <ReportSectionPDF title="Analyse de la Performance Étudiante">{report.performanceComment}</ReportSectionPDF>
+                <ReportSectionPDF title="Analyse des Inscriptions">{report.enrollmentComment}</ReportSectionPDF>
+                <ReportSectionPDF title="Analyse Démographique">{report.demographicsComment}</ReportSectionPDF>
+                <ReportSectionPDF title="Conclusion & Recommandations">{report.globalConclusion}</ReportSectionPDF>
+            </main>
+        </>
+    )
+}
+
+export default function AiReportPDF({ report, role, chartsData, year }: AiReportPDFProps) {
   const isStudentReport = (report: any): report is GenerateStudentReportOutput => role === 'student' && 'studentName' in report;
+  const isProfessorReport = (report: any): report is GenerateProfessorReportOutput => role === 'professor' && 'professorName' in report;
+  const isStatsReport = (report: any): report is GenerateStatsReportOutput => role === 'admin' && 'kpiSummary' in report;
+  
+  const renderReport = () => {
+    if (isStudentReport(report)) {
+      return <StudentReportPDF report={report} />;
+    }
+    if (isProfessorReport(report)) {
+      return <ProfessorReportPDF report={report} />;
+    }
+    if (isStatsReport(report) && chartsData && year) {
+        return <StatsReportPDF report={report} chartsData={chartsData} year={year}/>
+    }
+    return null;
+  }
 
   return (
     <div
+      id="ai-report-pdf-content"
       style={{
         width: '595px', // A4 width in pixels at 72 DPI
         minHeight: '842px', // A4 height
@@ -129,7 +174,7 @@ export default function AiReportPDF({ report, role }: AiReportPDFProps) {
         color: '#000',
       }}
     >
-      {isStudentReport(report) ? <StudentReportPDF report={report} /> : <ProfessorReportPDF report={report as GenerateProfessorReportOutput} />}
+      {renderReport()}
 
       <footer style={{ marginTop: '40px', paddingTop: '15px', borderTop: '1px solid #ddd', fontSize: '10px', color: '#888', textAlign: 'center' }}>
         <p>Généré par UNI-VERX - Le Système Universitaire Intelligent</p>
