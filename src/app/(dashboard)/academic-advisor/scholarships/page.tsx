@@ -183,7 +183,7 @@ export default function ScholarshipsPage() {
                                 const {icon: StatusIcon, label: statusLabel, color: statusColor} = getStatusConfig(student.status);
                                 const progress = (student.paidAmount / student.totalAmount) * 100;
                                 return (
-                                <TableRow key={student.id}>
+                                <TableRow key={student.id} className="even:bg-muted/40">
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-9 w-9"><AvatarImage src={student.avatar}/><AvatarFallback>{getInitials(student.name)}</AvatarFallback></Avatar>
@@ -278,4 +278,3 @@ export default function ScholarshipsPage() {
         </div>
     );
 }
-
