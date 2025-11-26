@@ -5,7 +5,7 @@ import React, { useState, useMemo } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
-  FileStack, CheckCircle, Clock, XCircle, Download, FileText, Check, MoreHorizontal, Search, Settings, FileCheck, Award
+  FileStack, CheckCircle, Clock, XCircle, Download, FileText, Check, MoreHorizontal, Search, Settings, FileCheck, Award, Eye
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,7 +218,7 @@ export default function BulletinsPage() {
                                 {semesterResults.s1.courses.slice(0,4).map(c => (
                                     <TableRow key={c.id}>
                                         <TableCell>{c.module}</TableCell>
-                                        <TableCell className={cn(getGradeClass(c.grade))}>{c.grade}</TableCell>
+                                        <TableCell className={cn(getGradeClass(parseFloat(c.grade)))}>{c.grade}</TableCell>
                                         <TableCell>{c.creditsValidated}/{c.creditsToValidate}</TableCell>
                                     </TableRow>
                                 ))}
