@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -14,10 +15,9 @@ import {
   Globe,
   LogIn,
   Eye,
-  Upload,
-  Edit,
-  ClipboardCheck,
-  MessageSquare,
+  CheckCheck,
+  Megaphone,
+  FileBarChart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type ActionType = 'connexion' | 'consultation' | 'téléchargement' | 'soumission' | 'modification' | 'évaluation' | 'message';
+type ActionType = 'connexion' | 'validation' | 'rapport' | 'annonce' | 'planning' | 'consultation';
 
 interface Action {
   id: string;
@@ -44,12 +44,11 @@ interface Action {
 
 const actionConfig: Record<ActionType, { label: string; icon: LucideIcon; color: string; }> = {
   connexion: { label: 'Connexion', icon: LogIn, color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' },
-  consultation: { label: 'Consultation', icon: Eye, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' },
-  téléchargement: { label: 'Téléchargement', icon: Download, color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' },
-  soumission: { label: 'Soumission', icon: Upload, color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' },
-  modification: { label: 'Modification', icon: Edit, color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300' },
-  évaluation: { label: 'Évaluation', icon: ClipboardCheck, color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-300' },
-  message: { label: 'Message', icon: MessageSquare, color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300' },
+  validation: { label: 'Validation', icon: CheckCheck, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' },
+  rapport: { label: 'Rapport', icon: FileBarChart, color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' },
+  annonce: { label: 'Annonce', icon: Megaphone, color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' },
+  planning: { label: 'Planning', icon: CalendarIcon, color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300' },
+  consultation: { label: 'Consultation', icon: Eye, color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-300' },
 };
 
 const deviceConfig: Record<Action['device'], { icon: LucideIcon }> = {
@@ -59,16 +58,6 @@ const deviceConfig: Record<Action['device'], { icon: LucideIcon }> = {
     Android: { icon: Smartphone },
 };
 
-const createActionsForDate = (date: Date): Action[] => [
-    { id: `${date.getTime()}-1`, date: new Date(date.setHours(8, 27, 15)), type: 'connexion', details: 'Première connexion de la journée', location: 'Campus de Paris', device: 'Windows' },
-    { id: `${date.getTime()}-2`, date: new Date(date.setHours(8, 32, 47)), type: 'consultation', details: 'Consultation du tableau de bord', location: 'Campus de Paris', device: 'Windows' },
-    { id: `${date.getTime()}-3`, date: new Date(date.setHours(8, 45, 12)), type: 'consultation', details: 'Consultation des cours - Base de Données Avancées', location: 'Campus de Paris', device: 'Windows' },
-    { id: `${date.getTime()}-4`, date: new Date(date.setHours(9, 12, 38)), type: 'téléchargement', details: 'Téléchargement du cours "SQL Avancé.pdf"', location: 'Campus de Paris', device: 'Windows' },
-    { id: `${date.getTime()}-5`, date: new Date(date.setHours(10, 5, 22)), type: 'consultation', details: 'Consultation des évaluations', location: 'Campus de Paris', device: 'Windows' },
-    { id: `${date.getTime()}-6`, date: new Date(date.setHours(10, 45, 53)), type: 'soumission', details: 'Soumission du devoir "TP1 - Création d\'un site responsive"', location: 'Campus de Paris', device: 'Windows' },
-    { id: `${date.getTime()}-7`, date: new Date(date.setHours(14, 5, 42)), type: 'évaluation', details: 'Évaluation terminée - QCM de Développement Web', location: 'Campus de Paris', device: 'Windows' },
-];
-
 const today = new Date();
 const yesterday = new Date();
 yesterday.setDate(today.getDate() - 1);
@@ -76,21 +65,20 @@ const dayBeforeYesterday = new Date();
 dayBeforeYesterday.setDate(today.getDate() - 2);
 
 const mockActions: Action[] = [
-  ...createActionsForDate(new Date(today.setHours(0,0,0,0))),
-  { id: 'y-1', date: new Date(new Date(yesterday).setHours(9, 5, 33)), type: 'connexion', details: 'Première connexion de la journée', location: 'À distance', device: 'iOS' },
-  { id: 'y-2', date: new Date(new Date(yesterday).setHours(9, 10, 15)), type: 'consultation', details: 'Consultation de l\'emploi du temps', location: 'À distance', device: 'iOS' },
-  { id: 'y-3', date: new Date(new Date(yesterday).setHours(9, 45, 22)), type: 'message', details: 'Message envoyé à Emma Bernard', location: 'À distance', device: 'iOS' },
-  { id: 'y-4', date: new Date(new Date(yesterday).setHours(14, 12, 38)), type: 'connexion', details: 'Connexion à l\'application', location: 'Campus de Paris', device: 'macOS' },
-  { id: 'y-5', date: new Date(new Date(yesterday).setHours(14, 30, 45)), type: 'téléchargement', details: 'Téléchargement du cours "Introduction NoSQL.pdf"', location: 'Campus de Paris', device: 'macOS' },
-  { id: 'y-6', date: new Date(new Date(yesterday).setHours(15, 45, 10)), type: 'modification', details: 'Modification du profil utilisateur', location: 'Campus de Paris', device: 'macOS' },
-  { id: 'dby-1', date: new Date(new Date(dayBeforeYesterday).setHours(8, 15, 42)), type: 'connexion', details: 'Première connexion de la journée', location: 'Campus de Paris', device: 'Windows' },
-  { id: 'dby-2', date: new Date(new Date(dayBeforeYesterday).setHours(8, 30, 15)), type: 'consultation', details: 'Consultation des résultats', location: 'Campus de Paris', device: 'Windows' },
-  { id: 'dby-3', date: new Date(new Date(dayBeforeYesterday).setHours(9, 15, 22)), type: 'téléchargement', details: 'Téléchargement du sujet "TD Algorithmes de graphes.docx"', location: 'Campus de Paris', device: 'Windows' },
+  { id: 't-1', date: new Date(new Date(today).setHours(9, 2, 18)), type: 'connexion', details: 'Première connexion de la journée', location: 'Bureau C201', device: 'Windows' },
+  { id: 't-2', date: new Date(new Date(today).setHours(9, 15, 30)), type: 'validation', details: 'Validation de 23 bulletins pour la L3 Info', location: 'Bureau C201', device: 'Windows' },
+  { id: 't-3', date: new Date(new Date(today).setHours(10, 30, 5)), type: 'rapport', details: 'Génération du rapport de performance semestriel', location: 'Bureau C201', device: 'Windows' },
+  { id: 'y-1', date: new Date(new Date(yesterday).setHours(8, 55, 12)), type: 'connexion', details: 'Connexion depuis un appareil mobile', location: 'À distance', device: 'iOS' },
+  { id: 'y-2', date: new Date(new Date(yesterday).setHours(11, 45, 20)), type: 'annonce', details: 'Envoi de l\'annonce "Rappel inscriptions S2"', location: 'Bureau C201', device: 'macOS' },
+  { id: 'y-3', date: new Date(new Date(yesterday).setHours(15, 0, 41)), type: 'consultation', details: 'Consultation du dossier de l\'étudiant Lucas Dupont (L1)', location: 'Bureau C201', device: 'macOS' },
+  { id: 'dby-1', date: new Date(new Date(dayBeforeYesterday).setHours(10, 10, 10)), type: 'connexion', details: 'Première connexion de la journée', location: 'Bureau C201', device: 'macOS' },
+  { id: 'dby-2', date: new Date(new Date(dayBeforeYesterday).setHours(14, 20, 0)), type: 'planning', details: 'Modification du planning des examens de M1', location: 'Bureau C201', device: 'macOS' },
+  { id: 'dby-3', date: new Date(new Date(dayBeforeYesterday).setHours(16, 50, 15)), type: 'validation', details: 'Rejet de la demande de changement de salle pour "Physique Quantique"', location: 'Bureau C201', device: 'macOS' },
 ];
 
 const ITEMS_PER_PAGE = 10;
 
-export default function ActionsPage() {
+export default function AcademicAdvisorActionsPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [activeFilter, setActiveFilter] = useState<ActionType | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,7 +100,6 @@ export default function ActionsPage() {
   );
 
   useEffect(() => {
-    // Reset to first page when filters change
     setCurrentPage(1);
   }, [date, activeFilter]);
 
@@ -271,3 +258,4 @@ export default function ActionsPage() {
     </div>
   );
 }
+
