@@ -15,6 +15,7 @@ import {
   Printer,
   Mail,
   Search,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,6 +59,8 @@ import { newInscriptionsData, enrolledStudentsData, getStatusLabel, getStatusCol
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 
 const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: string | number; icon: React.ElementType; color: string; }) => (
@@ -155,7 +158,7 @@ const NewInscriptionsTab = ({ onShowCredentials, onPrint, onNewInscription }: { 
     )
 }
 
-const EnrolledStudentsTab = ({ onShowFile, onReinscribe }: { onShowFile: (s: EnrolledStudent) => void, onReinscribe: (s: EnrolledStudent) => void }) => {
+const EnrolledStudentsTab = ({ onShowFile, onOpenReinscription }: { onShowFile: (s: EnrolledStudent) => void, onOpenReinscription: () => void }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [levelFilter, setLevelFilter] = useState('all');
     const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -172,17 +175,18 @@ const EnrolledStudentsTab = ({ onShowFile, onReinscribe }: { onShowFile: (s: Enr
         <div className="space-y-6">
              <Card>
                 <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <Input placeholder="Nom, prénom, numéro..." className="max-w-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                        <div className="flex gap-2">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <Input placeholder="Rechercher par nom, prénom, numéro étudiant..." className="md:max-w-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <div className="flex gap-2 flex-wrap w-full md:w-auto">
                              <Select value={levelFilter} onValueChange={setLevelFilter}>
-                                <SelectTrigger className="w-[180px]"><SelectValue placeholder="Niveau" /></SelectTrigger>
+                                <SelectTrigger className="flex-1 min-w-[150px]"><SelectValue placeholder="Niveau" /></SelectTrigger>
                                 <SelectContent><SelectItem value="all">Tous niveaux</SelectItem><SelectItem value="L1">L1</SelectItem><SelectItem value="L2">L2</SelectItem><SelectItem value="L3">L3</SelectItem><SelectItem value="M1">M1</SelectItem><SelectItem value="M2">M2</SelectItem></SelectContent>
                              </Select>
                              <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                                <SelectTrigger className="w-[180px]"><SelectValue placeholder="Département" /></SelectTrigger>
+                                <SelectTrigger className="flex-1 min-w-[150px]"><SelectValue placeholder="Département" /></SelectTrigger>
                                 <SelectContent><SelectItem value="all">Tous départements</SelectItem><SelectItem value="informatique">Informatique</SelectItem><SelectItem value="mathematiques">Mathématiques</SelectItem></SelectContent>
                              </Select>
+                              <Button onClick={onOpenReinscription}><Redo className="mr-2 h-4 w-4"/>Réinscription</Button>
                         </div>
                     </div>
                 </CardHeader>
@@ -211,7 +215,6 @@ const EnrolledStudentsTab = ({ onShowFile, onReinscribe }: { onShowFile: (s: Enr
                                     <TableCell><Badge variant="outline" className={cn('border-0', getStatusColor(student.canProgress))}>{getStatusLabel(student.canProgress)}</Badge></TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="ghost" size="icon" onClick={() => onShowFile(student)}><Eye/></Button>
-                                        <Button variant="ghost" size="icon" onClick={() => onReinscribe(student)}><Redo/></Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -242,14 +245,15 @@ export default function EnrollmentsPage() {
         setIsStudentFileModalOpen(true);
     };
 
-    const handleReinscribe = (student: EnrolledStudent) => {
-        setSelectedStudent(student);
+    const handleOpenReinscription = () => {
+        setSelectedStudent(null);
         setIsReinscriptionModalOpen(true);
     };
 
     const handleNewInscription = () => setIsNewInscriptionModalOpen(true);
     
     const getNextLevel = (currentLevel: string) => {
+        if (!currentLevel) return '';
         if (currentLevel.startsWith('L')) {
             const levelNum = parseInt(currentLevel.charAt(1));
             if (levelNum < 3) return `L${levelNum + 1}`;
@@ -273,7 +277,7 @@ export default function EnrollmentsPage() {
                     <NewInscriptionsTab onShowCredentials={handleShowCredentials} onPrint={() => {}} onNewInscription={handleNewInscription} />
                 </TabsContent>
                 <TabsContent value="enrolled" className="mt-6">
-                    <EnrolledStudentsTab onShowFile={handleShowFile} onReinscribe={handleReinscribe} />
+                    <EnrolledStudentsTab onShowFile={handleShowFile} onOpenReinscription={handleOpenReinscription} />
                 </TabsContent>
             </Tabs>
             
@@ -317,29 +321,63 @@ export default function EnrollmentsPage() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Réinscription Étudiant</DialogTitle>
-                        <DialogDescription>Confirmez le passage au niveau supérieur.</DialogDescription>
+                        <DialogDescription>Recherchez un étudiant et confirmez son passage au niveau supérieur.</DialogDescription>
                     </DialogHeader>
-                    {selectedStudent && (
                         <form className="space-y-4 py-4">
-                             <div className="bg-muted/50 rounded-lg p-4">
-                                <h4 className="font-semibold mb-2">Informations de l'étudiant</h4>
-                                <p><strong>Nom:</strong> {selectedStudent.firstName} {selectedStudent.lastName}</p>
-                                <p><strong>Niveau actuel:</strong> {selectedStudent.currentLevel}</p>
-                                <p><strong>Moyenne:</strong> {selectedStudent.gpa}/20</p>
-                             </div>
-                             <div className="bg-muted/50 rounded-lg p-4">
-                                <h4 className="font-semibold mb-2">Nouvelle Formation</h4>
-                                <div>
-                                    <Label>Nouveau niveau</Label>
-                                    <Input value={getNextLevel(selectedStudent.currentLevel)} readOnly />
-                                </div>
-                             </div>
+                            <div className="space-y-2">
+                                <Label>Étudiant à réinscrire</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" role="combobox" className="w-full justify-between">
+                                            {selectedStudent ? `${selectedStudent.firstName} ${selectedStudent.lastName}` : "Sélectionner un étudiant..."}
+                                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Rechercher un étudiant..." />
+                                            <CommandList>
+                                                <CommandEmpty>Aucun étudiant trouvé.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {enrolledStudentsData.map((student) => (
+                                                        <CommandItem
+                                                            key={student.id}
+                                                            value={`${student.firstName} ${student.lastName}`}
+                                                            onSelect={() => setSelectedStudent(student)}
+                                                        >
+                                                            {student.firstName} {student.lastName}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                             
+                             {selectedStudent && (
+                                <>
+                                    <div className="bg-muted/50 rounded-lg p-4">
+                                        <h4 className="font-semibold mb-2">Informations de l'étudiant</h4>
+                                        <p className="text-sm"><strong>Nom:</strong> {selectedStudent.firstName} {selectedStudent.lastName}</p>
+                                        <p className="text-sm"><strong>Niveau actuel:</strong> {selectedStudent.currentLevel}</p>
+                                        <p className="text-sm"><strong>Moyenne:</strong> {selectedStudent.gpa}/20</p>
+                                    </div>
+                                    <div className="bg-muted/50 rounded-lg p-4">
+                                        <h4 className="font-semibold mb-2">Nouvelle Formation</h4>
+                                        <div>
+                                            <Label>Nouveau niveau</Label>
+                                            <Input value={getNextLevel(selectedStudent.currentLevel)} readOnly />
+                                        </div>
+                                    </div>
+                                </>
+                             )}
+
                              <DialogFooter>
                                 <Button type="button" variant="ghost" onClick={() => setIsReinscriptionModalOpen(false)}>Annuler</Button>
-                                <Button type="submit">Confirmer la réinscription</Button>
+                                <Button type="submit" disabled={!selectedStudent}>Confirmer la réinscription</Button>
                             </DialogFooter>
                         </form>
-                    )}
                 </DialogContent>
             </Dialog>
 
