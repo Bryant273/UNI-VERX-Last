@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -209,7 +208,7 @@ export default function ActionsPage() {
                   const { icon: DeviceIcon } = deviceConfig[action.device];
                   
                   return (
-                    <TableRow key={action.id} className={cn('even:bg-muted/40', action.type === 'connexion' && action.details === 'Première connexion de la journée' && 'bg-gradient-to-r from-primary/10 to-[#FFB26B]/20')}>
+                    <TableRow key={action.id} className={cn('even:bg-muted/40', action.type === 'connexion' && action.details === 'Première connexion de la journée' && 'bg-gradient-to-r from-primary/10 to-transparent')}>
                       <TableCell className="font-mono text-xs">{format(action.date, 'HH:mm:ss')}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn('border-0 font-normal', color)}>
