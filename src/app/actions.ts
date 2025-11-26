@@ -3,6 +3,7 @@
 import { summarizeCourseMaterials } from "@/ai/flows/summarize-course-materials";
 import { generateStudentReport } from "@/ai/flows/generate-student-report";
 import { generateProfessorReport } from "@/ai/flows/generate-professor-report";
+import { generateStatsReport } from "@/ai/flows/generate-stats-report";
 import { z } from "zod";
 
 const summarySchema = z.object({
@@ -77,5 +78,15 @@ export async function getAiProfessorReport(prevState: any, formData: FormData) {
   } catch (error) {
     console.error(error);
     return { error: "Échec de la génération du rapport. Veuillez réessayer." };
+  }
+}
+
+export async function getAiStatsReport(statsData: any) {
+  try {
+    const result = await generateStatsReport(statsData);
+    return { report: result };
+  } catch (error) {
+    console.error(error);
+    return { error: "Échec de la génération de l'analyse IA. Veuillez réessayer." };
   }
 }

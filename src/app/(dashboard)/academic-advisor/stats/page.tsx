@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useTransition } from 'react';
 import {
   BarChart,
   GraduationCap,
@@ -10,6 +10,8 @@ import {
   LineChart,
   PieChart as PieChartIcon,
   Filter,
+  BrainCircuit,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -40,6 +42,11 @@ import {
   Cell,
 } from 'recharts';
 import { kpiData, performanceData, enrollmentData, demographicsData } from '@/lib/stats-data';
+import { getAiStatsReport } from '@/app/actions';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import type { GenerateStatsReportOutput } from '@/ai/flows/generate-stats-report';
 
 const StatCard = ({ title, value, change, icon: Icon, color }: { title: string; value: string; change: string; icon: React.ElementType; color: string }) => (
     <Card className="hover-lift">
@@ -67,10 +74,41 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   );
 };
 
+const ReportSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
+  <div className="mb-4">
+    <h3 className="text-base font-semibold text-primary mb-2">{title}</h3>
+    <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">{children}</div>
+  </div>
+);
+
 
 export default function StatsPage() {
   const [yearFilter, setYearFilter] = useState('2024-2025');
   const [semesterFilter, setSemesterFilter] = useState('all');
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [report, setReport] = useState<GenerateStatsReportOutput | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleGenerateReport = () => {
+    setError(null);
+    setReport(null);
+    startTransition(async () => {
+      const statsData = {
+        kpis: kpiData,
+        performanceData: performanceData,
+        enrollmentData: enrollmentData.chartData,
+        demographicsData: demographicsData,
+      };
+      const result = await getAiStatsReport(statsData);
+      if (result.error) {
+        setError(result.error);
+      } else if (result.report) {
+        setReport(result.report);
+        setIsModalOpen(true);
+      }
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -100,8 +138,27 @@ export default function StatsPage() {
                     <SelectItem value="s2">Semestre 2</SelectItem>
                 </SelectContent>
             </Select>
+            <Button onClick={handleGenerateReport} disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Génération...
+                </>
+              ) : (
+                <>
+                  <BrainCircuit className="mr-2 h-4 w-4" />
+                  Générer une analyse IA
+                </>
+              )}
+            </Button>
          </div>
       </div>
+      {error && (
+        <Alert variant="destructive">
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {kpiData.map(kpi => <StatCard key={kpi.title} {...kpi} />)}
@@ -173,6 +230,37 @@ export default function StatsPage() {
                 </ChartContainer>
             </CardContent>
         </Card>
+
+      {report && (
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogContent className="sm:max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle className="text-2xl">Analyse IA des Statistiques</DialogTitle>
+                    <DialogDescription>Rapport généré pour l'année académique {yearFilter}</DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto p-1 pr-4">
+                  <ReportSection title="Résumé des Indicateurs Clés">
+                      <p>{report.kpiSummary}</p>
+                  </ReportSection>
+                  <ReportSection title="Analyse de la Performance Étudiante">
+                      <p>{report.performanceComment}</p>
+                  </ReportSection>
+                  <ReportSection title="Analyse des Inscriptions">
+                      <p>{report.enrollmentComment}</p>
+                  </ReportSection>
+                  <ReportSection title="Analyse Démographique">
+                      <p>{report.demographicsComment}</p>
+                  </ReportSection>
+                  <ReportSection title="Conclusion & Recommandations">
+                      <p>{report.globalConclusion}</p>
+                  </ReportSection>
+                </div>
+                 <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsModalOpen(false)}>Fermer</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
