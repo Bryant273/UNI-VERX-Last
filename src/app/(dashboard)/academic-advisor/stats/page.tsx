@@ -12,6 +12,7 @@ import {
   Filter,
   BrainCircuit,
   Loader2,
+  Star,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -95,7 +96,7 @@ export default function StatsPage() {
     setReport(null);
     startTransition(async () => {
       const statsData = {
-        kpis: kpiData,
+        kpis: kpiData.map(({ icon, ...rest }) => rest), // Remove icon before sending
         performanceData: performanceData,
         enrollmentData: enrollmentData.chartData,
         demographicsData: demographicsData,
