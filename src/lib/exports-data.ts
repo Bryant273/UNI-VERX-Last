@@ -1,5 +1,5 @@
 
-import { Users, GraduationCap, BookOpen, Clock, File, Download, FileBarChart, PieChart } from 'lucide-react';
+import { Users, GraduationCap, BookOpen, Clock, File, Download, FileBarChart, PieChart, FileCheck2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface ExportTemplate {
