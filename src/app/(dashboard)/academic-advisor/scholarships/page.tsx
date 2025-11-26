@@ -194,9 +194,9 @@ export default function ScholarshipsPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>{student.class}</TableCell>
-                                    <TableCell className="text-right font-medium">{student.totalAmount.toLocaleString()} FCFA</TableCell>
-                                    <TableCell className="text-right text-green-600 font-medium">{student.paidAmount.toLocaleString()} FCFA</TableCell>
-                                    <TableCell className="text-right text-red-600 font-medium">{(student.totalAmount - student.paidAmount).toLocaleString()} FCFA</TableCell>
+                                    <TableCell className="text-right font-medium">{student.totalAmount.toLocaleString('fr-FR')} FCFA</TableCell>
+                                    <TableCell className="text-right text-green-600 font-medium">{student.paidAmount.toLocaleString('fr-FR')} FCFA</TableCell>
+                                    <TableCell className="text-right text-red-600 font-medium">{(student.totalAmount - student.paidAmount).toLocaleString('fr-FR')} FCFA</TableCell>
                                     <TableCell><Progress value={progress} className="h-2" /></TableCell>
                                     <TableCell><Badge variant="outline" className={cn("border-0 font-medium", statusColor)}><StatusIcon className="h-3.5 w-3.5 mr-1.5"/>{statusLabel}</Badge></TableCell>
                                     <TableCell className="text-right">
@@ -261,7 +261,7 @@ export default function ScholarshipsPage() {
                         <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
                             <p className="text-sm">Solde restant de l'étudiant:</p>
                             <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                                {(selectedStudent?.totalAmount || 0 - (selectedStudent?.paidAmount || 0)).toLocaleString()} FCFA
+                                {((selectedStudent?.totalAmount || 0) - (selectedStudent?.paidAmount || 0)).toLocaleString('fr-FR')} FCFA
                             </p>
                         </div>
                          <div className="space-y-2">
