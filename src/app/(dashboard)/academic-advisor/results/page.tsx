@@ -5,9 +5,9 @@ import React, { useState, useMemo } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
-  FileStack, CheckCircle, Clock, XCircle, Download, FileText, Check, MoreHorizontal, Search, Settings, FileCheck, Award, Eye
+  FileStack, CheckCircle, Clock, XCircle, Download, FileText, Check, MoreHorizontal, Search, Settings, FileCheck, Award, Eye, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -67,6 +67,8 @@ export default function BulletinsPage() {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredBulletins.slice(startIndex, startIndex + itemsPerPage);
     }, [filteredBulletins, currentPage]);
+
+    const totalPages = Math.ceil(filteredBulletins.length / itemsPerPage);
 
     const stats = useMemo(() => {
         return {
@@ -170,7 +172,7 @@ export default function BulletinsPage() {
                         </TableHeader>
                         <TableBody>
                             {paginatedBulletins.map(b => (
-                                <TableRow key={b.id} data-state={selectedBulletins.has(b.id) ? 'selected' : ''}>
+                                <TableRow key={b.id} data-state={selectedBulletins.has(b.id) ? 'selected' : ''} className="even:bg-muted/40">
                                     <TableCell className="px-6"><Checkbox checked={selectedBulletins.has(b.id)} onCheckedChange={() => handleSelectOne(b.id)} /></TableCell>
                                     <TableCell>
                                         <div className="font-medium">{b.studentName}</div>
@@ -189,6 +191,34 @@ export default function BulletinsPage() {
                         </TableBody>
                     </Table>
                 </div>
+                 <CardFooter className="flex items-center justify-between p-4">
+                    <p className="text-sm text-muted-foreground">
+                        Affichage de {paginatedBulletins.length} sur {filteredBulletins.length} bulletins
+                    </p>
+                    {totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                                className="h-8 w-8"
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                                className="h-8 w-8"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
+                </CardFooter>
             </Card>
             
             {/* Modal for Bulletin Preview */}
