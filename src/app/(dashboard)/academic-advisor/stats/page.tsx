@@ -48,6 +48,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { GenerateStatsReportOutput } from '@/ai/flows/generate-stats-report';
+import { Separator } from '@/components/ui/separator';
 
 const StatCard = ({ title, value, change, icon: Icon, color }: { title: string; value: string; change: string; icon: React.ElementType; color: string }) => (
     <Card className="hover-lift">
@@ -76,12 +77,97 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 };
 
 const ReportSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
-  <div className="mb-4">
-    <h3 className="text-base font-semibold text-primary mb-2">{title}</h3>
-    <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">{children}</div>
+  <div className="mb-6">
+    <h3 className="text-lg font-semibold text-primary mb-3">{title}</h3>
+    <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border">{children}</div>
   </div>
 );
 
+const ChartWithComment = ({ title, comment, children }: { title: string, comment: React.ReactNode, children: React.ReactNode }) => (
+  <div className="mb-6">
+    <h3 className="text-lg font-semibold text-primary mb-3">{title}</h3>
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="lg:col-span-3">
+        {children}
+      </div>
+      <div className="lg:col-span-2 text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border">
+        <p className="italic">{comment}</p>
+      </div>
+    </div>
+  </div>
+);
+
+const PerformanceChart = () => (
+    <Card>
+        <CardHeader>
+            <CardTitle>Performance des étudiants</CardTitle>
+            <CardDescription>Répartition des moyennes générales.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <ChartContainer config={{}} className="h-[300px] w-full">
+                <RechartsBarChart data={performanceData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+                </RechartsBarChart>
+            </ChartContainer>
+        </CardContent>
+    </Card>
+);
+
+const EnrollmentChart = () => (
+    <Card>
+        <CardHeader>
+            <CardTitle>Évolution des inscriptions par niveau</CardTitle>
+            <CardDescription>Comparaison sur les 3 dernières années.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <ChartContainer config={enrollmentData.chartConfig} className="h-[400px] w-full">
+                <RechartsLineChart data={enrollmentData.chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="year" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip content={<ChartTooltipContent indicator="dot" />} />
+                    <Legend />
+                    {Object.entries(enrollmentData.chartConfig).map(([key, config]) => (
+                        <Line key={key} type="monotone" dataKey={key} stroke={config.color} strokeWidth={2} dot={{r:4}} activeDot={{r:6}} />
+                    ))}
+                </RechartsLineChart>
+            </ChartContainer>
+        </CardContent>
+    </Card>
+);
+
+const DemographicsChart = () => (
+    <Card>
+        <CardHeader>
+            <CardTitle>Démographie des étudiants</CardTitle>
+            <CardDescription>Répartition par région d'origine.</CardDescription>
+        </CardHeader>
+        <CardContent>
+             <ChartContainer config={{}} className="h-[300px] w-full">
+                <RechartsPieChart>
+                     <Tooltip content={<ChartTooltipContent />} />
+                    <Pie
+                        data={demographicsData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={renderCustomizedLabel}
+                        outerRadius={120}
+                        dataKey="value"
+                    >
+                        {demographicsData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                    </Pie>
+                </RechartsPieChart>
+            </ChartContainer>
+        </CardContent>
+    </Card>
+);
 
 export default function StatsPage() {
   const [yearFilter, setYearFilter] = useState('2024-2025');
@@ -96,7 +182,7 @@ export default function StatsPage() {
     setReport(null);
     startTransition(async () => {
       const statsData = {
-        kpis: kpiData.map(({ icon, ...rest }) => rest), // Remove icon before sending
+        kpis: kpiData.map(({ icon, ...rest }) => rest),
         performanceData: performanceData,
         enrollmentData: enrollmentData.chartData,
         demographicsData: demographicsData,
@@ -110,7 +196,7 @@ export default function StatsPage() {
       }
     });
   };
-
+  
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -166,94 +252,46 @@ export default function StatsPage() {
        </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Performance des étudiants</CardTitle>
-                    <CardDescription>Répartition des moyennes générales.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ChartContainer config={{}} className="h-[300px] w-full">
-                        <RechartsBarChart data={performanceData}>
-                            <CartesianGrid vertical={false} />
-                            <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip content={<ChartTooltipContent />} />
-                            <Bar dataKey="value" radius={[4, 4, 0, 0]} />
-                        </RechartsBarChart>
-                    </ChartContainer>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Démographie des étudiants</CardTitle>
-                    <CardDescription>Répartition par région d'origine.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <ChartContainer config={{}} className="h-[300px] w-full">
-                        <RechartsPieChart>
-                             <Tooltip content={<ChartTooltipContent />} />
-                            <Pie
-                                data={demographicsData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                label={renderCustomizedLabel}
-                                outerRadius={120}
-                                dataKey="value"
-                            >
-                                {demographicsData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Pie>
-                        </RechartsPieChart>
-                    </ChartContainer>
-                </CardContent>
-            </Card>
+            <PerformanceChart />
+            <DemographicsChart />
        </div>
        
-        <Card>
-            <CardHeader>
-                <CardTitle>Évolution des inscriptions par niveau</CardTitle>
-                <CardDescription>Comparaison sur les 3 dernières années.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <ChartContainer config={enrollmentData.chartConfig} className="h-[400px] w-full">
-                    <RechartsLineChart data={enrollmentData.chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="year" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                        <Tooltip content={<ChartTooltipContent indicator="dot" />} />
-                        <Legend />
-                        {Object.entries(enrollmentData.chartConfig).map(([key, config]) => (
-                            <Line key={key} type="monotone" dataKey={key} stroke={config.color} strokeWidth={2} dot={{r:4}} activeDot={{r:6}} />
-                        ))}
-                    </RechartsLineChart>
-                </ChartContainer>
-            </CardContent>
-        </Card>
+        <EnrollmentChart />
 
       {report && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-4xl max-h-[85vh]">
                 <DialogHeader>
                     <DialogTitle className="text-2xl">Analyse IA des Statistiques</DialogTitle>
                     <DialogDescription>Rapport généré pour l'année académique {yearFilter}</DialogDescription>
                 </DialogHeader>
-                <div className="max-h-[60vh] overflow-y-auto p-1 pr-4">
+                <div className="max-h-[65vh] overflow-y-auto p-1 pr-4 space-y-4">
                   <ReportSection title="Résumé des Indicateurs Clés">
                       <p>{report.kpiSummary}</p>
                   </ReportSection>
-                  <ReportSection title="Analyse de la Performance Étudiante">
-                      <p>{report.performanceComment}</p>
-                  </ReportSection>
-                  <ReportSection title="Analyse des Inscriptions">
-                      <p>{report.enrollmentComment}</p>
-                  </ReportSection>
-                  <ReportSection title="Analyse Démographique">
-                      <p>{report.demographicsComment}</p>
-                  </ReportSection>
+
+                  <Separator />
+
+                  <ChartWithComment title="Analyse de la Performance Étudiante" comment={report.performanceComment}>
+                      <div className="h-[250px]"><PerformanceChart /></div>
+                  </ChartWithComment>
+                  
+                  <Separator />
+
+                  <ChartWithComment title="Analyse des Inscriptions" comment={report.enrollmentComment}>
+                      <div className="h-[300px]"><EnrollmentChart /></div>
+                  </ChartWithComment>
+
+                  <Separator />
+
+                  <ChartWithComment title="Analyse Démographique" comment={report.demographicsComment}>
+                      <div className="h-[250px]"><DemographicsChart /></div>
+                  </ChartWithComment>
+                  
+                  <Separator />
+
                   <ReportSection title="Conclusion & Recommandations">
-                      <p>{report.globalConclusion}</p>
+                      <p className="font-semibold">{report.globalConclusion}</p>
                   </ReportSection>
                 </div>
                  <DialogFooter>
