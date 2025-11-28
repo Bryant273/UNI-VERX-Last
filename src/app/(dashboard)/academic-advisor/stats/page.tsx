@@ -46,7 +46,7 @@ import {
   Cell,
 } from 'recharts';
 import { getStatsDataForYear } from '@/lib/stats-data';
-import { getAiStatsReport } from '@/app/actions';
+import { getAiStatsReport } from '@/server/actions';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';

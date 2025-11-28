@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useTransition } from 'react';
 import { BrainCircuit, Loader2 } from 'lucide-react';
-import { getAiStudentReport, getAiProfessorReport } from '@/app/actions';
+import { getAiStudentReport, getAiProfessorReport } from '@/server/actions';
 import {
   Card,
   CardContent,
