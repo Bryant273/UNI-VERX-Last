@@ -16,7 +16,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { TimetableEvent, UserRole, TimetableEventType } from '@/lib/data';
 import { allEvents, studentData } from '@/lib/static-data';
 import { cn } from '@/lib/utils';
-import { useParams } from 'next/navigation';
 import EventDetailsModal from '@/components/dashboard/event-details-modal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import jsPDF from 'jspdf';

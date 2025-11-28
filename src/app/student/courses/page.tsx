@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import {
   File as FileIcon,
   FileText,
@@ -706,3 +705,4 @@ export default function CoursesPage() {
     </div>
   );
 }
+
