@@ -1,4 +1,5 @@
 
+
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -67,3 +68,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
