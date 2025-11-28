@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,7 +9,7 @@
  * - SummarizeDocumentOutput - The return type for the summarizeDocument function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai} from '@/blue-ai/genkit';
 import {z} from 'genkit';
 
 const SummarizeDocumentInputSchema = z.object({

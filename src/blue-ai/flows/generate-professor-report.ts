@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent that generates a professor's semester performance report.
@@ -7,7 +8,7 @@
  * - GenerateProfessorReportOutput - The return type for the generateProfessorReport function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai } from '@/blue-ai/genkit';
 import { z } from 'genkit';
 
 // Mock professor data - in a real app, this would come from a database.

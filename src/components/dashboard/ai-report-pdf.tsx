@@ -2,9 +2,9 @@
 'use client';
 
 import React from 'react';
-import type { GenerateStudentReportOutput } from '@/ai/flows/generate-student-report';
-import type { GenerateProfessorReportOutput } from '@/ai/flows/generate-professor-report';
-import type { GenerateStatsReportOutput } from '@/ai/flows/generate-stats-report';
+import type { GenerateStudentReportOutput } from '@/blue-ai/flows/generate-student-report';
+import type { GenerateProfessorReportOutput } from '@/blue-ai/flows/generate-professor-report';
+import type { GenerateStatsReportOutput } from '@/blue-ai/flows/generate-stats-report';
 import Logo from '@/components/logo';
 
 type ReportType = GenerateStudentReportOutput | GenerateProfessorReportOutput | GenerateStatsReportOutput;
@@ -177,7 +177,7 @@ export default function AiReportPDF({ report, role, chartsData, year }: AiReport
       {renderReport()}
 
       <footer style={{ marginTop: '40px', paddingTop: '15px', borderTop: '1px solid #ddd', fontSize: '10px', color: '#888', textAlign: 'center' }}>
-        <p>Généré par UNI-VERX - Le Système Universitaire Intelligent</p>
+        <p>Généré par Blue AI, l'assistant intelligent d'UNI-VERX</p>
         <p>© 2024 INNOV'KORP. Tous droits réservés.</p>
       </footer>
     </div>

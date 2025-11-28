@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent that generates a student's semester report.
@@ -7,7 +8,7 @@
  * - GenerateStudentReportOutput - The return type for the generateStudentReport function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai } from '@/blue-ai/genkit';
 import { z } from 'genkit';
 import { studentData } from '@/lib/static-data';
 

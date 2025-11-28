@@ -21,8 +21,8 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import type { GenerateStudentReportOutput } from '@/ai/flows/generate-student-report';
-import type { GenerateProfessorReportOutput } from '@/ai/flows/generate-professor-report';
+import type { GenerateStudentReportOutput } from '@/blue-ai/flows/generate-student-report';
+import type { GenerateProfessorReportOutput } from '@/blue-ai/flows/generate-professor-report';
 import AiReportModal from './ai-report-modal';
 
 interface AiReportCardProps {

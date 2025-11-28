@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent that summarizes course materials.
@@ -7,7 +8,7 @@
  * - SummarizeCourseMaterialsOutput - The return type for the summarizeCourseMaterials function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai} from '@/blue-ai/genkit';
 import {z} from 'genkit';
 
 const SummarizeCourseMaterialsInputSchema = z.object({

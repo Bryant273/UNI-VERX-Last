@@ -1,9 +1,10 @@
+
 "use server";
 
-import { summarizeCourseMaterials } from "@/ai/flows/summarize-course-materials";
-import { generateStudentReport } from "@/ai/flows/generate-student-report";
-import { generateProfessorReport } from "@/ai/flows/generate-professor-report";
-import { generateStatsReport } from "@/ai/flows/generate-stats-report";
+import { summarizeCourseMaterials } from "@/blue-ai/flows/summarize-course-materials";
+import { generateStudentReport } from "@/blue-ai/flows/generate-student-report";
+import { generateProfessorReport } from "@/blue-ai/flows/generate-professor-report";
+import { generateStatsReport } from "@/blue-ai/flows/generate-stats-report";
 import { z } from "zod";
 
 const summarySchema = z.object({

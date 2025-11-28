@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent that analyzes statistical data and generates comments.
@@ -7,7 +8,7 @@
  * - GenerateStatsReportOutput - The return type for the generateStatsReport function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai } from '@/blue-ai/genkit';
 import { z } from 'genkit';
 
 const KpiSchema = z.object({

@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { useState } from 'react';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, BrainCircuit } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -15,8 +16,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { GenerateStudentReportOutput } from '@/ai/flows/generate-student-report';
-import type { GenerateProfessorReportOutput } from '@/ai/flows/generate-professor-report';
+import type { GenerateStudentReportOutput } from '@/blue-ai/flows/generate-student-report';
+import type { GenerateProfessorReportOutput } from '@/blue-ai/flows/generate-professor-report';
 import Logo from '@/components/logo';
 import AiReportPDF from './ai-report-pdf';
 
@@ -59,7 +60,7 @@ const StudentReportContent: React.FC<{ report: GenerateStudentReportOutput }> = 
       <ReportSection title="Assiduité aux Cours">
           <p><span className='font-bold text-foreground'>{courses.attended}</span> cours suivis sur <span className='font-bold text-foreground'>{courses.total}</span> au total.</p>
       </ReportSection>
-      <ReportSection title="Commentaire de l'IA">
+      <ReportSection title="Commentaire de Blue AI">
           <p className="italic">{comment}</p>
       </ReportSection>
     </>
@@ -84,7 +85,7 @@ const ProfessorReportContent: React.FC<{ report: GenerateProfessorReportOutput }
       <ReportSection title="Évolution des Notes">
           <p>{gradeEvolution}</p>
       </ReportSection>
-      <ReportSection title="Commentaire de l'IA">
+      <ReportSection title="Commentaire de Blue AI">
           <p className="italic">{comment}</p>
       </ReportSection>
     </>
@@ -133,7 +134,10 @@ export default function AiReportModal({ isOpen, onClose, report, role }: AiRepor
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader className="flex flex-row items-start justify-between pr-6">
             <div>
-              <DialogTitle className="text-2xl mb-2">Rapport de Performance IA</DialogTitle>
+              <div className="flex items-center gap-2 mb-2">
+                <BrainCircuit className="h-6 w-6 text-primary" />
+                <DialogTitle className="text-2xl">Analyse par Blue AI</DialogTitle>
+              </div>
               <DialogDescription asChild>
                 {isStudentReport(report) ? (
                   <div className='space-y-1 text-xs'>
