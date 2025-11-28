@@ -29,7 +29,7 @@ const StudentReportPDF: React.FC<{ report: GenerateStudentReportOutput }> = ({ r
     <>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #6A5ACD', paddingBottom: '15px', marginBottom: '30px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Rapport de Performance IA</h1>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Rapport d'Analyse par Blue AI</h1>
           <div style={{ fontSize: '11px', color: '#555' }}>
             <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Étudiant :</strong> {studentName}</p>
             <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Matricule :</strong> {studentId}</p>
@@ -69,7 +69,7 @@ const StudentReportPDF: React.FC<{ report: GenerateStudentReportOutput }> = ({ r
           <p><span style={{fontWeight: 'bold'}}>{courses.attended}</span> cours suivis sur <span style={{fontWeight: 'bold'}}>{courses.total}</span> au total.</p>
         </ReportSectionPDF>
 
-        <ReportSectionPDF title="Commentaire de l'IA">
+        <ReportSectionPDF title="Analyse de Blue AI">
           <p style={{ fontStyle: 'italic', lineHeight: '1.5' }}>{comment}</p>
         </ReportSectionPDF>
       </main>
@@ -83,7 +83,7 @@ const ProfessorReportPDF: React.FC<{ report: GenerateProfessorReportOutput }> = 
     <>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #6A5ACD', paddingBottom: '15px', marginBottom: '30px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Rapport de Performance IA</h1>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Rapport d'Analyse par Blue AI</h1>
           <div style={{ fontSize: '11px', color: '#555' }}>
             <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Professeur :</strong> {professorName}</p>
             <p style={{ margin: '0 0 4px 0' }}><strong style={{ color: '#000' }}>Département :</strong> {department}</p>
@@ -113,7 +113,7 @@ const ProfessorReportPDF: React.FC<{ report: GenerateProfessorReportOutput }> = 
           <p style={{ lineHeight: '1.5' }}>{gradeEvolution}</p>
         </ReportSectionPDF>
 
-        <ReportSectionPDF title="Commentaire de l'IA">
+        <ReportSectionPDF title="Analyse de Blue AI">
           <p style={{ fontStyle: 'italic', lineHeight: '1.5' }}>{comment}</p>
         </ReportSectionPDF>
       </main>
@@ -126,7 +126,7 @@ const StatsReportPDF: React.FC<{ report: GenerateStatsReportOutput, year: string
         <>
              <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #6A5ACD', paddingBottom: '15px', marginBottom: '30px' }}>
                 <div>
-                  <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Analyse IA des Statistiques</h1>
+                  <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Analyse par Blue AI</h1>
                    <div style={{ fontSize: '11px', color: '#555' }}>
                     <p style={{ margin: 0 }}><strong style={{ color: '#000' }}>Année académique :</strong> {year}</p>
                   </div>

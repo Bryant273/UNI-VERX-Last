@@ -216,7 +216,7 @@ export default function StatsPage() {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'px', [canvas.width, canvas.height]);
             pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save(`Rapport_Analyse_IA_${yearFilter}.pdf`);
+            pdf.save(`Rapport_Analyse_BlueAI_${yearFilter}.pdf`);
             setIsDownloadingPdf(false);
         });
     }
@@ -225,7 +225,7 @@ export default function StatsPage() {
   return (
     <div className="space-y-6">
       <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-        {report && <AiReportPDF report={report} chartsData={statsData} year={yearFilter}/>}
+        {report && <AiReportPDF report={report} chartsData={statsData} year={yearFilter} role="admin"/>}
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -263,7 +263,7 @@ export default function StatsPage() {
               ) : (
                 <>
                   <BrainCircuit className="mr-2 h-4 w-4" />
-                  Générer une analyse IA
+                  Générer une analyse Blue AI
                 </>
               )}
             </Button>
@@ -291,7 +291,7 @@ export default function StatsPage() {
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogContent className="sm:max-w-4xl max-h-[85vh]">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl">Analyse IA des Statistiques</DialogTitle>
+                    <DialogTitle className="text-2xl">Analyse par Blue AI</DialogTitle>
                     <DialogDescription>Rapport généré pour l'année académique {yearFilter} ({semesterFilter === 'all' ? 'Annuel' : `Semestre ${semesterFilter.substring(1)}`})</DialogDescription>
                 </DialogHeader>
                 <div className="max-h-[65vh] overflow-y-auto p-1 pr-4 space-y-4">

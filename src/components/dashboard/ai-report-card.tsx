@@ -69,9 +69,9 @@ export default function AiReportCard({ role }: AiReportCardProps) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Rapport de Performance IA</CardTitle>
+                <CardTitle>Rapport Blue AI</CardTitle>
                 <CardDescription>
-                  Générez un rapport personnalisé basé sur l'IA.
+                  Générez une analyse de performance par l'IA.
                 </CardDescription>
               </div>
               <BrainCircuit className="h-6 w-6 text-muted-foreground" />

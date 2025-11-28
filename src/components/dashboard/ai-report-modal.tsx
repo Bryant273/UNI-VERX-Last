@@ -60,7 +60,7 @@ const StudentReportContent: React.FC<{ report: GenerateStudentReportOutput }> = 
       <ReportSection title="Assiduité aux Cours">
           <p><span className='font-bold text-foreground'>{courses.attended}</span> cours suivis sur <span className='font-bold text-foreground'>{courses.total}</span> au total.</p>
       </ReportSection>
-      <ReportSection title="Commentaire de Blue AI">
+      <ReportSection title="Analyse par Blue AI">
           <p className="italic">{comment}</p>
       </ReportSection>
     </>
@@ -85,7 +85,7 @@ const ProfessorReportContent: React.FC<{ report: GenerateProfessorReportOutput }
       <ReportSection title="Évolution des Notes">
           <p>{gradeEvolution}</p>
       </ReportSection>
-      <ReportSection title="Commentaire de Blue AI">
+      <ReportSection title="Analyse par Blue AI">
           <p className="italic">{comment}</p>
       </ReportSection>
     </>
@@ -115,7 +115,7 @@ export default function AiReportModal({ isOpen, onClose, report, role }: AiRepor
       
       const reportName = 'studentName' in report ? report.studentName : report.professorName;
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`Rapport_${reportName.replace(' ', '_')}_${report.semester}.pdf`);
+      pdf.save(`Rapport_BlueAI_${reportName.replace(' ', '_')}_${report.semester}.pdf`);
     }
 
     setIsDownloading(false);
@@ -136,7 +136,7 @@ export default function AiReportModal({ isOpen, onClose, report, role }: AiRepor
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <BrainCircuit className="h-6 w-6 text-primary" />
-                <DialogTitle className="text-2xl">Analyse par Blue AI</DialogTitle>
+                <DialogTitle className="text-2xl">Rapport d'Analyse par Blue AI</DialogTitle>
               </div>
               <DialogDescription asChild>
                 {isStudentReport(report) ? (
