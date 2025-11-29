@@ -2,7 +2,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { BadgeHelp, BookUser, Wrench } from 'lucide-react';
 import { CheckCircle, Clock, XCircle, Archive } from 'lucide-react';
-import { studentData } from './static-data';
+import { userData } from './static-data';
 
 export type TicketStatus = 'open' | 'pending' | 'closed';
 export type TicketDepartment = 'scolarite' | 'technique' | 'pedagogique';
@@ -33,10 +33,10 @@ export const ticketsData: Ticket[] = [
     date: '18/05/2025',
     lastUpdate: '2025-05-18T10:00:00Z',
     status: 'open',
-    author: studentData.name,
+    author: userData.student.name,
     messages: [
       {
-        author: studentData.name,
+        author: userData.student.name,
         date: '2025-05-18T10:00:00Z',
         content: 'Bonjour, je n\'arrive pas à accéder aux documents du cours de Bases de Données du Prof. Dubois. La page reste blanche.',
       },
@@ -49,10 +49,10 @@ export const ticketsData: Ticket[] = [
     date: '17/05/2025',
     lastUpdate: '2025-05-18T14:30:00Z',
     status: 'pending',
-    author: studentData.name,
+    author: userData.student.name,
     messages: [
       {
-        author: studentData.name,
+        author: userData.student.name,
         date: '2025-05-17T11:00:00Z',
         content: 'Bonjour, j\'aurais besoin d\'un relevé de notes officiel pour le semestre 1 de l\'année 2024-2025.',
       },
@@ -70,10 +70,10 @@ export const ticketsData: Ticket[] = [
     date: '12/04/2025',
     lastUpdate: '2025-04-15T09:00:00Z',
     status: 'closed',
-    author: 'Dr. Évelyne Dubois',
+    author: userData.professor.name,
     messages: [
       {
-        author: 'Dr. Évelyne Dubois',
+        author: userData.professor.name,
         date: '2025-04-12T16:00:00Z',
         content: 'Bonjour, pourriez-vous clarifier le barème appliqué pour le dernier TP de Python ? Plusieurs étudiants ont des questions.',
       },
@@ -83,7 +83,7 @@ export const ticketsData: Ticket[] = [
         content: 'Bonjour Dr. Dubois, le barème est le suivant : 10 points pour la fonctionnalité, 5 points pour la qualité du code, 5 points pour les commentaires. Nous allons envoyer une annonce aux étudiants.',
       },
        {
-        author: 'Dr. Évelyne Dubois',
+        author: userData.professor.name,
         date: '2025-04-15T09:00:00Z',
         content: 'Parfait, merci beaucoup.',
       },
@@ -96,10 +96,10 @@ export const ticketsData: Ticket[] = [
     date: '10/04/2025',
     lastUpdate: '2025-04-11T12:00:00Z',
     status: 'closed',
-    author: 'Dr. Évelyne Dubois',
+    author: userData.professor.name,
     messages: [
       {
-        author: 'Dr. Évelyne Dubois',
+        author: userData.professor.name,
         date: '2025-04-10T08:30:00Z',
         content: 'Le projecteur de la salle B205 ne s\'allume plus. J\'ai un cours à 10h. Merci de votre intervention.',
       },
