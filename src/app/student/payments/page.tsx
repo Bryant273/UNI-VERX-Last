@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Download, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Download, CheckCircle, Clock, AlertTriangle, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { studentPaymentHistory, getStatusConfig, type PaymentHistoryItem, type PaymentStatus } from '@/lib/student-payment-data';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 const StudentPaymentsPage = () => {
   const { summary, installments } = studentPaymentHistory;
@@ -72,7 +73,7 @@ const StudentPaymentsPage = () => {
                 <TableHead>Date d'échéance</TableHead>
                 <TableHead>Montant</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Reçu</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -91,12 +92,32 @@ const StudentPaymentsPage = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       {item.status === 'paid' && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={item.receiptUrl} download>
-                            <Download className="mr-2 h-4 w-4" />
-                            Voir le reçu
-                          </a>
-                        </Button>
+                        <TooltipProvider>
+                           <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" asChild>
+                                <a href={item.receiptUrl} target="_blank" rel="noopener noreferrer">
+                                  <Eye className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Voir le reçu</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" asChild>
+                                <a href={item.receiptUrl} download>
+                                  <Download className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Télécharger le reçu</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
                     </TableCell>
                   </TableRow>
