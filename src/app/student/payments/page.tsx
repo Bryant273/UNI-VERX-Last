@@ -91,10 +91,10 @@ const StudentPaymentsPage = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       {item.status === 'paid' && (
-                        <Button variant="ghost" size="icon" asChild>
+                        <Button variant="outline" size="sm" asChild>
                           <a href={item.receiptUrl} download>
-                            <Download className="h-4 w-4" />
-                            <span className="sr-only">Télécharger le reçu</span>
+                            <Download className="mr-2 h-4 w-4" />
+                            Voir le reçu
                           </a>
                         </Button>
                       )}
