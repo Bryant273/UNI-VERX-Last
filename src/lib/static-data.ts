@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   BookOpen,
@@ -31,6 +32,14 @@ import {
   Megaphone,
   FolderOpen,
   FileArchive,
+  Ticket,
+  Banknote,
+  BookCopy,
+  Hourglass,
+  CalendarDays,
+  Columns,
+  Sheet,
+  CheckCheck,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
@@ -105,6 +114,57 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       ],
     },
   ],
+  'academic-advisor': advisorNavLinks,
+  secretariat: [
+    { href: '/secretariat/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/secretariat/tickets', label: 'Tickets', icon: Ticket },
+    { href: '/secretariat/users', label: 'Utilisateurs', icon: Users },
+    { href: '/secretariat/treasury', label: 'Trésorerie', icon: Banknote },
+    { href: '/secretariat/journal', label: 'Journal', icon: History },
+    { href: '/secretariat/results', label: 'Bulletins & Résultats', icon: GraduationCap },
+    {
+      title: 'Académique',
+      links: [
+        { href: '/secretariat/modules', label: 'Modules', icon: BookCopy },
+        { href: '/secretariat/hours', label: 'Heures', icon: Hourglass },
+        { href: '/secretariat/planning', label: 'Planning', icon: CalendarDays },
+      ],
+    },
+    {
+      title: 'Gestion',
+      links: [
+        { href: '/secretariat/alerts', label: 'Alertes', icon: AlertTriangle },
+        { href: '/secretariat/validations', label: 'Validations', icon: CheckCheck },
+        { href: '/secretariat/rooms', label: 'Salles', icon: DoorOpen },
+        { href: '/secretariat/templates', label: 'Templates', icon: Sheet },
+        { href: '/secretariat/enrollments', label: 'Inscriptions', icon: UserPlus },
+        { href: '/secretariat/courses', label: 'Cours', icon: BookOpen },
+      ],
+    },
+    {
+      title: 'Administratif',
+      links: [
+        { href: '/secretariat/student-files', label: 'Dossiers étudiants', icon: Users },
+        { href: '/secretariat/teacher-files', label: 'Dossiers professeurs', icon: BookUser },
+        { href: '/secretariat/contracts', label: 'Contrats', icon: FileText },
+      ],
+    },
+    {
+      title: 'Communication',
+      links: [
+        { href: '/secretariat/messaging', label: 'Messagerie', icon: MessageSquare },
+        { href: '/secretariat/announcements', label: 'Annonces', icon: Megaphone },
+      ],
+    },
+    {
+      title: 'Rapports',
+      links: [
+        { href: '/secretariat/stats', label: 'Statistiques', icon: PieChart },
+        { href: '/secretariat/reports', label: 'Rapports', icon: FileBarChart },
+        { href: '/secretariat/exports', label: 'Exports', icon: Download },
+      ],
+    },
+  ],
   admin: [
     { href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '#', label: 'Gestion des utilisateurs', icon: Users },
@@ -112,12 +172,6 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '/admin/evaluations', label: 'Gestion des évaluations', icon: ClipboardCheck },
     { href: '#', label: 'Statistiques', icon: PieChart },
     { href: '#', label: 'Sécurité', icon: Shield },
-  ],
-  'academic-advisor': advisorNavLinks,
-  secretariat: [
-    { href: '/secretariat/dashboard', label: 'Secrétariat', icon: LayoutDashboard },
-    { href: '#', label: 'Inscriptions', icon: ClipboardCheck },
-    { href: '#', label: 'Gestion Documents', icon: FileCog },
   ],
   rectorate: [
       { href: '/rectorate/dashboard', label: 'Rectorat', icon: LayoutDashboard },
@@ -282,6 +336,17 @@ export const allEvents: Record<UserRole, TimetableEvent[]> = {
         presenceStatus: 'na',
     }
   ],
+  secretariat: [
+    {
+      id: 11,
+      time: '09:00 - 17:00',
+      course: 'Accueil & Administration',
+      location: 'Bureau du secrétariat',
+      type: 'activité',
+      instructor: 'Personnel du secrétariat',
+      presenceStatus: 'na'
+    }
+  ],
   admin: [
      { 
       id: 5, 
@@ -294,7 +359,6 @@ export const allEvents: Record<UserRole, TimetableEvent[]> = {
     }
   ],
   'academic-advisor': [],
-  secretariat: [],
   rectorate: [
       { 
       id: 10, 
