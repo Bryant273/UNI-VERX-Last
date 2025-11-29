@@ -70,6 +70,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   student: [
     { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/student/payments', label: 'Paiements', icon: CreditCard },
+    { href: '/student/tickets', label: 'Tickets', icon: Ticket },
     { href: '/student/courses', label: 'Mes cours', icon: BookOpen },
     { href: '/student/timetable', label: 'Emploi du temps', icon: Calendar },
     { href: '/student/evaluations', label: 'Évaluations', icon: ClipboardList },
@@ -93,6 +94,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   professor: [
     { href: '/professor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/professor/payments', label: 'Paiements', icon: CreditCard },
+    { href: '/professor/tickets', label: 'Tickets', icon: Ticket },
     { href: '/professor/courses', label: 'Mes cours', icon: BookOpen },
     { href: '/professor/timetable', label: 'Planning', icon: Calendar },
     { href: '/professor/evaluations', label: 'Évaluations', icon: ClipboardCheck },
