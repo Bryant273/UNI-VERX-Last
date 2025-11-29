@@ -17,6 +17,7 @@ import {
   FileBarChart,
   Download,
   CheckCheck,
+  Ticket,
 } from 'lucide-react';
 import type { NavItem } from './data';
 
@@ -26,6 +27,7 @@ export const advisorNavLinks: NavItem[] = [
     { href: '/academic-advisor/teachers', label: 'Enseignants', icon: UserCheck },
     { href: '/academic-advisor/courses', label: 'Cours & Programmes', icon: BookOpen },
     { href: '/academic-advisor/planning', label: 'Planning Global', icon: Calendar },
+    { href: '/academic-advisor/tickets', label: 'Tickets', icon: Ticket },
     {
       title: 'Gestion',
       links: [
