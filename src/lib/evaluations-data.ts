@@ -1,4 +1,9 @@
+'use client';
+
+import { Check, ChevronRight, Clock, HelpCircle, X } from "lucide-react";
+
 export type DevoirStatus = 'À faire' | 'Rendu' | 'En retard' | 'Corrigé';
+export type QCMStatus = 'À venir' | 'Actif' | 'Terminé' | 'Corrigé';
 
 export interface Attachment {
   name: string;
@@ -31,6 +36,51 @@ export interface Interrogation {
     teacher: string;
     status: 'À venir' | 'En cours' | 'Terminé';
 }
+
+export interface QCMQuestion {
+  question: string;
+  options: string[];
+  answer: number;
+}
+
+export interface QCM {
+  id: string;
+  course: string;
+  qcmNumber: number;
+  status: QCMStatus;
+  questions: QCMQuestion[];
+  time: string;
+  duration: number; // in minutes
+}
+
+export const qcmData: QCM[] = [
+    {
+        id: "qcm-bdd-1",
+        course: "Bases de Données",
+        qcmNumber: 1,
+        status: 'Actif',
+        time: "10:30",
+        duration: 15,
+        questions: [
+            { question: "Qu'est-ce qu'une clé primaire ?", options: ["A) Une clé unique", "B) Une clé étrangère", "C) Un index", "D) Une vue"], answer: 0 },
+            { question: "Quelle commande SQL sélectionne toutes les colonnes d'une table ?", options: ["A) SELECT *", "B) SELECT ALL", "C) GET *", "D) FETCH ALL"], answer: 0 },
+            { question: "À quoi sert la clause WHERE ?", options: ["A) Trier", "B) Joindre", "C) Filtrer", "D) Regrouper"], answer: 2 },
+            { question: "Que signifie 'JOIN' en SQL ?", options: ["A) Diviser une table", "B) Unir des tables", "C) Supprimer une table", "D) Créer une table"], answer: 1 },
+            { question: "Qu'est-ce que la normalisation ?", options: ["A) Accélérer les requêtes", "B) Réduire la redondance", "C) Augmenter le stockage", "D) Sécuriser les données"], answer: 1 },
+        ]
+    },
+     {
+        id: "qcm-math-1",
+        course: "Mathématiques Discrètes",
+        qcmNumber: 1,
+        status: 'À venir',
+        time: "15:30",
+        duration: 15,
+        questions: [
+             { question: "Qu'est-ce qu'un graphe connexe ?", options: ["A) Un graphe avec des boucles", "B) Un graphe où tous les sommets sont reliés", "C) Un graphe sans arêtes", "D) Un graphe orienté"], answer: 1 },
+        ]
+    }
+];
 
 export const interrogationsData: Interrogation[] = [
     {
