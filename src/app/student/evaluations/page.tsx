@@ -66,6 +66,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 const devoirStatusConfig: Record<
@@ -83,11 +84,13 @@ const devoirStatusConfig: Record<
 const QCMModal = ({ qcm, isOpen, onClose }: { qcm: QCM | null, isOpen: boolean, onClose: () => void }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
+    const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
 
     useEffect(() => {
         if (isOpen && qcm) {
             setTimeLeft(qcm.duration * 60);
             setCurrentPage(0);
+            setUserAnswers({});
         }
     }, [isOpen, qcm]);
 
@@ -109,6 +112,10 @@ const QCMModal = ({ qcm, isOpen, onClose }: { qcm: QCM | null, isOpen: boolean, 
     
     const currentQuestion = qcm.questions[currentPage];
 
+    const handleAnswer = (questionIndex: number, optionIndex: number) => {
+        setUserAnswers(prev => ({...prev, [questionIndex]: optionIndex}));
+    }
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-2xl flex flex-col p-0 gap-0">
@@ -124,10 +131,10 @@ const QCMModal = ({ qcm, isOpen, onClose }: { qcm: QCM | null, isOpen: boolean, 
                 <Progress value={(timeLeft / (qcm.duration * 60)) * 100} className="w-full h-1 rounded-none [&>div]:bg-primary" />
                 <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
                      <h2 className="text-lg font-semibold text-center">{currentQuestion.question}</h2>
-                     <RadioGroup className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <RadioGroup className="grid grid-cols-1 sm:grid-cols-2 gap-4" onValueChange={(val) => handleAnswer(currentPage, Number(val))}>
                         {currentQuestion.options.map((option, index) => (
                              <div key={index}>
-                                <RadioGroupItem value={option} id={`q-${currentPage}-o-${index}`} className="sr-only"/>
+                                <RadioGroupItem value={String(index)} id={`q-${currentPage}-o-${index}`} className="sr-only"/>
                                 <Label 
                                     htmlFor={`q-${currentPage}-o-${index}`} 
                                     className="flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer hover:bg-accent/50 hover:border-primary transition-all has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"
@@ -162,29 +169,93 @@ const QCMModal = ({ qcm, isOpen, onClose }: { qcm: QCM | null, isOpen: boolean, 
 
 const QCMResultsModal = ({ qcm, isOpen, onClose }: { qcm: QCM | null, isOpen: boolean, onClose: () => void }) => {
     if (!qcm) return null;
+    const correctAnswersCount = qcm.grade ?? 0;
+    const totalQuestions = qcm.questions.length;
+    const wrongAnswersCount = totalQuestions - correctAnswersCount;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
+            <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Résultats - {qcm.course}</DialogTitle>
                     <DialogDescription>QCM n°{qcm.qcmNumber} du {qcm.date}</DialogDescription>
                 </DialogHeader>
-                <div className="py-4 text-center">
-                    <p className="text-sm text-muted-foreground">Votre note</p>
-                    <p className="text-5xl font-bold text-primary">{qcm.grade}/20</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="p-3 bg-muted rounded-lg">
-                        <p className="text-muted-foreground">Bonnes réponses</p>
-                        <p className="font-bold text-green-600">{qcm.grade} / 20</p>
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-hidden">
+                    <div className="md:col-span-1 flex flex-col gap-4">
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Score Final</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-5xl font-bold text-primary">{qcm.grade}<span className="text-2xl text-muted-foreground">/20</span></p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Détails</CardTitle>
+                            </CardHeader>
+                             <CardContent className="text-sm space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Bonnes réponses</span>
+                                    <span className="font-bold text-green-600">{correctAnswersCount}/{totalQuestions}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Mauvaises réponses</span>
+                                    <span className="font-bold text-red-600">{wrongAnswersCount}/{totalQuestions}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Temps utilisé</span>
+                                    <span className="font-bold">12:34 / 15:00</span>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
-                     <div className="p-3 bg-muted rounded-lg">
-                        <p className="text-muted-foreground">Temps utilisé</p>
-                        <p className="font-bold">12:34 / 15:00</p>
+                    <div className="md:col-span-2 overflow-y-auto pr-3">
+                         <Accordion type="multiple" className="w-full space-y-2">
+                            {qcm.questions.map((question, index) => {
+                                const userAnswer = qcm.userAnswers ? qcm.userAnswers[index] : -1;
+                                const isCorrect = userAnswer === question.answer;
+
+                                return (
+                                    <AccordionItem key={index} value={`item-${index}`} className="border-0">
+                                         <Card className={cn(isCorrect ? "bg-green-500/5 border-green-500/20" : "bg-red-500/5 border-red-500/20")}>
+                                            <AccordionTrigger className="p-4 hover:no-underline text-left">
+                                                <div className="flex gap-3 items-center">
+                                                    {isCorrect ? <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0"/> : <XCircle className="h-5 w-5 text-red-600 flex-shrink-0"/>}
+                                                    <span className="flex-1">Question {index + 1}: {question.question}</span>
+                                                </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent className="px-4 pb-4">
+                                                <div className="space-y-2 text-sm pl-8">
+                                                    {question.options.map((option, optIndex) => {
+                                                        const isUserChoice = optIndex === userAnswer;
+                                                        const isCorrectAnswer = optIndex === question.answer;
+
+                                                        return (
+                                                            <div 
+                                                                key={optIndex}
+                                                                className={cn(
+                                                                    "p-2 rounded-md",
+                                                                    isCorrectAnswer && "bg-green-500/20",
+                                                                    isUserChoice && !isCorrectAnswer && "bg-red-500/20"
+                                                                )}
+                                                            >
+                                                                {isCorrectAnswer && <span className="font-bold text-green-700 dark:text-green-300">Bonne réponse: </span>}
+                                                                {isUserChoice && !isCorrectAnswer && <span className="font-bold text-red-700 dark:text-red-300">Votre réponse: </span>}
+                                                                {option}
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </AccordionContent>
+                                        </Card>
+                                    </AccordionItem>
+                                )
+                            })}
+                         </Accordion>
                     </div>
                 </div>
-                 <DialogFooter>
+                 <DialogFooter className="pt-4 border-t">
                     <Button onClick={onClose}>Fermer</Button>
                 </DialogFooter>
             </DialogContent>

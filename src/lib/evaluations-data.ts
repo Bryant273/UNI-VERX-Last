@@ -53,6 +53,7 @@ export interface QCM {
   duration: number; // in minutes
   grade?: number;
   date?: string;
+  userAnswers?: number[];
 }
 
 // Helper to generate 20 questions for a QCM
@@ -93,7 +94,8 @@ export const qcmData: QCM[] = [
         duration: 15,
         questions: generateQuestions(20, 'Complexity'),
         grade: 16,
-        date: "15/05/2025"
+        date: "15/05/2025",
+        userAnswers: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 0], // 19 good, 1 bad
     },
     {
         id: "qcm-reseau-1",
@@ -104,7 +106,8 @@ export const qcmData: QCM[] = [
         duration: 15,
         questions: generateQuestions(20, 'TCP/IP'),
         grade: 14,
-        date: "12/05/2025"
+        date: "12/05/2025",
+        userAnswers: [0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 1], // 17 good, 3 bad
     }
 ];
 
@@ -147,9 +150,7 @@ export const devoirsData: Devoir[] = [
     deadline: '15/06/2025 - 23:59',
     status: 'À faire',
     instructions: 'Réalisez un site e-commerce simple avec React et Node.js. Le site doit inclure un panier, une page produit et un système d\'authentification simple.',
-    attachments: [
-        { name: 'cahier_des_charges.pdf', url: '#' }
-    ],
+    attachments: [{ name: 'cahier_des_charges.pdf', url: '#' }],
   },
   {
     id: 'devoir-3',
@@ -189,5 +190,3 @@ export const devoirsData: Devoir[] = [
     attachments: [{ name: 'webapp_vulnerable.zip', url: '#' }],
   },
 ];
-
-    
