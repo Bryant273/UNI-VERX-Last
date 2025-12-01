@@ -13,6 +13,10 @@ export interface Message {
   author: Member;
   content: string;
   timestamp: string;
+  attachment?: {
+    name: string;
+    size: string;
+  }
 }
 
 export interface SharedFile {
@@ -120,3 +124,5 @@ export const groupWorkData: GroupWork = {
     }
   ]
 };
+
+    
