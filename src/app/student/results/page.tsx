@@ -30,24 +30,12 @@ import { Badge } from '@/components/ui/badge';
 import { Download, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { coursesResultsData, semesterResults, type CourseResult } from '@/lib/results-data';
-import { studentData } from '@/lib/static-data';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 type DisplayType = 'bulletin' | 'course';
 type SemesterType = 'all' | 'S1' | 'S2';
 
-const GradeBadge = ({ grade }: { grade: number }) => {
-  const gradeClass =
-    grade >= 16
-      ? 'text-green-600 dark:text-green-400'
-      : grade >= 14
-      ? 'text-blue-600 dark:text-blue-400'
-      : grade >= 10
-      ? 'text-yellow-600 dark:text-yellow-400'
-      : 'text-red-600 dark:text-red-400';
-  return <span className={cn('font-bold', gradeClass)}>{grade.toFixed(2)}/20</span>;
-};
 
 const CourseDetailsView = ({ course }: { course: CourseResult }) => (
     <Card>
@@ -82,59 +70,128 @@ const CourseDetailsView = ({ course }: { course: CourseResult }) => (
     </Card>
 );
 
+const SemesterTable = ({ semester, data }: { semester: string, data: any }) => {
+    const ueEntries = Object.entries(data.groupedCourses);
+    const totalRows = data.courses.length;
+
+    let rowIndex = 0;
+
+    return (
+        <Table className="border mb-8">
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="w-[100px]">Semestre</TableHead>
+                    <TableHead className="w-[200px]">UE</TableHead>
+                    <TableHead>Module</TableHead>
+                    <TableHead className="w-[100px]">Moyenne</TableHead>
+                    <TableHead className="w-[150px]">Crédits à valider</TableHead>
+                    <TableHead className="w-[150px]">Crédits validés</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {ueEntries.map(([ue, courses], ueIndex) => {
+                    const ueCourses = courses as CourseResult[];
+                    const ueRowSpan = ueCourses.length;
+                    return ueCourses.map((course, courseIndex) => {
+                        rowIndex++;
+                        const isFailed = parseFloat(course.grade) < 10;
+                        return (
+                            <TableRow key={course.id}>
+                                {ueIndex === 0 && courseIndex === 0 && (
+                                    <TableCell rowSpan={totalRows} className="align-middle text-center font-semibold text-muted-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'rotate(180deg)' }}>
+                                        {semester}
+                                    </TableCell>
+                                )}
+                                {courseIndex === 0 && (
+                                    <TableCell rowSpan={ueRowSpan} className="font-semibold align-middle">{ue}</TableCell>
+                                )}
+                                <TableCell className="font-medium">{course.name}</TableCell>
+                                <TableCell><Badge variant={isFailed ? "destructive" : "secondary"}>{course.grade}/20</Badge></TableCell>
+                                <TableCell className="text-center">{course.creditsToValidate}</TableCell>
+                                <TableCell className="text-center">
+                                    <div className="flex items-center justify-center gap-2">
+                                        {isFailed ? <XCircle className="h-4 w-4 text-red-500"/> : <CheckCircle className="h-4 w-4 text-green-500"/>}
+                                        <span className={cn(isFailed ? 'text-red-500' : 'text-green-500', "font-semibold")}>
+                                            {course.creditsValidated}
+                                        </span>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        );
+                    });
+                })}
+            </TableBody>
+        </Table>
+    );
+};
+
 const BulletinView = ({ semester }: { semester: SemesterType }) => {
-    const data = semester === 'all' ? semesterResults.annual : semesterResults[semester.toLowerCase() as 's1' | 's2'];
-    const courses = semester === 'S1' ? semesterResults.s1.courses : semester === 'S2' ? semesterResults.s2.courses : [...semesterResults.s1.courses, ...semesterResults.s2.courses];
     const isAnnual = semester === 'all';
     
     return (
         <div id="bulletin-content">
-            <Card className="mb-6">
-                <CardHeader><CardTitle>Synthèse {isAnnual ? "Annuelle" : `du Semestre ${semester.slice(-1)}`}</CardTitle></CardHeader>
-                <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                     <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Moyenne</p><p className="text-xl font-bold">{data.average}</p></CardContent></Card>
-                     <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Crédits</p><p className="text-xl font-bold">{data.credits}</p></CardContent></Card>
-                     <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Classement</p><p className="text-xl font-bold">{data.rank} / {data.totalStudents}</p></CardContent></Card>
-                     <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Mention</p><p className="text-xl font-bold">{data.mention}</p></CardContent></Card>
-                </CardContent>
+             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-slate-700">
+                <h3 className="text-xl font-bold text-center mb-6">BULLETIN DE NOTES - ANNÉE 2024-2025</h3>
+                {(semester === 'all' || semester === 'S1') && <SemesterTable semester="SEMESTRE 1" data={semesterResults.s1} />}
+                {(semester === 'all' || semester === 'S2') && <SemesterTable semester="SEMESTRE 2" data={semesterResults.s2} />}
+
                 {isAnnual && (
-                    <CardFooter className="flex-col items-start gap-4 border-t p-6">
-                        <div>
-                            <p className="font-semibold">Décision du jury</p>
-                            <p className="text-sm text-muted-foreground">{data.juryComment}</p>
+                    <>
+                        <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 rounded-xl p-6 flex flex-col items-center justify-center">
+                                <div className="text-center mb-3">
+                                    <div className="font-medium text-muted-foreground mb-1">Moyenne annuelle</div>
+                                    <div className="text-3xl font-bold text-primary">{semesterResults.annual.average}/20</div>
+                                </div>
+                                <div className="text-sm text-muted-foreground mt-3 text-center">
+                                    <span className="font-medium text-primary">Mention :</span> {semesterResults.annual.mention}
+                                </div>
+                            </div>
+                            
+                            <div className="bg-card shadow-sm rounded-xl p-6 flex flex-col items-center justify-center border">
+                                <div className="text-center">
+                                    <div className="font-medium text-muted-foreground mb-1">Crédits validés</div>
+                                    <div className="text-lg font-bold">{semesterResults.annual.credits}</div>
+                                    <div className="text-sm text-amber-600 mt-1">{semesterResults.annual.creditsStatus}</div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-card shadow-sm rounded-xl p-6 flex flex-col items-center justify-center border">
+                                <div className="text-center">
+                                    <div className="font-medium text-muted-foreground mb-1">Classement</div>
+                                    <div className="text-lg font-bold">{semesterResults.annual.rank} / {semesterResults.annual.totalStudents}</div>
+                                    <div className="text-sm text-muted-foreground mt-1">Top 10%</div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-card shadow-sm rounded-xl p-6 flex flex-col items-center justify-center border">
+                                <div className="text-center">
+                                    <div className="font-medium text-muted-foreground mb-1">Décision</div>
+                                    <div className="text-lg font-bold text-green-600">{semesterResults.annual.status}</div>
+                                    <div className="text-sm text-muted-foreground mt-1">{semesterResults.annual.statusDetails}</div>
+                                </div>
+                            </div>
                         </div>
-                    </CardFooter>
+
+                        <div className="mt-8 p-4 bg-muted/50 rounded-lg">
+                            <h4 className="text-base font-medium text-foreground mb-2">Commentaires du jury</h4>
+                            <p className="text-sm text-muted-foreground italic">
+                                {semesterResults.annual.juryComment}
+                            </p>
+                        </div>
+                         <div className="flex justify-between items-end mt-16">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Fait le, {new Date().toLocaleDateString('fr-FR')}</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="font-semibold">Le Directeur des Études</p>
+                                <div className="mt-8 border-t-2 w-48 mx-auto"></div>
+                                <p className="text-xs text-muted-foreground mt-2">(Cachet et Signature)</p>
+                            </div>
+                        </div>
+                    </>
                 )}
-            </Card>
-             <Card>
-                <CardHeader><CardTitle>Détail des notes</CardTitle></CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow><TableHead>UE</TableHead><TableHead>Module</TableHead><TableHead>Note</TableHead><TableHead>Crédits Obtenus</TableHead></TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {courses.map((course, index) => {
-                                const isFailed = parseFloat(course.grade.replace(',', '.')) < 10;
-                                return (
-                                <TableRow key={index}>
-                                    <TableCell>{course.ue}</TableCell>
-                                    <TableCell className="font-medium">{course.module}</TableCell>
-                                    <TableCell><Badge variant={isFailed ? "destructive" : "secondary"}>{course.grade}</Badge></TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            {isFailed ? <XCircle className="h-4 w-4 text-red-500"/> : <CheckCircle className="h-4 w-4 text-green-500"/>}
-                                            <span className={cn(isFailed ? 'text-red-500' : 'text-green-500', "font-semibold")}>
-                                                {course.creditsValidated}/{course.creditsToValidate}
-                                            </span>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            )})}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            </div>
         </div>
     )
 }
@@ -145,20 +202,30 @@ export default function ResultsPage() {
   const [selectedCourse, setSelectedCourse] = useState<string>('');
 
   const handleDownload = () => {
-    const content = document.getElementById('resultsContainer');
+    const content = document.getElementById('bulletin-content');
     if (content) {
       html2canvas(content, { scale: 2 }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
-        const width = pdfWidth;
-        const height = width / ratio;
+        const canvasAspectRatio = canvas.width / canvas.height;
+        const pdfAspectRatio = pdfWidth / pdfHeight;
         
-        pdf.addImage(imgData, 'PNG', 0, 0, width, height > pdfHeight ? pdfHeight : height);
+        let finalWidth, finalHeight;
+        
+        if (canvasAspectRatio > pdfAspectRatio) {
+            finalWidth = pdfWidth;
+            finalHeight = pdfWidth / canvasAspectRatio;
+        } else {
+            finalHeight = pdfHeight;
+            finalWidth = pdfHeight * canvasAspectRatio;
+        }
+
+        const x = (pdfWidth - finalWidth) / 2;
+        const y = (pdfHeight - finalHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
         pdf.save('mes_resultats.pdf');
       });
     }
@@ -194,7 +261,7 @@ export default function ResultsPage() {
                         <SelectTrigger><SelectValue placeholder="Sélectionner une matière..."/></SelectTrigger>
                         <SelectContent>
                              {Object.values(coursesResultsData).map(course => (
-                                 <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                                 <SelectItem key={course.id} value={course.id}>{course.name} ({course.semester.replace('Semestre ', 'S')})</SelectItem>
                              ))}
                         </SelectContent>
                     </Select>
@@ -206,7 +273,11 @@ export default function ResultsPage() {
       <div id="resultsContainer">
         {displayType === 'bulletin' && <BulletinView semester={semester} />}
         {displayType === 'course' && selectedCourse && <CourseDetailsView course={coursesResultsData[selectedCourse]} />}
-        {displayType === 'course' && !selectedCourse && <p className="text-center text-muted-foreground p-8">Veuillez sélectionner une matière pour voir les détails.</p>}
+        {displayType === 'course' && !selectedCourse && (
+             <Card className="text-center text-muted-foreground p-8">
+                <CardContent>Veuillez sélectionner une matière pour voir les détails.</CardContent>
+            </Card>
+        )}
       </div>
     </div>
   );
