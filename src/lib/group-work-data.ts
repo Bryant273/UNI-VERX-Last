@@ -28,6 +28,21 @@ export interface Submission {
   date: string;
 }
 
+export interface Task {
+    id: string;
+    title: string;
+    completed: boolean;
+    assignedTo?: Member;
+}
+
+export interface Mission {
+    id: string;
+    title: string;
+    status: 'completed' | 'in-progress' | 'pending';
+    tasks: Task[];
+    dueDate: string;
+}
+
 export interface GroupWork {
   id: string;
   title: string;
@@ -38,6 +53,7 @@ export interface GroupWork {
   members: Member[];
   messages: Message[];
   sharedFiles: SharedFile[];
+  missions: Mission[];
   submission?: Submission;
 }
 
@@ -67,4 +83,40 @@ export const groupWorkData: GroupWork = {
     { id: 'file-2', name: 'schema-db.png', size: '345 KB', uploadedBy: members[1] },
     { id: 'file-3', name: 'maquettes-v1.fig', size: '5.8 MB', uploadedBy: members[2] },
   ],
+  missions: [
+    {
+        id: 'mission-1',
+        title: 'Phase 1: Conception et Maquettage',
+        status: 'completed',
+        dueDate: '20/05/2025',
+        tasks: [
+            { id: 't1-1', title: 'Rédiger le cahier des charges', completed: true, assignedTo: members[0] },
+            { id: 't1-2', title: 'Créer les maquettes Figma', completed: true, assignedTo: members[2] },
+            { id: 't1-3', title: 'Définir le schéma de la base de données', completed: true, assignedTo: members[1] },
+        ]
+    },
+    {
+        id: 'mission-2',
+        title: 'Phase 2: Développement du Backend',
+        status: 'in-progress',
+        dueDate: '10/06/2025',
+        tasks: [
+            { id: 't2-1', title: 'Mettre en place le serveur Node.js', completed: true, assignedTo: members[1] },
+            { id: 't2-2', title: 'Développer l\'API pour les utilisateurs', completed: true, assignedTo: members[1] },
+            { id: 't2-3', title: 'Développer l\'API pour les produits', completed: false, assignedTo: members[1] },
+            { id: 't2-4', title: 'Rédiger les tests unitaires du backend', completed: false, assignedTo: members[3] },
+        ]
+    },
+     {
+        id: 'mission-3',
+        title: 'Phase 3: Développement du Frontend',
+        status: 'pending',
+        dueDate: '25/06/2025',
+        tasks: [
+            { id: 't3-1', title: 'Initialiser le projet React', completed: false },
+            { id: 't3-2', title: 'Créer les composants de base', completed: false },
+            { id: 't3-3', title: 'Intégrer l\'API des produits', completed: false },
+        ]
+    }
+  ]
 };
