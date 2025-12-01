@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -132,8 +131,70 @@ const BulletinView = ({ semester }: { semester: SemesterType }) => {
         <div id="bulletin-content">
              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-slate-700">
                 <h3 className="text-xl font-bold text-center mb-6">BULLETIN DE NOTES - ANNÉE 2024-2025</h3>
-                {(semester === 'all' || semester === 'S1') && <SemesterTable semester="SEMESTRE 1" data={semesterResults.s1} />}
-                {(semester === 'all' || semester === 'S2') && <SemesterTable semester="SEMESTRE 2" data={semesterResults.s2} />}
+                {isAnnual ? (
+                    <Table className="border mb-8">
+                        <TableHeader>
+                             <TableRow>
+                                <TableHead className="w-[100px]">Semestre</TableHead>
+                                <TableHead className="w-[200px]">UE</TableHead>
+                                <TableHead>Module</TableHead>
+                                <TableHead className="w-[100px]">Moyenne</TableHead>
+                                <TableHead className="w-[150px]">Crédits à valider</TableHead>
+                                <TableHead className="w-[150px]">Crédits validés</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Object.entries(semesterResults.s1.groupedCourses).map(([ue, courses], ueIndex, ueArr) => {
+                                const ueCourses = courses as CourseResult[];
+                                return ueCourses.map((course, courseIndex) => {
+                                    const isFailed = parseFloat(course.grade) < 10;
+                                    return (
+                                        <TableRow key={course.id}>
+                                            {ueIndex === 0 && courseIndex === 0 && <TableCell rowSpan={semesterResults.s1.courses.length} className="align-middle text-center font-semibold text-muted-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'rotate(180deg)' }}>SEMESTRE 1</TableCell>}
+                                            {courseIndex === 0 && <TableCell rowSpan={ueCourses.length} className="font-semibold align-middle">{ue}</TableCell>}
+                                            <TableCell className="font-medium">{course.name}</TableCell>
+                                            <TableCell><Badge variant={isFailed ? "destructive" : "secondary"}>{course.grade}/20</Badge></TableCell>
+                                            <TableCell className="text-center">{course.creditsToValidate}</TableCell>
+                                            <TableCell className="text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    {isFailed ? <XCircle className="h-4 w-4 text-red-500"/> : <CheckCircle className="h-4 w-4 text-green-500"/>}
+                                                    <span className={cn(isFailed ? 'text-red-500' : 'text-green-500', "font-semibold")}>{course.creditsValidated}</span>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })
+                            })}
+                             {Object.entries(semesterResults.s2.groupedCourses).map(([ue, courses], ueIndex, ueArr) => {
+                                const ueCourses = courses as CourseResult[];
+                                return ueCourses.map((course, courseIndex) => {
+                                    const isFailed = parseFloat(course.grade) < 10;
+                                    return (
+                                        <TableRow key={course.id}>
+                                            {ueIndex === 0 && courseIndex === 0 && <TableCell rowSpan={semesterResults.s2.courses.length} className="align-middle text-center font-semibold text-muted-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'rotate(180deg)' }}>SEMESTRE 2</TableCell>}
+                                            {courseIndex === 0 && <TableCell rowSpan={ueCourses.length} className="font-semibold align-middle">{ue}</TableCell>}
+                                            <TableCell className="font-medium">{course.name}</TableCell>
+                                            <TableCell><Badge variant={isFailed ? "destructive" : "secondary"}>{course.grade}/20</Badge></TableCell>
+                                            <TableCell className="text-center">{course.creditsToValidate}</TableCell>
+                                            <TableCell className="text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    {isFailed ? <XCircle className="h-4 w-4 text-red-500"/> : <CheckCircle className="h-4 w-4 text-green-500"/>}
+                                                    <span className={cn(isFailed ? 'text-red-500' : 'text-green-500', "font-semibold")}>{course.creditsValidated}</span>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })
+                            })}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <>
+                        {semester === 'S1' && <SemesterTable semester="SEMESTRE 1" data={semesterResults.s1} />}
+                        {semester === 'S2' && <SemesterTable semester="SEMESTRE 2" data={semesterResults.s2} />}
+                    </>
+                )}
+                
 
                 {isAnnual && (
                     <>
