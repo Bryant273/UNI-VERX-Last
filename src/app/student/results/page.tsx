@@ -26,6 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Download, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { coursesResultsData, semesterResults, type CourseResult } from '@/lib/results-data';
