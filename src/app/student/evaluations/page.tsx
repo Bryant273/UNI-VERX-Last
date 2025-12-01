@@ -22,6 +22,7 @@ import {
   ChevronDown,
   Eye,
   Trash2,
+  Check,
 } from 'lucide-react';
 import {
   Card,
@@ -51,7 +52,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import {
-  devoirsData,
+  devoirsData as initialDevoirsData,
   qcmData,
   type Devoir,
   type DevoirStatus,
@@ -64,6 +65,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
 
 
 const devoirStatusConfig: Record<
@@ -71,6 +73,7 @@ const devoirStatusConfig: Record<
   { label: string; icon: React.ElementType; color: string }
 > = {
   'À faire': { label: 'À faire', icon: FileClock, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
+  'En attente': { label: 'En attente', icon: Clock, color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' },
   'Rendu': { label: 'Rendu', icon: CheckCircle, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
   'En retard': { label: 'En retard', icon: AlertCircle, color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' },
   'Corrigé': { label: 'Corrigé', icon: BookCheck, color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' },
@@ -199,9 +202,11 @@ const InterrogationsTab = () => {
 
     const activeQCMs = useMemo(() => {
         const now = new Date();
+        // For demo purposes, we will ignore the date and only check the time
+        // const currentDay = now.toLocaleString('fr-FR', { weekday: 'long' });
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
-        
+
         return qcmData.filter(qcm => {
             const correspondingEvent = studentTimetable.find(event => event.course === qcm.course);
             if (!correspondingEvent) return false;
@@ -211,9 +216,11 @@ const InterrogationsTab = () => {
             const currentTimeInMinutes = currentHour * 60 + currentMinute;
             
             const isQcmActive = currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes < (startTimeInMinutes + 15);
+            
+            // In a real app, you would also check if the event is today
+            // For now, we assume all events in studentTimetable are for today.
             return qcm.status === 'Actif' && isQcmActive;
         });
-
     }, [studentTimetable]);
 
     const completedQCMs = useMemo(() => qcmData.filter(q => q.status === 'Corrigé'), []);
@@ -311,23 +318,33 @@ const InterrogationsTab = () => {
 };
 
 const DevoirsTab = () => {
+    const [devoirs, setDevoirs] = useState<Devoir[]>(initialDevoirsData);
     const [viewModalDevoir, setViewModalDevoir] = useState<Devoir | null>(null);
     const [submitModalDevoir, setSubmitModalDevoir] = useState<Devoir | null>(null);
-    const [file, setFile] = useState<File | null>(null);
+    const [fileToSubmit, setFileToSubmit] = useState<{devoirId: string; file: File} | null>(null);
+    const { toast } = useToast();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setFile(e.target.files[0]);
+        if (e.target.files && submitModalDevoir) {
+            setFileToSubmit({ devoirId: submitModalDevoir.id, file: e.target.files[0] });
+            toast({ title: "Fichier sélectionné", description: `${e.target.files[0].name} est prêt à être confirmé.` });
+            setSubmitModalDevoir(null);
         }
     };
-
-    const handleSumbitDevoir = () => {
-        if (submitModalDevoir) {
-            console.log(`Submitting file for devoir ${submitModalDevoir.id}`);
-            // Logic to handle file submission would go here.
-            setSubmitModalDevoir(null);
-            setFile(null);
+    
+    const removeStagedFile = (devoirId: string) => {
+        if (fileToSubmit?.devoirId === devoirId) {
+            setFileToSubmit(null);
+            toast({ title: "Fichier retiré", description: "Le fichier a été retiré de la zone de soumission." });
         }
+    }
+    
+    const confirmSubmission = (devoirId: string) => {
+        setDevoirs(prev => prev.map(d => 
+            d.id === devoirId ? { ...d, status: 'Rendu', submission: { date: new Date().toLocaleString('fr-FR'), file: fileToSubmit!.file.name }} : d
+        ));
+        setFileToSubmit(null);
+        toast({ title: "Devoir envoyé !", description: "Votre devoir a été soumis avec succès.", variant: "default" });
     }
   
     return (
@@ -350,8 +367,11 @@ const DevoirsTab = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {devoirsData.map((devoir) => {
+                            {devoirs.map((devoir) => {
                                 const status = devoirStatusConfig[devoir.status];
+                                const isSubmitted = devoir.status === 'Rendu' || devoir.status === 'Corrigé';
+                                const isFileStaged = fileToSubmit?.devoirId === devoir.id;
+
                                 return (
                                 <TableRow key={devoir.id} className="even:bg-muted/40">
                                     <TableCell className="font-medium">{devoir.course}</TableCell>
@@ -360,23 +380,15 @@ const DevoirsTab = () => {
                                     <TableCell>
                                     <Badge variant="outline" className={cn("border-0", status.color)}>
                                         <status.icon className="mr-2 h-4 w-4" />
-                                        {status.label}
+                                        {isFileStaged && !isSubmitted ? 'Prêt à confirmer' : status.label}
                                     </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => setViewModalDevoir(devoir)}><Eye className="h-4 w-4" /></Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent><p>Voir le sujet</p></TooltipContent>
-                                            </Tooltip>
-                                             <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => setSubmitModalDevoir(devoir)} disabled={devoir.status === 'Rendu' || devoir.status === 'Corrigé'}><Paperclip className="h-4 w-4" /></Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent><p>Rendre le devoir</p></TooltipContent>
-                                            </Tooltip>
+                                            <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setViewModalDevoir(devoir)}><Eye className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Voir le sujet</p></TooltipContent></Tooltip>
+                                            <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setSubmitModalDevoir(devoir)} disabled={isSubmitted}><Paperclip className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Joindre un fichier</p></TooltipContent></Tooltip>
+                                            <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => removeStagedFile(devoir.id)} disabled={!isFileStaged || isSubmitted}><Trash2 className="h-4 w-4 text-destructive" /></Button></TooltipTrigger><TooltipContent><p>Annuler la sélection</p></TooltipContent></Tooltip>
+                                            <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => confirmSubmission(devoir.id)} disabled={!isFileStaged || isSubmitted}><Check className="h-4 w-4 text-green-600" /></Button></TooltipTrigger><TooltipContent><p>Confirmer l'envoi</p></TooltipContent></Tooltip>
                                         </TooltipProvider>
                                     </TableCell>
                                 </TableRow>
@@ -454,34 +466,15 @@ const DevoirsTab = () => {
                         <DialogDescription>Sélectionnez votre fichier à envoyer.</DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
-                         {file ? (
-                             <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
-                                <div className="flex items-center gap-3">
-                                    <FileIcon className="h-6 w-6 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">{file.name}</p>
-                                        <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(2)} KB</p>
-                                    </div>
-                                </div>
-                                <Button variant="ghost" size="icon" onClick={() => setFile(null)}><X className="h-4 w-4" /></Button>
-                            </div>
-                         ) : (
-                            <div 
-                                className="p-6 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors"
-                                onClick={() => document.getElementById('file-upload')?.click()}
-                            >
-                                <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
-                                <p className="mt-2 text-sm text-muted-foreground">Cliquez ou glissez-déposez votre fichier</p>
-                                <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange}/>
-                            </div>
-                        )}
+                        <div 
+                            className="p-6 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors"
+                            onClick={() => document.getElementById('file-upload')?.click()}
+                        >
+                            <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">Cliquez ou glissez-déposez votre fichier</p>
+                            <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange}/>
+                        </div>
                     </div>
-                    <DialogFooter>
-                        <Button variant="ghost" onClick={() => setSubmitModalDevoir(null)}>Annuler</Button>
-                        <Button onClick={handleSumbitDevoir} disabled={!file}>
-                            Confirmer l'envoi
-                        </Button>
-                    </DialogFooter>
                 </DialogContent>
              </Dialog>
         )}
