@@ -51,7 +51,19 @@ export interface QCM {
   questions: QCMQuestion[];
   time: string;
   duration: number; // in minutes
+  grade?: number;
+  date?: string;
 }
+
+// Helper to generate 20 questions for a QCM
+const generateQuestions = (count: number, topic: string): QCMQuestion[] => {
+    return Array.from({ length: count }, (_, i) => ({
+        question: `Quelle est la définition de ${topic} ${i + 1} ?`,
+        options: [`Option A${i+1}`, `Option B${i+1}`, `Option C${i+1}`, `Option D${i+1}`],
+        answer: (i + 1) % 4,
+    }));
+};
+
 
 export const qcmData: QCM[] = [
     {
@@ -61,24 +73,38 @@ export const qcmData: QCM[] = [
         status: 'Actif',
         time: "10:30",
         duration: 15,
-        questions: [
-            { question: "Qu'est-ce qu'une clé primaire ?", options: ["A) Une clé unique", "B) Une clé étrangère", "C) Un index", "D) Une vue"], answer: 0 },
-            { question: "Quelle commande SQL sélectionne toutes les colonnes d'une table ?", options: ["A) SELECT *", "B) SELECT ALL", "C) GET *", "D) FETCH ALL"], answer: 0 },
-            { question: "À quoi sert la clause WHERE ?", options: ["A) Trier", "B) Joindre", "C) Filtrer", "D) Regrouper"], answer: 2 },
-            { question: "Que signifie 'JOIN' en SQL ?", options: ["A) Diviser une table", "B) Unir des tables", "C) Supprimer une table", "D) Créer une table"], answer: 1 },
-            { question: "Qu'est-ce que la normalisation ?", options: ["A) Accélérer les requêtes", "B) Réduire la redondance", "C) Augmenter le stockage", "D) Sécuriser les données"], answer: 1 },
-        ]
+        questions: generateQuestions(20, 'SQL')
     },
-     {
+    {
         id: "qcm-math-1",
         course: "Mathématiques Discrètes",
         qcmNumber: 1,
         status: 'À venir',
         time: "15:30",
         duration: 15,
-        questions: [
-             { question: "Qu'est-ce qu'un graphe connexe ?", options: ["A) Un graphe avec des boucles", "B) Un graphe où tous les sommets sont reliés", "C) Un graphe sans arêtes", "D) Un graphe orienté"], answer: 1 },
-        ]
+        questions: generateQuestions(20, 'Graph')
+    },
+    {
+        id: "qcm-algo-1",
+        course: "Algorithmique",
+        qcmNumber: 1,
+        status: 'Corrigé',
+        time: "08:30",
+        duration: 15,
+        questions: generateQuestions(20, 'Complexity'),
+        grade: 16,
+        date: "15/05/2025"
+    },
+    {
+        id: "qcm-reseau-1",
+        course: "Réseaux",
+        qcmNumber: 1,
+        status: 'Corrigé',
+        time: "14:00",
+        duration: 15,
+        questions: generateQuestions(20, 'TCP/IP'),
+        grade: 14,
+        date: "12/05/2025"
     }
 ];
 
@@ -163,3 +189,5 @@ export const devoirsData: Devoir[] = [
     attachments: [{ name: 'webapp_vulnerable.zip', url: '#' }],
   },
 ];
+
+    

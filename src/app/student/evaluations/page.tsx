@@ -19,6 +19,7 @@ import {
   ChevronRight,
   HelpCircle,
   Timer,
+  ChevronDown,
 } from 'lucide-react';
 import {
   Card,
@@ -79,6 +80,7 @@ const QCMModal = ({ qcm, isOpen, onClose }: { qcm: QCM | null, isOpen: boolean, 
     useEffect(() => {
         if (isOpen && qcm) {
             setTimeLeft(qcm.duration * 60);
+            setCurrentPage(0);
         }
     }, [isOpen, qcm]);
 
@@ -102,39 +104,47 @@ const QCMModal = ({ qcm, isOpen, onClose }: { qcm: QCM | null, isOpen: boolean, 
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-4xl h-full sm:h-[90vh] flex flex-col p-0">
-                <DialogHeader className="p-6 pb-2">
+            <DialogContent className="sm:max-w-3xl flex flex-col p-0 gap-0">
+                <DialogHeader className="p-6 pb-4">
                      <div className="flex justify-between items-center">
                         <DialogTitle className="text-2xl">{qcm.course} - QCM N°{qcm.qcmNumber}</DialogTitle>
-                        <div className="flex items-center gap-2 font-mono text-lg font-semibold text-destructive">
+                        <div className={`flex items-center gap-2 font-mono text-lg font-semibold ${timeLeft < 60 ? 'text-destructive' : ''}`}>
                            <Timer />
                            <span>{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</span>
                         </div>
                     </div>
-                    <Progress value={(timeLeft / (qcm.duration * 60)) * 100} className="w-full h-2 [&>div]:bg-destructive" />
                 </DialogHeader>
-                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-8">
+                <Progress value={(timeLeft / (qcm.duration * 60)) * 100} className="w-full h-1 rounded-none [&>div]:bg-primary" />
+                <div className="flex-1 overflow-y-auto px-6 py-8 space-y-8">
                      <h2 className="text-xl font-semibold text-center">{currentQuestion.question}</h2>
-
                      <RadioGroup className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {currentQuestion.options.map((option, index) => (
                              <div key={index}>
                                 <RadioGroupItem value={option} id={`q-${currentPage}-o-${index}`} className="sr-only"/>
-                                <Label htmlFor={`q-${currentPage}-o-${index}`} className="flex flex-col items-center justify-center p-6 border rounded-lg cursor-pointer hover:bg-accent hover:text-accent-foreground has-[:checked]:bg-primary has-[:checked]:text-primary-foreground">
+                                <Label 
+                                    htmlFor={`q-${currentPage}-o-${index}`} 
+                                    className="flex flex-col items-center justify-center p-6 border-2 rounded-lg cursor-pointer hover:bg-accent/50 hover:border-primary transition-all has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"
+                                >
                                     <span className="font-bold text-lg">{option}</span>
                                 </Label>
                              </div>
                         ))}
                      </RadioGroup>
                 </div>
-                <DialogFooter className="p-4 bg-muted/50 border-t flex justify-between items-center w-full">
-                    <p className="text-sm font-medium">Question {currentPage + 1}/{qcm.questions.length}</p>
+                <DialogFooter className="p-4 bg-muted/30 border-t flex justify-between items-center w-full">
+                    <p className="text-sm font-medium text-muted-foreground">Question {currentPage + 1}/{qcm.questions.length}</p>
                     <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}><ChevronLeft /> Précédent</Button>
+                        <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
+                            <ChevronLeft className="mr-2 h-4 w-4"/> Précédent
+                        </Button>
                         {currentPage < qcm.questions.length - 1 ? (
-                            <Button onClick={() => setCurrentPage(p => Math.min(qcm.questions.length - 1, p + 1))}><ChevronRight /> Suivant</Button>
+                            <Button onClick={() => setCurrentPage(p => Math.min(qcm.questions.length - 1, p + 1))}>
+                                Suivant <ChevronRight className="ml-2 h-4 w-4"/>
+                            </Button>
                         ) : (
-                             <Button onClick={onClose} className="bg-green-600 hover:bg-green-700">Soumettre</Button>
+                             <Button onClick={onClose} className="bg-green-600 hover:bg-green-700">
+                                Soumettre
+                             </Button>
                         )}
                     </div>
                 </DialogFooter>
@@ -147,14 +157,16 @@ const InterrogationsTab = () => {
     const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const [selectedQcm, setSelectedQcm] = useState<QCM | null>(null);
 
+    const completedQCMs = useMemo(() => qcmData.filter(q => q.status === 'Corrigé'), []);
+
     return (
       <>
-        <div className="mt-6">
+        <div className="mt-6 space-y-8">
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5"/>
-                        <span>QCM du jour</span>
+                        <Calendar className="h-5 w-5 text-primary"/>
+                        <span>QCM Actifs</span>
                     </CardTitle>
                     <CardDescription>{today}</CardDescription>
                 </CardHeader>
@@ -162,7 +174,7 @@ const InterrogationsTab = () => {
                     {qcmData.filter(q => q.status === 'Actif').length > 0 ? (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {qcmData.filter(q => q.status === 'Actif').map((qcm) => (
-                            <Card key={qcm.id} className="flex flex-col">
+                            <Card key={qcm.id} className="flex flex-col hover:shadow-lg transition-shadow">
                                 <CardHeader>
                                     <CardTitle className="text-lg">{qcm.course} - QCM N°{qcm.qcmNumber}</CardTitle>
                                     <CardDescription>Disponible pendant les 15 premières minutes du cours.</CardDescription>
@@ -180,12 +192,47 @@ const InterrogationsTab = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-12 text-muted-foreground">
+                        <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-lg">
                             <ClipboardCheck className="mx-auto h-12 w-12" />
                             <p className="mt-4 font-semibold">Aucun QCM actif pour le moment.</p>
                             <p className="text-sm">Reposez-vous bien !</p>
                         </div>
                     )}
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Historique des QCM</CardTitle>
+                    <CardDescription>Retrouvez ici les résultats de vos interrogations passées.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Matière</TableHead>
+                                    <TableHead>Numéro</TableHead>
+                                    <TableHead>Note</TableHead>
+                                    <TableHead className="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {completedQCMs.map(qcm => (
+                                    <TableRow key={qcm.id} className="even:bg-muted/30">
+                                        <TableCell>{qcm.date}</TableCell>
+                                        <TableCell className="font-medium">{qcm.course}</TableCell>
+                                        <TableCell>QCM n°{qcm.qcmNumber}</TableCell>
+                                        <TableCell><Badge variant="secondary">{qcm.grade}/20</Badge></TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="outline" size="sm">Voir les détails</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>
@@ -355,10 +402,10 @@ const DevoirsTab = () => {
 export default function StudentEvaluationsPage() {
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="devoirs" className="w-full">
+      <Tabs defaultValue="interrogations" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="interrogations">
-            <Calendar className="mr-2" /> QCM du jour
+            <Calendar className="mr-2" /> Interrogations (QCM)
           </TabsTrigger>
           <TabsTrigger value="devoirs">
             <FileClock className="mr-2" /> Devoirs à rendre
@@ -374,3 +421,5 @@ export default function StudentEvaluationsPage() {
     </div>
   );
 }
+
+    
