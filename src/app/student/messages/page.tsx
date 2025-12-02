@@ -19,6 +19,7 @@ import {
   Inbox,
   AtSign,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -62,7 +63,7 @@ const ConversationList = ({
   onSelect: (conv: Conversation) => void;
 }) => {
   return (
-    <ScrollArea className="h-full -mx-2">
+    <ScrollArea className="flex-1 -mx-2">
       <div className="flex flex-col gap-1 p-2">
         {conversations.length > 0 ? conversations.map((conv) => (
           <button
@@ -291,6 +292,16 @@ export default function StudentMessagingPage() {
     );
   }, [conversations, searchTerm, activeFilter]);
 
+  useEffect(() => {
+    if (filteredConversations.length > 0 && !selectedConversation) {
+      handleSelectConversation(filteredConversations[0]);
+    }
+    if (filteredConversations.length === 0) {
+      setSelectedConversation(null);
+    }
+  }, [filteredConversations, selectedConversation]);
+
+
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConversation(conv);
     // Mark as read
@@ -334,10 +345,10 @@ export default function StudentMessagingPage() {
 );
 
   return (
-    <div className="h-[calc(100vh_-_8rem)] flex flex-col">
-       <Card className="flex-1 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 overflow-hidden">
-        <div className="col-span-1 flex flex-col border-r h-full p-4">
-            <div className="space-y-4">
+    <div className="h-[calc(100vh_-_8rem)]">
+       <Card className="h-full flex overflow-hidden">
+        <div className="w-[320px] flex flex-col border-r h-full">
+            <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold">Messages</h2>
                     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -356,21 +367,21 @@ export default function StudentMessagingPage() {
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
+                 <div className="grid grid-cols-2 gap-2">
+                    <FilterButton filter="all" icon={Inbox} label="Tous" />
+                    <FilterButton filter="unread" icon={AtSign} label="Non lus" />
+                    <FilterButton filter="groups" icon={Users} label="Groupes" />
+                    <FilterButton filter="contacts" icon={User} label="Contacts" />
+                 </div>
             </div>
-             <div className="grid grid-cols-2 gap-2 my-4">
-                <FilterButton filter="all" icon={Inbox} label="Tous" />
-                <FilterButton filter="unread" icon={AtSign} label="Non lus" />
-                <FilterButton filter="groups" icon={Users} label="Groupes" />
-                <FilterButton filter="contacts" icon={User} label="Contacts" />
-             </div>
-            <Separator className="mb-2"/>
+            <Separator />
             <ConversationList
                 conversations={filteredConversations}
                 selectedConversation={selectedConversation}
                 onSelect={handleSelectConversation}
             />
         </div>
-        <div className="col-span-1 md:col-span-2 lg:col-span-3 h-full">
+        <div className="flex-1 h-full">
             <ChatPanel conversation={selectedConversation} />
         </div>
        </Card>
