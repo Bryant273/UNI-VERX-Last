@@ -230,7 +230,7 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
     avatar: studentData.avatar,
   },
   professor: {
-    name: 'Dr. Évelyne Dubois',
+    name: 'Prof. Dubois',
     avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-2')?.imageUrl || '',
   },
   admin: {

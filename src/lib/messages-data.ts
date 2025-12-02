@@ -175,31 +175,31 @@ export const initialConversationsData: Conversation[] = [
 
 export const messagesData: { [key: string]: any[] } = {
     'course-bdd-l3': [
-        { id: 1, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '09:00', content: 'Bonjour à tous ! Le TP 5 sur les requêtes SQL avancées est maintenant disponible sur la plateforme. Date limite de rendu : vendredi 17 mai.', isMe: true },
+        { id: 1, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '09:00', content: 'Bonjour à tous ! Le TP 5 sur les requêtes SQL avancées est maintenant disponible sur la plateforme. Date limite de rendu : vendredi 17 mai.', isMe: true },
         { id: 2, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', time: '09:15', content: 'Merci professeur ! J\'ai une question sur l\'exercice 3, est-ce qu\'on doit utiliser des sous-requêtes ou des jointures ?', isMe: false },
         { id: 3, sender: 'Thomas Mercier', avatar: 'https://i.pravatar.cc/100?img=59', time: '09:18', content: 'Même question que Emma ! Et est-ce qu\'on peut utiliser les fonctions d\'agrégation ?', isMe: false },
-        { id: 4, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '09:25', content: 'Excellentes questions ! Pour l\'exercice 3, vous pouvez utiliser les deux approches. L\'important est d\'optimiser vos requêtes. Les fonctions d\'agrégation sont autorisées et même recommandées.', isMe: true },
+        { id: 4, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '09:25', content: 'Excellentes questions ! Pour l\'exercice 3, vous pouvez utiliser les deux approches. L\'important est d\'optimiser vos requêtes. Les fonctions d\'agrégation sont autorisées et même recommandées.', isMe: true },
         { id: 5, sender: 'Sophie Martin', avatar: 'https://i.pravatar.cc/100?img=47', time: '09:30', content: 'Est-ce que vous pourriez nous montrer un exemple en cours ?', isMe: false },
-        { id: 6, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '14:30', content: 'Bien sûr ! Je ferai des exemples détaillés lors du prochain cours mardi. En attendant, consultez le chapitre 8 du manuel.', isMe: true }
+        { id: 6, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '14:30', content: 'Bien sûr ! Je ferai des exemples détaillés lors du prochain cours mardi. En attendant, consultez le chapitre 8 du manuel.', isMe: true }
     ],
     'course-python-l2': [
         { id: 1, sender: 'Antoine Moreau', avatar: 'https://i.pravatar.cc/100?img=15', time: '11:30', content: 'Professeur, j\'ai une erreur dans mon code pour le TP 4. Pouvez-vous m\'aider ?', isMe: false },
-        { id: 2, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '11:45', content: 'Bien sûr Antoine ! Peux-tu partager le message d\'erreur et le code problématique ?', isMe: true },
+        { id: 2, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '11:45', content: 'Bien sûr Antoine ! Peux-tu partager le message d\'erreur et le code problématique ?', isMe: true },
         { id: 3, sender: 'Antoine Moreau', avatar: 'https://i.pravatar.cc/100?img=15', time: '11:50', content: 'J\'ai un "IndexError: list index out of range" ligne 23. Je pense que c\'est avec ma boucle for.', isMe: false },
-        { id: 4, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '12:00', content: 'Cette erreur indique que tu essaies d\'accéder à un élément qui n\'existe pas dans ta liste. Vérifie la longueur de ta liste avec len() avant d\'y accéder.', isMe: true },
+        { id: 4, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '12:00', content: 'Cette erreur indique que tu essaies d\'accéder à un élément qui n\'existe pas dans ta liste. Vérifie la longueur de ta liste avec len() avant d\'y accéder.', isMe: true },
         { id: 5, sender: 'Antoine Moreau', avatar: 'https://i.pravatar.cc/100?img=15', time: '12:15', content: 'Ça marche ! Merci beaucoup professeur 😊', isMe: false }
     ],
     'student-emma': [
         { id: 1, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', time: '14:30', content: 'Bonjour Professeur Dubois, j\'ai une question sur les index en base de données. Je ne comprends pas bien la différence entre un index clustered et non-clustered.', isMe: false },
-        { id: 2, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '14:45', content: 'Bonjour Emma ! Excellente question. Un index clustered réorganise physiquement les données sur le disque selon l\'ordre de l\'index, tandis qu\'un index non-clustered crée une structure séparée qui pointe vers les données.', isMe: true },
+        { id: 2, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '14:45', content: 'Bonjour Emma ! Excellente question. Un index clustered réorganise physiquement les données sur le disque selon l\'ordre de l\'index, tandis qu\'un index non-clustered crée une structure séparée qui pointe vers les données.', isMe: true },
         { id: 3, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', time: '14:50', content: 'D\'accord, donc il ne peut y avoir qu\'un seul index clustered par table ?', isMe: false },
-        { id: 4, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '15:00', content: 'Exactement ! Puisque les données ne peuvent être organisées physiquement que d\'une seule façon. Par contre, vous pouvez avoir plusieurs index non-clustered.', isMe: true },
+        { id: 4, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '15:00', content: 'Exactement ! Puisque les données ne peuvent être organisées physiquement que d\'une seule façon. Par contre, vous pouvez avoir plusieurs index non-clustered.', isMe: true },
         { id: 5, sender: 'Emma Bernard', avatar: 'https://i.pravatar.cc/100?img=32', time: '15:20', content: 'Merci beaucoup pour vos explications ! C\'est beaucoup plus clair maintenant 😊', isMe: false }
     ],
     'colleague-martin': [
         { id: 1, sender: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', time: '16:30', content: 'Salut Claire ! Tu es disponible pour la réunion équipe pédagogique demain 10h ? On doit discuter des nouveaux programmes.', isMe: false },
-        { id: 2, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '16:35', content: 'Salut Pierre ! Oui, je suis disponible. Tu as déjà l\'ordre du jour ?', isMe: true },
+        { id: 2, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '16:35', content: 'Salut Pierre ! Oui, je suis disponible. Tu as déjà l\'ordre du jour ?', isMe: true },
         { id: 3, sender: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', time: '16:40', content: 'Je l\'envoie ce soir par mail. On va principalement parler de la réforme du L2 et de la coordination entre nos modules.', isMe: false },
-        { id: 4, sender: 'Dr. Claire Dubois', avatar: 'https://i.pravatar.cc/100?img=12', time: '16:45', content: 'Parfait ! J\'ai quelques idées pour mieux articuler programmation et bases de données. À demain !', isMe: true }
+        { id: 4, sender: 'Prof. Dubois', avatar: 'https://i.pravatar.cc/100?img=69', time: '16:45', content: 'Parfait ! J\'ai quelques idées pour mieux articuler programmation et bases de données. À demain !', isMe: true }
     ],
 };
