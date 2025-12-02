@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -16,6 +17,9 @@ import {
   User,
   GraduationCap,
   University,
+  FileText,
+  FileSpreadsheet,
+  Presentation,
 } from 'lucide-react';
 
 import {
@@ -77,7 +81,6 @@ const DocumentTable = ({
     const handleDelete = (docToDelete: Document) => {
         if (!setDocuments) return;
 
-        // For user-added certs, remove the row. For others, reset status.
         if (docToDelete.type === 'certificat' && docToDelete.id.startsWith('new-')) {
              setDocuments(docs => docs.filter(d => d.id !== docToDelete.id));
         } else {
@@ -117,7 +120,7 @@ const DocumentTable = ({
                             <TableRow key={doc.id}>
                                 <TableCell>
                                     <div className="flex items-center gap-3">
-                                        <div className={cn("flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center", documentConfig[doc.type]?.color)}>
+                                        <div className={cn("flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center", documentConfig[doc.type]?.color.split(' ')[1])}>
                                             <DocumentIcon type={doc.type} />
                                         </div>
                                         <div>
@@ -157,6 +160,72 @@ const DocumentTable = ({
     );
 };
 
+const DocumentViewerModal = ({ doc, onClose }: { doc: Document | null; onClose: () => void; }) => {
+    if (!doc) return null;
+
+    let previewContent;
+    switch (doc.type) {
+        case 'cv':
+        case 'lettre-motivation':
+        case 'diplome':
+        case 'certificat':
+        case 'attestation':
+        case 'releve-notes':
+        case 'certificat-scolarite':
+        case 'convention-stage':
+        case 'facture':
+            previewContent = (
+                <div className="text-center text-muted-foreground bg-muted/30 p-4 rounded-lg">
+                    <div className="w-full bg-background p-6 rounded-md shadow-sm h-[350px] flex flex-col">
+                        <div className="flex justify-between items-center border-b pb-2 mb-4">
+                            <span className="text-sm font-medium">{doc.name}</span>
+                        </div>
+                        <div className="flex-grow overflow-hidden relative">
+                            <p className="text-xs text-left text-muted-foreground/50 blur-[2px] select-none">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in...
+                            </p>
+                            <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+            break;
+        case 'cni':
+        case 'photo-identite':
+            previewContent = <img src={'https://placehold.co/600x400/e2e8f0/e2e8f0'} alt="Aperçu" className="rounded-lg w-full" />;
+            break;
+        default:
+            previewContent = (
+                <div className="py-4 my-4 bg-muted/50 rounded-lg flex items-center justify-center min-h-[300px]">
+                    <div className="text-center text-muted-foreground">
+                        <DocumentIcon type={doc.type} />
+                        <p className="mt-4 font-semibold">Prévisualisation non disponible</p>
+                        <p className="text-sm">Le contenu du fichier serait affiché ici.</p>
+                    </div>
+                </div>
+            );
+    }
+    
+    return (
+        <Dialog open={!!doc} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{doc.name}</DialogTitle>
+                    <DialogDescription>{doc.description}</DialogDescription>
+                </DialogHeader>
+                <div className="py-4 my-4 bg-muted/50 rounded-lg flex items-center justify-center">
+                    {previewContent}
+                </div>
+                <DialogFooter>
+                     <Button variant="ghost" onClick={onClose}>Fermer</Button>
+                     <Button><Download className="mr-2 h-4 w-4" />Télécharger</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+
 export default function StudentDocumentsPage() {
     const [personalDocs, setPersonalDocs] = useState(initialPersonal);
     const [diplomaDocs, setDiplomaDocs] = useState(initialDiploma);
@@ -188,7 +257,7 @@ export default function StudentDocumentsPage() {
         const docType = (formData.get('doc-type') as DocumentType) || modalData?.type;
         const customName = formData.get('doc-name') as string;
 
-        if (!docType || !selectedFile) {
+        if (!docType || (!selectedFile && modalData?.status !== 'uploaded')) {
             toast({
                 title: 'Erreur',
                 description: 'Veuillez sélectionner un type et un fichier.',
@@ -200,11 +269,10 @@ export default function StudentDocumentsPage() {
         const category = documentConfig[docType].category;
         const isEditing = modalData && modalData.id;
 
-        const newDocData = {
-            ...modalData,
+        const newDocData: Document = {
             id: isEditing ? modalData.id : `new-${Date.now()}`,
             type: docType,
-            name: docType === 'certificat' && customName ? customName : (selectedFile?.name || 'Nouveau document'),
+            name: docType === 'certificat' && customName ? customName : (selectedFile?.name || modalData?.name || 'Nouveau document'),
             description: documentConfig[docType].label,
             status: 'uploaded' as 'uploaded',
             date: new Date().toLocaleDateString('fr-FR'),
@@ -212,13 +280,13 @@ export default function StudentDocumentsPage() {
         };
         
         if (category === 'personal') {
-            if(isEditing) {
+            if(isEditing && personalDocs.some(d => d.id === modalData.id)) {
                 setPersonalDocs(docs => docs.map(d => d.id === modalData.id ? newDocData : d));
             } else {
                 setPersonalDocs(docs => [newDocData, ...docs]);
             }
         } else if (category === 'academic') {
-             if(isEditing) {
+             if(isEditing && diplomaDocs.some(d => d.id === modalData.id)) {
                 setDiplomaDocs(docs => docs.map(d => d.id === modalData.id ? newDocData : d));
             } else {
                 setDiplomaDocs(docs => [newDocData, ...docs]);
@@ -281,13 +349,13 @@ export default function StudentDocumentsPage() {
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{modalData?.id ? 'Modifier' : 'Ajouter'} un document</DialogTitle>
+                        <DialogTitle>{modalData?.status === 'uploaded' ? 'Modifier' : 'Ajouter'} un document</DialogTitle>
                         <DialogDescription>Sélectionnez le type et téléversez votre fichier.</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSaveDocument} className="space-y-4 py-4">
                         <div className="space-y-2">
                             <Label htmlFor="doc-type">Type de document</Label>
-                             <Select name="doc-type" required defaultValue={modalData?.type || ''} onValueChange={(v) => setSelectedDocType(v as DocumentType)} disabled={!!modalData?.id && modalData.type !== 'autre-perso'}>
+                             <Select name="doc-type" required defaultValue={modalData?.type || ''} onValueChange={(v) => setSelectedDocType(v as DocumentType)} disabled={!!modalData?.id && modalData.type !== 'autre-perso' && modalData.type !== 'certificat'}>
                                 <SelectTrigger id="doc-type"><SelectValue placeholder="Sélectionnez un type..."/></SelectTrigger>
                                 <SelectContent>
                                     {Object.entries(documentConfig)
@@ -298,7 +366,7 @@ export default function StudentDocumentsPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                         {(selectedDocType === 'certificat' || (modalData?.type === 'certificat')) && (
+                         {(selectedDocType === 'certificat') && (
                              <div className="space-y-2">
                                 <Label htmlFor="doc-name">Titre du certificat</Label>
                                 <Input id="doc-name" name="doc-name" placeholder="Ex: Certification Voltaire" defaultValue={modalData?.type === 'certificat' ? modalData.name : ''} required />
@@ -315,7 +383,7 @@ export default function StudentDocumentsPage() {
                                             {selectedFile && <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>}
                                         </div>
                                     </div>
-                                    <Button variant="ghost" size="icon" onClick={() => { setSelectedFile(null); if (modalData) setModalData({...modalData, name: 'Fichier à remplacer'}); }}><X className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => { setSelectedFile(null); if (modalData) setModalData({...modalData, name: 'Fichier à remplacer', status: 'missing' }); }}><X className="h-4 w-4" /></Button>
                                 </div>
                             ) : (
                                 <div 
@@ -336,27 +404,7 @@ export default function StudentDocumentsPage() {
                 </DialogContent>
             </Dialog>
 
-            {viewDoc && (
-                <Dialog open={!!viewDoc} onOpenChange={() => setViewDoc(null)}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>{viewDoc.name}</DialogTitle>
-                            <DialogDescription>{viewDoc.description}</DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4 my-4 bg-muted/50 rounded-lg flex items-center justify-center min-h-[300px]">
-                            <div className="text-center text-muted-foreground">
-                                <DocumentIcon type={viewDoc.type} />
-                                <p className="mt-4 font-semibold">Prévisualisation du document</p>
-                                <p className="text-sm">Le contenu du fichier serait affiché ici.</p>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                             <Button variant="ghost" onClick={() => setViewDoc(null)}>Fermer</Button>
-                             <Button><Download className="mr-2 h-4 w-4" />Télécharger</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            )}
+            <DocumentViewerModal doc={viewDoc} onClose={() => setViewDoc(null)} />
         </div>
     );
 }
