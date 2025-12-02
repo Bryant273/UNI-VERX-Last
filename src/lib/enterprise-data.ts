@@ -71,7 +71,9 @@ export interface EnterpriseData {
     supervisors: Supervisor[];
     documents: Document[];
     loginInfo: {
+        erpName: string;
         username: string;
+        password?: string;
     };
 }
 
@@ -158,11 +160,12 @@ export const enterpriseData: EnterpriseData = {
     ],
     documents: [
         { name: 'Convention de stage', type: 'pdf', info: 'Signé le 15/03/2025' },
-        { name: 'Guide du stagiaire', type: 'word', info: 'Mise à jour: 01/04/2025' },
-        { name: 'Planning du stage', type: 'excel', info: 'Mise à jour: 05/04/2025' },
-        { name: 'Rapport mensuel - Avril', type: 'pdf', info: 'Soumis le 30/04/2025' },
+        { name: 'Contrat de stage', type: 'word', info: 'Signé le 16/03/2025' },
+        { name: 'Attestation de fin de stage', type: 'excel', info: 'À générer' },
     ],
     loginInfo: {
+        erpName: 'UNIKORP',
         username: 'sdupont_stage',
+        password: 'password123'
     }
 };
