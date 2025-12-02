@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   BookOpen,
@@ -68,6 +69,7 @@ export const userRolesForLogin: { value: UserRole; label: string }[] = [
 export const navLinks: Record<UserRole, NavItem[]> = {
   student: [
     { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/student/profile', label: 'Profil', icon: BookUser },
     { href: '/student/payments', label: 'Paiements', icon: CreditCard },
     { href: ' /student/tickets', label: 'Tickets', icon: Ticket },
     { href: '/student/courses', label: 'Mes cours', icon: BookOpen },
