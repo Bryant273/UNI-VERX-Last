@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
@@ -24,7 +23,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -344,45 +342,47 @@ export default function StudentMessagingPage() {
 
   return (
     <div className="h-[calc(100vh_-_8rem)]">
-       <Card className="h-full flex overflow-hidden">
-        <div className="w-[320px] flex flex-col border-r h-full">
-            <div className="p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold">Messages</h2>
-                    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="ghost" size="icon"><Plus/></Button>
-                        </DialogTrigger>
-                        <NewMessageModal onSelectUser={handleSelectUserFromModal} />
-                    </Dialog>
+       <div className="h-full flex flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 flex-1 overflow-hidden">
+            <div className="col-span-1 flex flex-col border-r h-full">
+                <div className="p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-2xl font-bold">Messages</h2>
+                        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="ghost" size="icon"><Plus/></Button>
+                            </DialogTrigger>
+                            <NewMessageModal onSelectUser={handleSelectUserFromModal} />
+                        </Dialog>
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Rechercher..." 
+                            className="pl-10" 
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                     <div className="grid grid-cols-2 gap-2">
+                        <FilterButton filter="all" icon={Inbox} label="Tous" />
+                        <FilterButton filter="unread" icon={AtSign} label="Non lus" />
+                        <FilterButton filter="groups" icon={Users} label="Groupes" />
+                        <FilterButton filter="contacts" icon={User} label="Contacts" />
+                     </div>
                 </div>
-                <div className="relative">
-                    <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                        placeholder="Rechercher..." 
-                        className="pl-10" 
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                 <div className="grid grid-cols-2 gap-2">
-                    <FilterButton filter="all" icon={Inbox} label="Tous" />
-                    <FilterButton filter="unread" icon={AtSign} label="Non lus" />
-                    <FilterButton filter="groups" icon={Users} label="Groupes" />
-                    <FilterButton filter="contacts" icon={User} label="Contacts" />
-                 </div>
+                <Separator />
+                <ConversationList
+                    conversations={filteredConversations}
+                    selectedConversation={selectedConversation}
+                    onSelect={handleSelectConversation}
+                />
             </div>
-            <Separator />
-            <ConversationList
-                conversations={filteredConversations}
-                selectedConversation={selectedConversation}
-                onSelect={handleSelectConversation}
-            />
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 h-full overflow-hidden">
+                <ChatPanel conversation={selectedConversation} />
+            </div>
         </div>
-        <div className="flex-1 h-full">
-            <ChatPanel conversation={selectedConversation} />
-        </div>
-       </Card>
+       </div>
     </div>
   );
 }
