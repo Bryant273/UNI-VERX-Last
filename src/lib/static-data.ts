@@ -79,7 +79,6 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       title: 'Collaboratif',
       links: [
         { href: '/student/group-work', label: 'TD de groupe', icon: Users },
-        { href: '/student/messages', label: 'Messages', icon: MessageSquare },
       ],
     },
     {
@@ -103,7 +102,6 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       title: 'Pédagogique',
       links: [
         { href: '/professor/students', label: 'Mes étudiants', icon: Users },
-        { href: '/professor/messages', label: 'Messages', icon: MessageSquare },
         { href: '/professor/resources', label: 'Ressources', icon: FolderOpen },
       ],
     },
