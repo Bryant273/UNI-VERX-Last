@@ -69,7 +69,7 @@ const ProfileSettingsTab = () => {
                         <div><Label htmlFor="gender">Genre</Label>
                             <Select defaultValue="female">
                                 <SelectTrigger><SelectValue/></SelectTrigger>
-                                <SelectContent><SelectItem value="female">Femme</SelectItem><SelectItem value="male">Homme</SelectItem><SelectItem value="other">Autre</SelectItem></SelectContent>
+                                <SelectContent><SelectItem value="female">Femme</SelectItem><SelectItem value="male">Homme</SelectItem></SelectContent>
                             </Select>
                         </div>
                         <div><Label htmlFor="email">Email personnel</Label><Input id="email" type="email" defaultValue={studentData.email.replace('uni-verx.edu', 'example.com')} /></div>
