@@ -204,14 +204,14 @@ const totalStudents = semestersData['Semestre 1']?.totalStudents || 0;
 
 export const studentData = {
   id: 'ETU-2024-12345',
-  name: 'Alex Dupont',
-  firstName: 'Alex',
+  name: 'Sarah Dupont',
+  firstName: 'Sarah',
   lastName: 'Dupont',
-  email: 'alex.dupont@uni-verx.edu',
+  email: 'sarah.dupont@uni-verx.edu',
   password: 'password123',
   birthDate: '01/01/2002',
   birthPlace: 'Abidjan',
-  gender: 'Masculin',
+  gender: 'Féminin',
   academicYear: '2024-2025',
   level: 'Master 1',
   ufr: 'Sciences et Technologies',
