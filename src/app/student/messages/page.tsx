@@ -16,6 +16,8 @@ import {
   Archive,
   Trash2,
   MessageSquare,
+  Inbox,
+  AtSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -60,16 +62,16 @@ const ConversationList = ({
   onSelect: (conv: Conversation) => void;
 }) => {
   return (
-    <ScrollArea className="h-full">
+    <ScrollArea className="h-full -mx-2">
       <div className="flex flex-col gap-1 p-2">
-        {conversations.map((conv) => (
+        {conversations.length > 0 ? conversations.map((conv) => (
           <button
             key={conv.id}
             onClick={() => onSelect(conv)}
             className={cn(
               'flex items-center gap-3 p-2 rounded-lg text-left transition-colors w-full',
               selectedConversation?.id === conv.id
-                ? 'bg-primary/10 text-primary'
+                ? 'bg-primary/10 text-primary font-semibold'
                 : 'hover:bg-muted/50'
             )}
           >
@@ -94,14 +96,20 @@ const ConversationList = ({
                   {conv.lastMessage}
                 </p>
                 {conv.unread > 0 && (
-                  <Badge className="bg-primary h-5 w-5 p-0 flex items-center justify-center">
+                  <Badge className="bg-primary h-5 min-w-[1.25rem] p-0 flex items-center justify-center text-xs">
                     {conv.unread}
                   </Badge>
                 )}
               </div>
             </div>
           </button>
-        ))}
+        )) : (
+            <div className="text-center py-16 text-muted-foreground">
+                <Inbox className="mx-auto h-10 w-10" />
+                <p className="mt-4 text-sm font-semibold">Aucune conversation</p>
+                <p className="text-xs">Cette boîte de réception est vide.</p>
+            </div>
+        )}
       </div>
     </ScrollArea>
   );
@@ -130,7 +138,7 @@ const ChatPanel = ({
 
   if (!conversation) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-muted/30">
+      <div className="h-full flex flex-col items-center justify-center bg-muted/30 rounded-r-lg">
         <MessageSquare className="h-16 w-16 text-muted-foreground/50" />
         <p className="mt-4 text-muted-foreground">
           Sélectionnez une conversation pour commencer
@@ -154,7 +162,7 @@ const ChatPanel = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background rounded-r-lg">
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
@@ -197,7 +205,7 @@ const ChatPanel = ({
                 {!msg.isMe && <Avatar className="h-8 w-8"><AvatarImage src={msg.avatar} /><AvatarFallback>{getInitials(msg.sender)}</AvatarFallback></Avatar>}
                 <div className={cn("max-w-md p-3 rounded-xl", msg.isMe ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted rounded-bl-none")}>
                     <p className="text-sm">{msg.content}</p>
-                    <p className={cn("text-xs mt-1", msg.isMe ? "text-primary-foreground/70" : "text-muted-foreground")}>{msg.time}</p>
+                    <p className={cn("text-xs mt-1 text-right", msg.isMe ? "text-primary-foreground/70" : "text-muted-foreground")}>{msg.time}</p>
                 </div>
                 {msg.isMe && <Avatar className="h-8 w-8"><AvatarImage src={msg.avatar} /><AvatarFallback>{getInitials(msg.sender)}</AvatarFallback></Avatar>}
                 </div>
@@ -257,26 +265,42 @@ const NewMessageModal = ({ onSelectUser }: { onSelectUser: (user: DemoUser) => v
     )
 }
 
+type FilterType = 'all' | 'unread' | 'groups' | 'contacts';
+
 export default function StudentMessagingPage() {
   const [conversations, setConversations] = useState(initialConversationsData);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+
 
   const filteredConversations = useMemo(() => {
-    return conversations.filter((conv) =>
+    let filtered = conversations;
+
+    if (activeFilter === 'unread') {
+        filtered = filtered.filter(c => c.unread > 0);
+    } else if (activeFilter === 'groups') {
+        filtered = filtered.filter(c => c.type === 'group');
+    } else if (activeFilter === 'contacts') {
+        filtered = filtered.filter(c => c.type === 'user');
+    }
+    
+    return filtered.filter((conv) =>
       conv.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [conversations, searchTerm]);
+  }, [conversations, searchTerm, activeFilter]);
 
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConversation(conv);
+    // Mark as read
+    setConversations(prev => prev.map(c => c.id === conv.id ? {...c, unread: 0} : c));
   };
   
   const handleSelectUserFromModal = (user: DemoUser) => {
     const existingConversation = conversations.find(c => c.type === 'user' && c.name === user.name);
     if (existingConversation) {
-        setSelectedConversation(existingConversation);
+        handleSelectConversation(existingConversation);
     } else {
         const newConversation: Conversation = {
             id: user.id,
@@ -298,13 +322,24 @@ export default function StudentMessagingPage() {
     setIsModalOpen(false);
   }
 
+  const FilterButton = ({ filter, icon: Icon, label }: { filter: FilterType; icon: LucideIcon; label: string }) => (
+    <Button 
+        variant={activeFilter === filter ? "secondary" : "ghost"}
+        className="justify-start gap-2"
+        onClick={() => setActiveFilter(filter)}
+    >
+        <Icon className="h-4 w-4" />
+        <span>{label}</span>
+    </Button>
+);
+
   return (
     <div className="h-[calc(100vh_-_8rem)] flex flex-col">
        <Card className="flex-1 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 overflow-hidden">
-        <div className="col-span-1 flex flex-col border-r h-full">
-            <div className="p-4 border-b space-y-4">
+        <div className="col-span-1 flex flex-col border-r h-full p-4">
+            <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold">Messagerie</h2>
+                    <h2 className="text-2xl font-bold">Messages</h2>
                     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                         <DialogTrigger asChild>
                             <Button variant="ghost" size="icon"><Plus/></Button>
@@ -322,6 +357,13 @@ export default function StudentMessagingPage() {
                     />
                 </div>
             </div>
+             <div className="grid grid-cols-2 gap-2 my-4">
+                <FilterButton filter="all" icon={Inbox} label="Tous" />
+                <FilterButton filter="unread" icon={AtSign} label="Non lus" />
+                <FilterButton filter="groups" icon={Users} label="Groupes" />
+                <FilterButton filter="contacts" icon={User} label="Contacts" />
+             </div>
+            <Separator className="mb-2"/>
             <ConversationList
                 conversations={filteredConversations}
                 selectedConversation={selectedConversation}
