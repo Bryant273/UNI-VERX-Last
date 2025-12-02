@@ -1,4 +1,3 @@
-
 import {
   LayoutDashboard,
   BookOpen,
@@ -180,11 +179,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       { href: '/academic-advisor/stats', label: 'Statistiques Globales', icon: PieChart },
       { href: '#', label: 'Administration', icon: Building },
   ],
-  'erp-provider': [
-      { href: '/erp-provider/dashboard', label: 'Fournisseur ERP', icon: LayoutDashboard },
-      { href: '#', label: 'Intégrations', icon: Briefcase },
-      { href: '#', label: 'Maintenance', icon: Settings },
-  ]
+  'erp-provider': [],
 };
 
 export const bottomNavLinks: { href: string; label: string; icon: LucideIcon }[] = [
@@ -399,3 +394,5 @@ export const messages = [
 ];
 
 export { advisorNavLinks };
+
+    
