@@ -291,7 +291,6 @@ export default function ProfessorMessagingPage() {
   }, [conversations, searchTerm, activeFilter]);
 
   useEffect(() => {
-    // If the selected conversation is no longer in the filtered list (due to filter change), deselect it.
     if (selectedConversation && !filteredConversations.find(c => c.id === selectedConversation.id)) {
       setSelectedConversation(null);
     }
@@ -300,7 +299,6 @@ export default function ProfessorMessagingPage() {
 
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConversation(conv);
-    // Mark as read
     setConversations(prev => prev.map(c => c.id === conv.id ? {...c, unread: 0} : c));
   };
   
