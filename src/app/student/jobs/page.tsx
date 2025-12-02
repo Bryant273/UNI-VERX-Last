@@ -26,6 +26,7 @@ import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const JobCard = ({ offer, onSelect }: { offer: JobOffer, onSelect: (offer: JobOffer) => void }) => {
   return (
@@ -259,5 +260,3 @@ export default function JobsPage() {
     </div>
   );
 }
-
-    
