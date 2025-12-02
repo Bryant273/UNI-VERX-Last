@@ -144,11 +144,9 @@ const DocumentTable = ({
                                         <>
                                             <Button variant="ghost" size="icon" onClick={() => onView(doc)}><Eye className="h-4 w-4" /></Button>
                                             <Button variant="ghost" size="icon" onClick={() => onOpenModal(doc)}><Edit className="h-4 w-4" /></Button>
+                                            <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
                                             <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(doc)}><Trash2 className="h-4 w-4" /></Button>
                                         </>
-                                    )}
-                                    {title === "Documents Universitaires" && (
-                                        <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
                                     )}
                                 </TableCell>
                             </TableRow>
@@ -275,7 +273,6 @@ export default function StudentDocumentsPage() {
             name: docType === 'certificat' && customName ? customName : (selectedFile?.name || modalData?.name || 'Nouveau document'),
             description: documentConfig[docType].label,
             status: 'uploaded' as 'uploaded',
-            date: new Date().toLocaleDateString('fr-FR'),
             category: category,
         };
         
