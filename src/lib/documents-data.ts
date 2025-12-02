@@ -1,5 +1,4 @@
 
-
 import type { LucideIcon } from 'lucide-react';
 import { FileText, Award, Building, Briefcase, GraduationCap, User, Home, ImageIcon, FileQuestion, FileCheck2, FileArchive, BookOpen } from 'lucide-react';
 
@@ -15,26 +14,26 @@ export interface Document {
   date?: string; // upload or issue date
 }
 
-export const documentConfig: Record<DocumentType, { label: string; icon: LucideIcon; color: string }> = {
+export const documentConfig: Record<DocumentType, { label: string; icon: LucideIcon; color: string, category: Document['category'] }> = {
     // Personal
-    cv: { label: 'CV', icon: User, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400' },
-    'lettre-motivation': { label: 'Lettre', icon: FileText, color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400' },
-    cni: { label: 'CNI', icon: User, color: 'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400' },
-    'justificatif-domicile': { label: 'Domicile', icon: Home, color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400' },
-    'photo-identite': { label: 'Photo', icon: ImageIcon, color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30 dark:text-pink-400' },
-    'autre-perso': { label: 'Autre', icon: FileQuestion, color: 'text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-400' },
-    // Diplomas
-    diplome: { label: 'Diplôme', icon: Award, color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400' },
-    certificat: { label: 'Certificat', icon: Award, color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400' },
-    attestation: { label: 'Attestation', icon: FileCheck2, color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30 dark:text-cyan-400' },
-    // University
-    'releve-notes': { label: 'Relevé', icon: GraduationCap, color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400' },
-    'certificat-scolarite': { label: 'Scolarité', icon: GraduationCap, color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400' },
-    'convention-stage': { label: 'Convention', icon: Briefcase, color: 'text-rose-600 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400' },
-    facture: { label: 'Facture', icon: FileArchive, color: 'text-slate-600 bg-slate-100 dark:bg-slate-700 dark:text-slate-400' },
-    // Enterprise
-    'contrat-stage': { label: 'Contrat', icon: Building, color: 'text-lime-600 bg-lime-100 dark:bg-lime-900/30 dark:text-lime-400' },
-    'guide-accueil': { label: 'Guide', icon: BookOpen, color: 'text-teal-600 bg-teal-100 dark:bg-teal-900/30 dark:text-teal-400' },
+    cv: { label: 'CV', icon: User, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400', category: 'personal' },
+    'lettre-motivation': { label: 'Lettre de motivation', icon: FileText, color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400', category: 'personal' },
+    cni: { label: 'Carte d\'identité', icon: User, color: 'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400', category: 'personal' },
+    'justificatif-domicile': { label: 'Justificatif de domicile', icon: Home, color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400', category: 'personal' },
+    'photo-identite': { label: 'Photo d\'identité', icon: ImageIcon, color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30 dark:text-pink-400', category: 'personal' },
+    'autre-perso': { label: 'Autre (Personnel)', icon: FileQuestion, color: 'text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-400', category: 'personal' },
+    // Academic
+    diplome: { label: 'Diplôme', icon: Award, color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400', category: 'academic' },
+    certificat: { label: 'Certificat', icon: Award, color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400', category: 'academic' },
+    attestation: { label: 'Attestation', icon: FileCheck2, color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30 dark:text-cyan-400', category: 'academic' },
+    // University docs (not selectable by user)
+    'releve-notes': { label: 'Relevé', icon: GraduationCap, color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400', category: 'administrative' },
+    'certificat-scolarite': { label: 'Scolarité', icon: GraduationCap, color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400', category: 'administrative' },
+    'convention-stage': { label: 'Convention', icon: Briefcase, color: 'text-rose-600 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400', category: 'administrative' },
+    facture: { label: 'Facture', icon: FileArchive, color: 'text-slate-600 bg-slate-100 dark:bg-slate-700 dark:text-slate-400', category: 'administrative' },
+    // Enterprise docs (not selectable by user)
+    'contrat-stage': { label: 'Contrat', icon: Building, color: 'text-lime-600 bg-lime-100 dark:bg-lime-900/30 dark:text-lime-400', category: 'professional' },
+    'guide-accueil': { label: 'Guide', icon: BookOpen, color: 'text-teal-600 bg-teal-100 dark:bg-teal-900/30 dark:text-teal-400', category: 'professional' },
 };
 
 
