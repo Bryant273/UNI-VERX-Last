@@ -293,10 +293,8 @@ export default function StudentMessagingPage() {
   }, [conversations, searchTerm, activeFilter]);
 
   useEffect(() => {
-    if (filteredConversations.length > 0 && !selectedConversation) {
-      handleSelectConversation(filteredConversations[0]);
-    }
-    if (filteredConversations.length === 0) {
+    // If the selected conversation is no longer in the filtered list (due to filter change), deselect it.
+    if (selectedConversation && !filteredConversations.find(c => c.id === selectedConversation.id)) {
       setSelectedConversation(null);
     }
   }, [filteredConversations, selectedConversation]);
@@ -359,7 +357,7 @@ export default function StudentMessagingPage() {
                     </Dialog>
                 </div>
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                     <Input 
                         placeholder="Rechercher..." 
                         className="pl-10" 
