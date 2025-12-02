@@ -14,6 +14,7 @@ import {
   Clock,
   XCircle,
   Mail,
+  ChevronLeft,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+const ITEMS_PER_PAGE = 5;
 
 const JobCard = ({ offer, onSelect }: { offer: JobOffer, onSelect: (offer: JobOffer) => void }) => {
   return (
@@ -111,6 +114,7 @@ const JobDetailsModal = ({ offer, onClose }: { offer: JobOffer | null; onClose: 
 const ApplicationDetailsModal = ({ application, onClose }: { application: Application | null; onClose: () => void }) => {
     if (!application) return null;
     const currentStatus = statusConfig[application.status];
+    const isButtonDisabled = ['viewed', 'accepted', 'rejected'].includes(application.status);
 
     return (
         <Dialog open={!!application} onOpenChange={onClose}>
@@ -147,7 +151,10 @@ const ApplicationDetailsModal = ({ application, onClose }: { application: Applic
                 </div>
                 <DialogFooter>
                     <Button variant="ghost" onClick={onClose}>Fermer</Button>
-                    <Button><Trash2 className="mr-2 h-4 w-4" />Retirer la candidature</Button>
+                    <Button variant="destructive" disabled={isButtonDisabled}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Retirer la candidature
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -184,6 +191,15 @@ const JobOffersTab = () => {
 
 const ApplicationsTab = () => {
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const totalPages = Math.ceil(applications.length / ITEMS_PER_PAGE);
+
+    const paginatedApplications = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return applications.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [applications, currentPage]);
+
     return (
         <>
             <Card className="mt-6">
@@ -203,10 +219,10 @@ const ApplicationsTab = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {applications.map(app => {
+                            {paginatedApplications.map(app => {
                                 const currentStatus = statusConfig[app.status];
                                 return (
-                                    <TableRow key={app.id}>
+                                    <TableRow key={app.id} className="even:bg-muted/40">
                                         <TableCell className="font-medium">{app.company}</TableCell>
                                         <TableCell>{app.jobTitle}</TableCell>
                                         <TableCell>{app.date}</TableCell>
@@ -227,6 +243,18 @@ const ApplicationsTab = () => {
                         </TableBody>
                     </Table>
                 </CardContent>
+                 <CardFooter className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                        Affichage de {paginatedApplications.length} sur {applications.length} candidatures
+                    </p>
+                    {totalPages > 1 && (
+                         <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
+                            <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
+                        </div>
+                    )}
+                </CardFooter>
             </Card>
             <ApplicationDetailsModal application={selectedApplication} onClose={() => setSelectedApplication(null)} />
         </>
