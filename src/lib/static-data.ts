@@ -154,7 +154,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     {
       title: 'Communication',
       links: [
-        { href: '/secretariat/messaging', label: 'Messagerie', icon: MessageSquare },
+        { href: '/secretariat/messaging', label: 'Messages', icon: MessageSquare },
         { href: '/secretariat/announcements', label: 'Annonces', icon: Megaphone },
       ],
     },

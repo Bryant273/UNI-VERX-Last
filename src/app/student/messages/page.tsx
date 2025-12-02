@@ -35,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import {
   initialConversationsData,
@@ -45,11 +44,11 @@ import {
   type Conversation,
   type DemoUser,
 } from '@/lib/messages-data';
-import { studentData } from '@/lib/static-data';
+import { userData } from '@/lib/static-data';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
-const currentUser = allUsers.find(u => u.name === studentData.name)!;
+const currentUser = userData.student;
 
 const ConversationList = ({
   conversations,
@@ -266,13 +265,6 @@ export default function StudentMessagingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
 
-  useEffect(() => {
-    // If the selected conversation is no longer in the filtered list, unselect it
-    if (selectedConversation && !filteredConversations.some(c => c.id === selectedConversation.id)) {
-        setSelectedConversation(null);
-    }
-  }, [activeTab, searchTerm]);
-
   const filteredConversations = useMemo(() => {
     let convs = conversations.filter((conv) =>
       conv.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -289,6 +281,12 @@ export default function StudentMessagingPage() {
     return convs;
 
   }, [conversations, searchTerm, activeTab]);
+
+  useEffect(() => {
+    if (selectedConversation && !filteredConversations.some(c => c.id === selectedConversation.id)) {
+        setSelectedConversation(null);
+    }
+  }, [filteredConversations, selectedConversation]);
 
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConversation(conv);

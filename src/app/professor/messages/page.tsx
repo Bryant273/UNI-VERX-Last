@@ -35,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import {
   initialConversationsData,
@@ -282,6 +281,12 @@ export default function ProfessorMessagingPage() {
     return convs;
 
   }, [conversations, searchTerm, activeTab]);
+
+  useEffect(() => {
+    if (selectedConversation && !filteredConversations.some(c => c.id === selectedConversation.id)) {
+        setSelectedConversation(null);
+    }
+  }, [filteredConversations, selectedConversation]);
 
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConversation(conv);
