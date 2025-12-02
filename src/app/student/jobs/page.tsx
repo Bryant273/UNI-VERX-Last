@@ -114,7 +114,7 @@ const JobDetailsModal = ({ offer, onClose }: { offer: JobOffer | null; onClose: 
 const ApplicationDetailsModal = ({ application, onClose }: { application: Application | null; onClose: () => void }) => {
     if (!application) return null;
     const currentStatus = statusConfig[application.status];
-    const isButtonDisabled = ['viewed', 'accepted', 'rejected'].includes(application.status);
+    const isButtonDisabled = ['viewed', 'interview', 'accepted', 'rejected'].includes(application.status);
 
     return (
         <Dialog open={!!application} onOpenChange={onClose}>
