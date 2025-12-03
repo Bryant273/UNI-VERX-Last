@@ -1,5 +1,4 @@
 
-'use server';
 import type { LucideIcon } from 'lucide-react';
 import { allEvents } from './static-data';
 

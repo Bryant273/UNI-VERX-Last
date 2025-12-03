@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -39,14 +40,18 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const currentRole = (pathname.split('/')[1] || 'student') as UserRole;
   const currentNavItems = navLinks[currentRole] || [];
-  const { isMobile } = useSidebar();
+  const { isMobile, toggleSidebar } = useSidebar();
 
 
   return (
     <UISidebar>
        {isMobile && (
-          <SheetHeader className="p-4">
-            <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
+          <SheetHeader className="p-4 flex flex-row items-center justify-between">
+            <SheetTitle asChild><Logo /></SheetTitle>
+            <Button variant="ghost" size="icon" onClick={() => toggleSidebar()}>
+              <PanelLeft />
+              <span className="sr-only">Toggle Sidebar</span>
+            </Button>
           </SheetHeader>
         )}
       <SidebarHeader>
