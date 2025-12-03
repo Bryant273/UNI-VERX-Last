@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
 import {
-  Users, Search, Plus, MoreHorizontal, Edit, UserCheck, UserX, KeyRound, Archive, Trash2, ChevronLeft, ChevronRight
+  Users, Search, Plus, MoreHorizontal, Edit, UserCheck, UserX, KeyRound, Archive, Trash2, ChevronLeft, ChevronRight, Clock
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -112,7 +113,7 @@ export default function UsersPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>{role.label}</TableCell>
-                                        <TableCell><Badge variant="outline" className={cn("border-0 text-white", status.color.replace('text-', 'bg-'))}><status.icon className="mr-1.5 h-3 w-3"/>{status.label}</Badge></TableCell>
+                                        <TableCell><Badge variant="outline" className={cn("border-0", status.color.replace('text-', 'bg-'))}><status.icon className="mr-1.5 h-3 w-3"/>{status.label}</Badge></TableCell>
                                         <TableCell>{user.lastLogin}</TableCell>
                                         <TableCell>{user.creationDate}</TableCell>
                                         <TableCell className="text-right">
