@@ -84,13 +84,15 @@ export default function UserDetailsModal({ user, isOpen, onClose }: UserDetailsM
             </Avatar>
             <div>
               <DialogTitle className="text-2xl">{user.name}</DialogTitle>
-              <DialogDescription className="flex items-center gap-4 mt-1">
-                <span>{role.label}</span>
-                <Badge variant="outline" className={cn("border-0", status.color.replace('text-', 'bg-'))}>
+              <DialogDescription asChild>
+                 <div className="flex items-center gap-4 mt-1">
+                    <span>{role.label}</span>
+                  </div>
+              </DialogDescription>
+                <Badge variant="outline" className={cn("border-0 mt-1", status.color.replace('text-', 'bg-'))}>
                   <status.icon className="mr-1.5 h-3 w-3"/>
                   {status.label}
                 </Badge>
-              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
