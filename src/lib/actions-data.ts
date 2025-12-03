@@ -83,11 +83,16 @@ const generateActionData = (): ActionLog[] => {
   const locations = ['Paris, FR', 'Lyon, FR', 'Marseille, FR', 'Lille, FR'];
   const firstLoginDates = new Set<string>();
 
+  const baseDate = new Date();
+  baseDate.setHours(17, 25, 38, 0); // Set a fixed time for deterministic generation
+
   // Add some actions for today
-  const today = new Date();
   for (let i = 0; i < 5; i++) {
-    const time = new Date();
-    time.setHours(today.getHours() - i, today.getMinutes() - (i * 17) % 60, today.getSeconds());
+    const time = new Date(baseDate);
+    time.setHours(baseDate.getHours() - i);
+    time.setMinutes(baseDate.getMinutes() - (i * 17));
+    time.setSeconds(baseDate.getSeconds() - (i*5));
+    
     const type = actionTypes[i % actionTypes.length];
     
     let isFirstLogin = false;
@@ -108,8 +113,8 @@ const generateActionData = (): ActionLog[] => {
   }
 
   for (let i = 0; i < 50; i++) {
-    const date = new Date();
-    date.setDate(today.getDate() - Math.floor(i / 5) - 1);
+    const date = new Date(baseDate);
+    date.setDate(baseDate.getDate() - Math.floor(i / 5) - 1);
     date.setHours(20 - (i % 12), 59 - (i * 3) % 60, 0, 0);
 
     const type = actionTypes[i % actionTypes.length];
@@ -143,13 +148,13 @@ const generateActionData = (): ActionLog[] => {
   }
 
   // Ensure there is at least one "first login" for today if not already present
-  const todayString = today.toDateString();
+  const todayString = baseDate.toDateString();
   if (!firstLoginDates.has(todayString)) {
     const firstLoginToday = actions.find(a => a.action === 'login' && a.date.toDateString() === todayString);
     if (firstLoginToday) {
       firstLoginToday.isFirstLogin = true;
     } else {
-        const time = new Date();
+        const time = new Date(baseDate);
         time.setHours(8, 30, 0);
         actions.push({
             id: 'first-login-enforced',
@@ -162,7 +167,6 @@ const generateActionData = (): ActionLog[] => {
         });
     }
   }
-
 
   return actions.sort((a, b) => b.date.getTime() - a.date.getTime());
 };
