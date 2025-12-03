@@ -40,7 +40,7 @@ import { userData } from '@/lib/static-data';
 
 const ITEMS_PER_PAGE = 8;
 
-export default function SecretariatTicketsPage() {
+export default function AdminTicketsPage() {
   const [tickets, setTickets] = useState<Ticket[]>(ticketsData);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -75,10 +75,10 @@ export default function SecretariatTicketsPage() {
       date: new Date().toLocaleDateString('fr-FR'),
       lastUpdate: new Date().toISOString(),
       status: 'open',
-      author: userData.secretariat.name,
+      author: userData.admin.name,
       messages: [
         {
-          author: userData.secretariat.name,
+          author: userData.admin.name,
           date: new Date().toISOString(),
           content: formData.get('message') as string,
           attachments: formData.get('attachment') ? [(formData.get('attachment') as File).name] : [],
@@ -246,7 +246,7 @@ export default function SecretariatTicketsPage() {
                                <p className="font-semibold">{msg.author}</p>
                                <p className="text-xs text-muted-foreground">{new Date(msg.date).toLocaleString('fr-FR')}</p>
                             </div>
-                            <div className={cn("p-4 rounded-lg", msg.author === userData.secretariat.name ? 'bg-muted/50' : 'bg-primary/10')}>
+                            <div className={cn("p-4 rounded-lg", msg.author === userData.admin.name ? 'bg-muted/50' : 'bg-primary/10')}>
                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                                {msg.attachments && msg.attachments.length > 0 && (
                                    <div className="mt-4 border-t pt-2">
