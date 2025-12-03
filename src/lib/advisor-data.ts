@@ -21,41 +21,6 @@ import {
 } from 'lucide-react';
 import type { NavItem } from './data';
 
-export const advisorNavLinks: NavItem[] = [
-    { href: '/academic-advisor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-    { href: '/academic-advisor/students', label: 'Étudiants', icon: Users },
-    { href: '/academic-advisor/teachers', label: 'Enseignants', icon: UserCheck },
-    { href: '/academic-advisor/courses', label: 'Cours & Programmes', icon: BookOpen },
-    { href: '/academic-advisor/planning', label: 'Planning Global', icon: Calendar },
-    { href: '/academic-advisor/tickets', label: 'Tickets', icon: Ticket },
-    {
-      title: 'Gestion',
-      links: [
-        { href: '/academic-advisor/validations', label: 'Validations', icon: CheckCheck },
-        { href: '/academic-advisor/alerts', label: 'Alertes', icon: AlertTriangle },
-        { href: '/academic-advisor/rooms', label: 'Salles', icon: DoorOpen },
-        { href: '/academic-advisor/enrollments', label: 'Inscriptions', icon: UserPlus },
-        { href: '/academic-advisor/scholarships', label: 'Scolarité', icon: CreditCard },
-        { href: '/academic-advisor/results', label: 'Bulletins & Résultats', icon: FileStack },
-      ],
-    },
-    {
-      title: 'Communication',
-      links: [
-        { href: '/academic-advisor/messaging', label: 'Messagerie', icon: MessageSquare },
-        { href: '/academic-advisor/announcements', label: 'Annonces', icon: Megaphone },
-      ],
-    },
-     {
-      title: 'Rapports',
-      links: [
-        { href: '/academic-advisor/stats', label: 'Statistiques', icon: PieChart },
-        { href: '/academic-advisor/reports', label: 'Rapports', icon: FileBarChart },
-        { href: '/academic-advisor/exports', label: 'Exports', icon: Download },
-      ],
-    },
-];
-
 export const advisorStats = {
     successRate: 89,
     studentsInDifficulty: 43,
