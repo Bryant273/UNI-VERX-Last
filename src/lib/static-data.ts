@@ -118,11 +118,11 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   ],
   'academic-advisor': [
     { href: '/academic-advisor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/academic-advisor/tickets', label: 'Tickets', icon: Ticket },
     { href: '/academic-advisor/students', label: 'Étudiants', icon: Users },
     { href: '/academic-advisor/teachers', label: 'Enseignants', icon: UserCheck },
     { href: '/academic-advisor/courses', label: 'Cours & Programmes', icon: BookOpen },
     { href: '/academic-advisor/planning', label: 'Planning Global', icon: Calendar },
-    { href: '/academic-advisor/tickets', label: 'Tickets', icon: Ticket },
     {
       title: 'Gestion',
       links: [
