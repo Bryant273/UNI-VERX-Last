@@ -17,6 +17,7 @@ import { Mail, Phone, MapPin, Download, MessageSquare, FileText, CalendarCheck }
 import { getInitials } from '@/lib/messages-data';
 import type { Student } from '@/lib/students-data';
 import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface StudentProfileModalProps {
   student: Student | null;
