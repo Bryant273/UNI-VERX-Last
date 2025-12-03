@@ -64,7 +64,7 @@ const statusConfig = {
     color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
   },
   justified: {
-    label: 'Absence justifiée',
+    label: 'Justifié',
     icon: FileCheck,
     color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
   },
@@ -81,15 +81,6 @@ export default function ProfessorPresencePage() {
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
   const { toast } = useToast();
   
-  const stats = useMemo(() => {
-    const total = presences.length;
-    const present = presences.filter(p => p.status === 'present' || p.status === 'justified').length;
-    const absent = presences.filter(p => p.status === 'absent').length;
-    const late = presences.filter(p => p.status === 'late').length;
-    const rate = total > 0 ? ((present / (total - presences.filter(p => p.status === 'justified').length)) * 100).toFixed(1) : '100.0';
-    return { total, rate, absent, late };
-  }, [presences]);
-
   const filteredPresences = useMemo(() => {
     return presences.filter(p => {
         const date = new Date(p.date);
@@ -98,6 +89,16 @@ export default function ProfessorPresencePage() {
         return yearMatch && monthMatch;
     })
   }, [presences, monthFilter, yearFilter]);
+
+  const stats = useMemo(() => {
+    const data = filteredPresences;
+    const total = data.length;
+    const present = data.filter(p => p.status === 'present' || p.status === 'justified').length;
+    const absent = data.filter(p => p.status === 'absent').length;
+    const late = data.filter(p => p.status === 'late').length;
+    const rate = total > 0 ? ((present / (total - data.filter(p => p.status === 'justified').length)) * 100).toFixed(1) : '100.0';
+    return { total, rate, absent, late };
+  }, [filteredPresences]);
 
   const totalPages = Math.ceil(filteredPresences.length / ITEMS_PER_PAGE);
 
@@ -123,7 +124,7 @@ export default function ProfessorPresencePage() {
     setIsJustifyModalOpen(false);
     toast({
       title: 'Justificatif envoyé',
-      description: 'Votre absence a été marquée comme justifiée.',
+      description: `Votre ${selectedAbsence.status === 'absent' ? 'absence' : 'retard'} a été marqué comme justifié.`,
     });
   };
   
@@ -178,7 +179,7 @@ export default function ProfessorPresencePage() {
               {paginatedPresences.map((p) => {
                 const status = statusConfig[p.status];
                 return (
-                  <TableRow key={p.id}>
+                  <TableRow key={p.id} className="even:bg-muted/40">
                     <TableCell>{p.date}</TableCell>
                     <TableCell className="font-medium">{p.course}</TableCell>
                     <TableCell>{p.type}</TableCell>
@@ -190,7 +191,7 @@ export default function ProfessorPresencePage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {p.status === 'absent' && (
+                      {(p.status === 'absent' || p.status === 'late') && (
                         <Button variant="outline" size="sm" onClick={() => handleJustify(p)}>
                           <FilePlus className="mr-2 h-4 w-4" />
                           Justifier
@@ -218,20 +219,20 @@ export default function ProfessorPresencePage() {
       <Dialog open={isJustifyModalOpen} onOpenChange={setIsJustifyModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Justifier une absence</DialogTitle>
+            <DialogTitle>Justifier une absence ou un retard</DialogTitle>
             <DialogDescription>
-              Fournissez un motif et un justificatif pour votre absence du {selectedAbsence?.date} au cours de {selectedAbsence?.course}.
+              Fournissez un motif pour votre {selectedAbsence?.status === 'absent' ? 'absence' : 'retard'} du {selectedAbsence?.date} au cours de {selectedAbsence?.course}.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleJustificationSubmit}>
             <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                    <Label htmlFor="reason">Motif de l'absence</Label>
+                    <Label htmlFor="reason">Motif</Label>
                     <Textarea id="reason" placeholder="Ex: Rendez-vous médical, urgence familiale..." required />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="attachment">Justificatif (PDF, JPG, PNG)</Label>
-                    <Input id="attachment" type="file" required />
+                    <Input id="attachment" type="file" />
                 </div>
             </div>
             <DialogFooter>
