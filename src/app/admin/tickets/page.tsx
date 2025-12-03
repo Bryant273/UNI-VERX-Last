@@ -42,7 +42,6 @@ const ITEMS_PER_PAGE = 8;
 
 export default function AdminTicketsPage() {
   const [tickets, setTickets] = useState<Ticket[]>(ticketsData);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,34 +64,6 @@ export default function AdminTicketsPage() {
     return filteredTickets.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredTickets, currentPage]);
   
-  const handleCreateTicket = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newTicket: Ticket = {
-      id: `T-${Math.floor(1000 + Math.random() * 9000)}`,
-      subject: formData.get('subject') as string,
-      department: formData.get('department') as 'scolarite' | 'technique' | 'pedagogique',
-      date: new Date().toLocaleDateString('fr-FR'),
-      lastUpdate: new Date().toISOString(),
-      status: 'open',
-      author: userData.admin.name,
-      messages: [
-        {
-          author: userData.admin.name,
-          date: new Date().toISOString(),
-          content: formData.get('message') as string,
-          attachments: formData.get('attachment') ? [(formData.get('attachment') as File).name] : [],
-        },
-      ],
-    };
-    setTickets([newTicket, ...tickets]);
-    setIsCreateModalOpen(false);
-    toast({
-        title: "Ticket créé !",
-        description: `Votre ticket "${newTicket.subject}" a été soumis avec succès.`,
-    });
-  };
-
   const handleViewTicket = (ticket: Ticket) => {
     setSelectedTicket(ticket);
     setIsViewModalOpen(true);
@@ -102,12 +73,9 @@ export default function AdminTicketsPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 className="text-3xl font-bold">Tickets</h1>
-            <p className="text-muted-foreground">Suivez et gérez les requêtes de toute l'université.</p>
+            <h1 className="text-3xl font-bold">Gestion des Tickets</h1>
+            <p className="text-muted-foreground">Consultez et gérez les requêtes de toute l'université.</p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Soumettre une requête
-        </Button>
       </div>
 
       <Card>
@@ -188,47 +156,6 @@ export default function AdminTicketsPage() {
         </CardFooter>
       </Card>
       
-      {/* Create Ticket Modal */}
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Soumettre une nouvelle requête</DialogTitle>
-            <DialogDescription>Remplissez le formulaire ci-dessous. Une réponse vous sera apportée sous 48h.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateTicket}>
-            <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
-                <div className="space-y-2">
-                    <Label htmlFor="department">Département concerné</Label>
-                    <Select name="department" required>
-                        <SelectTrigger id="department"><SelectValue placeholder="Sélectionnez un département..."/></SelectTrigger>
-                        <SelectContent>
-                            {Object.entries(ticketDepartmentConfig).map(([key, {label}]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="subject">Sujet de la requête</Label>
-                    <Input id="subject" name="subject" placeholder="Ex: Problème d'accès à un cours" required/>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea id="message" name="message" placeholder="Décrivez votre problème en détail..." required rows={6}/>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="attachment">Pièce jointe (optionnel)</Label>
-                    <Input id="attachment" name="attachment" type="file" />
-                </div>
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="ghost">Annuler</Button>
-              </DialogClose>
-              <Button type="submit">Envoyer la requête</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
       {/* View Ticket Modal */}
       {selectedTicket && (
         <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
@@ -246,7 +173,7 @@ export default function AdminTicketsPage() {
                                <p className="font-semibold">{msg.author}</p>
                                <p className="text-xs text-muted-foreground">{new Date(msg.date).toLocaleString('fr-FR')}</p>
                             </div>
-                            <div className={cn("p-4 rounded-lg", msg.author === userData.admin.name ? 'bg-muted/50' : 'bg-primary/10')}>
+                            <div className={cn("p-4 rounded-lg", msg.author === userData.admin.name ? 'bg-primary/10' : 'bg-muted/50')}>
                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                                {msg.attachments && msg.attachments.length > 0 && (
                                    <div className="mt-4 border-t pt-2">
@@ -285,5 +212,3 @@ export default function AdminTicketsPage() {
     </div>
   );
 }
-
-    
