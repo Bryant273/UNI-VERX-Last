@@ -13,6 +13,7 @@ import {
   BookOpen,
   MessageSquare,
   FileText,
+  User as UserIcon,
 } from 'lucide-react';
 import {
   Card,
