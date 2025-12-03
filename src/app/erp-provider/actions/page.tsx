@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import {
   Card,
@@ -36,8 +37,6 @@ import { Badge } from '@/components/ui/badge';
 import {
   actionsData,
   statusConfig,
-  type ActionLog,
-  type ActionType,
 } from '@/lib/actions-data';
 import { cn } from '@/lib/utils';
 import {
@@ -46,6 +45,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -53,17 +56,26 @@ export default function ErpProviderActionsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
   const filteredActions = useMemo(() => {
-    return actionsData.filter(
-      (action) =>
-        (action.description
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-          action.ip.includes(searchTerm)) &&
-        (filterType === 'all' || action.action === filterType)
-    );
-  }, [searchTerm, filterType]);
+    return actionsData.filter((action) => {
+      const actionDate = new Date(action.date);
+      const isSameDay = date
+        ? actionDate.getFullYear() === date.getFullYear() &&
+          actionDate.getMonth() === date.getMonth() &&
+          actionDate.getDate() === date.getDate()
+        : true;
+
+      const matchesSearch =
+        action.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        action.ip.includes(searchTerm);
+      
+      const matchesType = filterType === 'all' || action.action === filterType;
+
+      return isSameDay && matchesSearch && matchesType;
+    });
+  }, [searchTerm, filterType, date]);
 
   const totalPages = Math.ceil(filteredActions.length / ITEMS_PER_PAGE);
 
@@ -94,7 +106,30 @@ export default function ErpProviderActionsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full sm:w-[240px] justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP", { locale: fr }) : <span>Choisir une date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                  locale={fr}
+                />
+              </PopoverContent>
+            </Popover>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-full sm:w-[200px]">
                 <div className="flex items-center gap-2">
@@ -158,8 +193,8 @@ export default function ErpProviderActionsPage() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{action.date}</p>
-                        <p className="text-xs text-muted-foreground">{action.time}</p>
+                        <p className="font-medium">{format(action.date, "dd/MM/yyyy")}</p>
+                        <p className="text-xs text-muted-foreground">{format(action.date, "HH:mm:ss")}</p>
                       </div>
                     </TableCell>
                     <TableCell>
