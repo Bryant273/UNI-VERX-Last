@@ -3,6 +3,7 @@ import WelcomeBanner from '@/components/dashboard/welcome-banner';
 import { userData } from '@/lib/static-data';
 import GlobalEventsCard from '@/components/dashboard/global-events-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import SecretariatQuickActions from '@/components/dashboard/secretariat-quick-actions';
 
 export default function SecretariatDashboard() {
   const user = userData.secretariat;
@@ -25,7 +26,21 @@ export default function SecretariatDashboard() {
             <CardContent><p className="text-2xl font-bold text-blue-500">14</p></CardContent>
         </Card>
       </div>
-      <p className="mt-2 text-muted-foreground">Le reste du tableau de bord du secrétariat est en cours de construction.</p>
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <SecretariatQuickActions />
+        </div>
+        <div className="lg:col-span-2">
+            <Card className="h-full">
+                <CardHeader>
+                    <CardTitle>Activité récente</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">Le journal d'activité global sera affiché ici.</p>
+                </CardContent>
+            </Card>
+        </div>
+      </div>
     </div>
   );
 }
