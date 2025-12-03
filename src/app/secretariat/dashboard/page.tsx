@@ -13,7 +13,6 @@ export default function SecretariatDashboard() {
     <div className="space-y-6">
       <WelcomeBanner name={user.name} role="secretariat" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <GlobalEventsCard />
         <Card>
             <CardHeader><CardTitle>Utilisateurs</CardTitle></CardHeader>
             <CardContent><p className="text-2xl font-bold">13,463</p></CardContent>
@@ -26,14 +25,15 @@ export default function SecretariatDashboard() {
             <CardHeader><CardTitle>Tickets ouverts</CardTitle></CardHeader>
             <CardContent><p className="text-2xl font-bold text-blue-500">14</p></CardContent>
         </Card>
+        <GlobalEventsCard />
       </div>
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 flex flex-col gap-6">
           <SecretariatQuickActions />
-          <AiReportCard role="admin" />
         </div>
-        <div className="lg:col-span-2">
-            <Card className="h-full">
+        <div className="lg:col-span-2 flex flex-col gap-6">
+            <AiReportCard role="admin" />
+            <Card className="flex-grow">
                 <CardHeader>
                     <CardTitle>Activité récente</CardTitle>
                 </CardHeader>

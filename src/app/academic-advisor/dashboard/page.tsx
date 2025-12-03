@@ -62,41 +62,36 @@ export default function AcademicAdvisorDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <WelcomeBanner name={user.name} role="academic-advisor" />
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 grid gap-6 md:grid-cols-2">
-            <StatCard title="Taux de réussite" value={`${advisorStats.successRate}%`} change="+2.5% vs S1" icon={GraduationCap} color="text-green-500" />
-            <StatCard title="Étudiants en difficulté" value={`${advisorStats.studentsInDifficulty}`} change="-5 vs S1" icon={TrendingDown} color="text-orange-500" />
-            <StatCard title="Enseignants actifs" value={`${advisorStats.activeTeachers}`} change="+8 nouvelles recrues" icon={Users} color="text-blue-500" />
-            <StatCard title="Programmes" value={`${advisorStats.programs}`} change="+3 nouveaux masters" icon={BookOpen} color="text-purple-500" />
-        </div>
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Accès rapide</CardTitle>
-                    <CardDescription>Vos outils de gestion.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                    {quickAccessLinks.map((link) => {
-                        const Icon = link.icon;
-                        return (
-                            <Button key={link.href} variant="outline" className="h-24 flex-col gap-2" asChild>
-                               <Link href={link.href}>
-                                 <Icon className="h-6 w-6 text-primary" />
-                                 <span className="text-center text-xs">{link.label}</span>
-                               </Link>
-                            </Button>
-                        )
-                    })}
-                </CardContent>
-            </Card>
-            <AiReportCard role="academic-advisor" />
-            <GlobalEventsCard />
-        </div>
+      
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Taux de réussite" value={`${advisorStats.successRate}%`} change="+2.5% vs S1" icon={GraduationCap} color="text-green-500" />
+        <StatCard title="Étudiants en difficulté" value={`${advisorStats.studentsInDifficulty}`} change="-5 vs S1" icon={TrendingDown} color="text-orange-500" />
+        <StatCard title="Enseignants actifs" value={`${advisorStats.activeTeachers}`} change="+8 nouvelles recrues" icon={Users} color="text-blue-500" />
+        <GlobalEventsCard />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
+        <Card>
+            <CardHeader>
+                <CardTitle>Accès rapide</CardTitle>
+                <CardDescription>Vos outils de gestion.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+                {quickAccessLinks.map((link) => {
+                    const Icon = link.icon;
+                    return (
+                        <Button key={link.href} variant="outline" className="h-24 flex-col gap-2" asChild>
+                           <Link href={link.href}>
+                             <Icon className="h-6 w-6 text-primary" />
+                             <span className="text-center text-xs">{link.label}</span>
+                           </Link>
+                        </Button>
+                    )
+                })}
+            </CardContent>
+        </Card>
+        
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="text-red-500" />
@@ -129,30 +124,41 @@ export default function AcademicAdvisorDashboard() {
               </TableBody>
             </Table>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full">
-              Voir toutes les alertes <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </CardFooter>
         </Card>
+      </div>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Performance des étudiants</CardTitle>
-            <CardDescription>Répartition des moyennes générales du semestre en cours.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={{}} className="h-[250px] w-full">
-              <RechartsBarChart data={performanceChartData}>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} />
-              </RechartsBarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+       <div className="grid gap-6 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+             <Card>
+              <CardHeader>
+                <CardTitle>Performance des étudiants</CardTitle>
+                <CardDescription>Répartition des moyennes générales du semestre en cours.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={{}} className="h-[250px] w-full">
+                  <RechartsBarChart data={performanceChartData}>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+                  </RechartsBarChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+        </div>
+        <div className="lg:col-span-2 flex flex-col gap-6">
+            <AiReportCard role="academic-advisor" />
+            <Card>
+                <CardHeader>
+                    <CardTitle>Nouveaux Programmes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-2xl font-bold">{advisorStats.programs}</p>
+                    <p className="text-xs text-muted-foreground">+3 nouveaux masters</p>
+                </CardContent>
+            </Card>
+        </div>
       </div>
 
       <Card>
