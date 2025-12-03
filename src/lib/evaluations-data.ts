@@ -1,192 +1,80 @@
 'use client';
 
-import { Check, ChevronRight, Clock, HelpCircle, X } from "lucide-react";
+import type { LucideIcon } from 'lucide-react';
+import { Check, ChevronRight, Clock, HelpCircle, X, ListChecks, FileClock, CheckCircle } from "lucide-react";
 
-export type DevoirStatus = 'À faire' | 'Rendu' | 'En retard' | 'Corrigé';
-export type QCMStatus = 'À venir' | 'Actif' | 'Terminé' | 'Corrigé';
+// --- Types Généraux ---
+export type EvaluationStatus = 'draft' | 'active' | 'grading' | 'completed' | 'archived';
 
-export interface Attachment {
-  name: string;
-  url: string;
-}
-
-export interface Submission {
-  date: string;
-  file: string;
-  grade?: number;
-  comment?: string;
-}
-
-export interface Devoir {
-  id: string;
-  course: string;
-  title: string;
-  deadline: string;
-  status: DevoirStatus;
-  instructions: string;
-  attachments: Attachment[];
-  submission?: Submission;
-}
-
-export interface Interrogation {
-    id: string;
-    course: string;
-    time: string;
-    location: string;
-    teacher: string;
-    status: 'À venir' | 'En cours' | 'Terminé';
-}
-
+// --- QCM (Quiz) ---
 export interface QCMQuestion {
+  id: string;
   question: string;
   options: string[];
-  answer: number;
+  correctAnswer: number;
 }
-
 export interface QCM {
   id: string;
+  title: string;
   course: string;
-  qcmNumber: number;
-  status: QCMStatus;
-  questions: QCMQuestion[];
-  time: string;
-  duration: number; // in minutes
-  grade?: number;
-  date?: string;
-  userAnswers?: number[];
+  date: string;
+  status: EvaluationStatus;
+  participants: number;
+  totalStudents: number;
+  questionBankSize: number;
+  questionsPerStudent: number;
 }
 
-// Helper to generate 20 questions for a QCM
-const generateQuestions = (count: number, topic: string): QCMQuestion[] => {
-    return Array.from({ length: count }, (_, i) => ({
-        question: `Quelle est la définition de ${topic} ${i + 1} ?`,
-        options: [`Option A${i+1}`, `Option B${i+1}`, `Option C${i+1}`, `Option D${i+1}`],
-        answer: (i + 1) % 4,
-    }));
+export const qcmStatusConfig: Record<EvaluationStatus, { label: string; icon: LucideIcon; color: string }> = {
+  draft: { label: 'Brouillon', icon: FileClock, color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' },
+  active: { label: 'Actif', icon: Clock, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
+  grading: { label: 'En correction', icon: ListChecks, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
+  completed: { label: 'Terminé', icon: CheckCircle, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
+  archived: { label: 'Archivé', icon: CheckCircle, color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' },
 };
 
-
-export const qcmData: QCM[] = [
-    {
-        id: "qcm-bdd-1",
-        course: "Bases de Données",
-        qcmNumber: 1,
-        status: 'Actif',
-        time: "10:30",
-        duration: 15,
-        questions: generateQuestions(20, 'SQL')
-    },
-    {
-        id: "qcm-math-1",
-        course: "Mathématiques Discrètes",
-        qcmNumber: 1,
-        status: 'À venir',
-        time: "15:30",
-        duration: 15,
-        questions: generateQuestions(20, 'Graph')
-    },
-    {
-        id: "qcm-algo-1",
-        course: "Algorithmique",
-        qcmNumber: 1,
-        status: 'Corrigé',
-        time: "08:30",
-        duration: 15,
-        questions: generateQuestions(20, 'Complexity'),
-        grade: 16,
-        date: "15/05/2025",
-        userAnswers: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 0], // 19 good, 1 bad
-    },
-    {
-        id: "qcm-reseau-1",
-        course: "Réseaux",
-        qcmNumber: 1,
-        status: 'Corrigé',
-        time: "14:00",
-        duration: 15,
-        questions: generateQuestions(20, 'TCP/IP'),
-        grade: 14,
-        date: "12/05/2025",
-        userAnswers: [0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 1], // 17 good, 3 bad
-    }
+export const qcmList: QCM[] = [
+  { id: 'qcm1', title: 'QCM de mi-semestre', course: 'Bases de Données', date: '15/04/2025', status: 'completed', participants: 85, totalStudents: 89, questionBankSize: 50, questionsPerStudent: 20 },
+  { id: 'qcm2', title: 'QCM Chapitres 1 & 2', course: 'Programmation Python', date: '22/04/2025', status: 'completed', participants: 65, totalStudents: 67, questionBankSize: 50, questionsPerStudent: 20 },
+  { id: 'qcm3', title: 'QCM final', course: 'Algorithmique', date: 'En cours', status: 'active', participants: 112, totalStudents: 120, questionBankSize: 50, questionsPerStudent: 20 },
+  { id: 'qcm4', title: 'QCM de révision', course: 'Bases de Données', date: 'Prévu le 30/05', status: 'draft', participants: 0, totalStudents: 89, questionBankSize: 50, questionsPerStudent: 20 },
 ];
 
-export const interrogationsData: Interrogation[] = [
-    {
-        id: 'interro-1',
-        course: 'Bases de Données',
-        time: '10:30 - 12:00',
-        location: 'Amphi A',
-        teacher: 'Dr. Claire Dubois',
-        status: 'En cours',
-    },
-    {
-        id: 'interro-2',
-        course: 'Mathématiques Discrètes',
-        time: '15:30 - 17:00',
-        location: 'Salle B204',
-        teacher: 'Prof. Jean Martin',
-        status: 'À venir',
-    },
+// --- Devoirs ---
+export type DevoirStatus = 'draft' | 'published' | 'grading' | 'completed';
+export interface Devoir {
+  id: string;
+  title: string;
+  course: string;
+  deadline: string;
+  status: DevoirStatus;
+  submissions: number;
+  totalStudents: number;
+}
+
+export const devoirStatusConfig: Record<DevoirStatus, { label: string; icon: LucideIcon; color: string }> = {
+  draft: { label: 'Brouillon', icon: FileClock, color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' },
+  published: { label: 'Publié', icon: Clock, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
+  grading: { label: 'En correction', icon: ListChecks, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
+  completed: { label: 'Corrigé', icon: CheckCircle, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
+};
+
+export const devoirsList: Devoir[] = [
+    { id: 'dev1', title: 'TP - Requêtes SQL avancées', course: 'Bases de Données', deadline: '25/05/2025', status: 'grading', submissions: 80, totalStudents: 89 },
+    { id: 'dev2', title: 'Projet - API REST', course: 'Programmation Python', deadline: '10/06/2025', status: 'published', submissions: 12, totalStudents: 67 },
+    { id: 'dev3', title: 'DM - Complexité', course: 'Algorithmique', deadline: '01/05/2025', status: 'completed', submissions: 115, totalStudents: 120 },
 ];
 
-export const devoirsData: Devoir[] = [
-  {
-    id: 'devoir-1',
-    course: 'Algorithmique avancée',
-    title: 'TP Noté - Algorithmes de graphes',
-    deadline: '25/05/2025 - 23:59',
-    status: 'À faire',
-    instructions: 'Implémentez l\'algorithme de Dijkstra et de A* en Python. Fournissez un rapport d\'analyse comparative des performances sur les jeux de données fournis.',
-    attachments: [
-      { name: 'sujet_tp_graphes.pdf', url: '#' },
-      { name: 'dataset_graphes.zip', url: '#' },
-    ],
-  },
-  {
-    id: 'devoir-2',
-    course: 'Développement Web',
-    title: 'Projet - Site e-commerce',
-    deadline: '15/06/2025 - 23:59',
-    status: 'À faire',
-    instructions: 'Réalisez un site e-commerce simple avec React et Node.js. Le site doit inclure un panier, une page produit et un système d\'authentification simple.',
-    attachments: [{ name: 'cahier_des_charges.pdf', url: '#' }],
-  },
-  {
-    id: 'devoir-3',
-    course: 'Programmation Orientée Objet',
-    title: 'DM - Design Patterns',
-    deadline: '10/05/2025 - 23:59',
-    status: 'Corrigé',
-    instructions: 'Analysez le code fourni et identifiez les Design Patterns utilisés. Proposez des améliorations en utilisant d\'autres patterns pertinents.',
-    attachments: [{ name: 'code_source.zip', url: '#' }],
-    submission: {
-      date: '09/05/2025',
-      file: 'DM_Dupont_Alex.pdf',
-      grade: 17,
-      comment: 'Excellente analyse. Les propositions d\'amélioration sont très pertinentes.'
-    },
-  },
-  {
-    id: 'devoir-4',
-    course: 'Réseaux',
-    title: 'TP - Configuration de routeurs',
-    deadline: '01/05/2025 - 23:59',
-    status: 'Rendu',
-    instructions: 'Configurez le routage entre les 3 réseaux fournis dans le simulateur Packet Tracer.',
-    attachments: [{ name: 'schema_reseau.pkt', url: '#' }],
-    submission: {
-      date: '01/05/2025',
-      file: 'config_routeurs_Dupont.pkt',
-    },
-  },
-    {
-    id: 'devoir-5',
-    course: 'Sécurité Informatique',
-    title: 'Rapport d\'analyse de vulnérabilités',
-    deadline: '28/04/2025 - 23:59',
-    status: 'En retard',
-    instructions: 'Effectuez une analyse de vulnérabilités sur l\'application web fournie et rédigez un rapport détaillé de vos trouvailles.',
-    attachments: [{ name: 'webapp_vulnerable.zip', url: '#' }],
-  },
+// --- Travaux de Groupe ---
+export interface GroupWork {
+    id: string;
+    title: string;
+    course: string;
+    deadline: string;
+    groupsCount: number;
+}
+
+export const groupWorksList: GroupWork[] = [
+    { id: 'grp1', title: 'Projet de fin de semestre', course: 'Développement Web', deadline: '30/06/2025', groupsCount: 12 },
+    { id: 'grp2', title: 'Analyse d\'un système existant', course: 'Génie Logiciel', deadline: '20/06/2025', groupsCount: 10 },
 ];
