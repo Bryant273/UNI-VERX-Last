@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Mail, Phone, MapPin, KeyRound, User, ShieldCheck, History } from 'lucide-react';
+import { Mail, Phone, MapPin, KeyRound, User, ShieldCheck, History, UserCog } from 'lucide-react';
 import { getInitials } from '@/lib/messages-data';
 import { UniversityUser, roleConfig, statusConfig } from '@/lib/users-data';
 import { cn } from '@/lib/utils';
