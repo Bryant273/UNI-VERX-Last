@@ -38,6 +38,7 @@ import {
   enrollmentChartConfig,
 } from '@/lib/advisor-data';
 import Link from 'next/link';
+import GlobalEventsCard from '@/components/dashboard/global-events-card';
 
 const StatCard = ({ title, value, change, icon: Icon, color }: { title: string, value: string, change: string, icon: React.ElementType, color: string }) => {
   const isPositive = change.startsWith('+');
@@ -62,11 +63,35 @@ export default function AcademicAdvisorDashboard() {
     <div className="flex flex-col gap-6">
       <WelcomeBanner name={user.name} role="academic-advisor" />
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Taux de réussite" value={`${advisorStats.successRate}%`} change="+2.5% vs S1" icon={GraduationCap} color="text-green-500" />
-        <StatCard title="Étudiants en difficulté" value={`${advisorStats.studentsInDifficulty}`} change="-5 vs S1" icon={TrendingDown} color="text-orange-500" />
-        <StatCard title="Enseignants actifs" value={`${advisorStats.activeTeachers}`} change="+8 nouvelles recrues" icon={Users} color="text-blue-500" />
-        <StatCard title="Programmes" value={`${advisorStats.programs}`} change="+3 nouveaux masters" icon={BookOpen} color="text-purple-500" />
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 grid gap-6 md:grid-cols-2">
+            <StatCard title="Taux de réussite" value={`${advisorStats.successRate}%`} change="+2.5% vs S1" icon={GraduationCap} color="text-green-500" />
+            <StatCard title="Étudiants en difficulté" value={`${advisorStats.studentsInDifficulty}`} change="-5 vs S1" icon={TrendingDown} color="text-orange-500" />
+            <StatCard title="Enseignants actifs" value={`${advisorStats.activeTeachers}`} change="+8 nouvelles recrues" icon={Users} color="text-blue-500" />
+            <StatCard title="Programmes" value={`${advisorStats.programs}`} change="+3 nouveaux masters" icon={BookOpen} color="text-purple-500" />
+        </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
+            <GlobalEventsCard />
+            <Card>
+                <CardHeader>
+                    <CardTitle>Accès rapide</CardTitle>
+                    <CardDescription>Vos outils de gestion.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                    {quickAccessLinks.map((link) => {
+                        const Icon = link.icon;
+                        return (
+                            <Button key={link.href} variant="outline" className="h-24 flex-col gap-2" asChild>
+                               <Link href={link.href}>
+                                 <Icon className="h-6 w-6 text-primary" />
+                                 <span className="text-center text-xs">{link.label}</span>
+                               </Link>
+                            </Button>
+                        )
+                    })}
+                </CardContent>
+            </Card>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -129,8 +154,7 @@ export default function AcademicAdvisorDashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <Card>
           <CardHeader>
             <CardTitle>Évolution des inscriptions</CardTitle>
             <CardDescription>Inscriptions mensuelles par niveau pour l'année 2024.</CardDescription>
@@ -150,27 +174,6 @@ export default function AcademicAdvisorDashboard() {
             </ChartContainer>
           </CardContent>
         </Card>
-        
-        <Card>
-            <CardHeader>
-                <CardTitle>Accès rapide</CardTitle>
-                <CardDescription>Vos outils de gestion principaux.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-                {quickAccessLinks.map((link) => {
-                    const Icon = link.icon;
-                    return (
-                        <Button key={link.href} variant="outline" className="h-24 flex-col gap-2" asChild>
-                           <Link href={link.href}>
-                             <Icon className="h-6 w-6 text-primary" />
-                             <span className="text-center text-xs">{link.label}</span>
-                           </Link>
-                        </Button>
-                    )
-                })}
-            </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

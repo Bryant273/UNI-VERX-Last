@@ -24,6 +24,7 @@ import StatsCard from '@/components/dashboard/stats-card';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import QuickActionsCard from '@/components/dashboard/quick-actions-card';
+import GlobalEventsCard from '@/components/dashboard/global-events-card';
 
 const ComingSoonCard = ({ title, icon: Icon }: { title: string, icon: React.ElementType }) => (
   <Card className="lg:col-span-3">
@@ -56,32 +57,34 @@ export default function DashboardPage() {
         
         {/* Tableau de bord Admin */}
         
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 col-span-full">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4 col-span-full">
             <StatsCard />
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Nombre total d'étudiants</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">12,405</div>
-                <p className="text-xs text-muted-foreground">
-                  +150 depuis le dernier semestre
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Nombre total de professeurs</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">873</div>
-                <p className="text-xs text-muted-foreground">
-                  +12 nouvelles recrues
-                </p>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Nombre total d'étudiants</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">12,405</div>
+                  <p className="text-xs text-muted-foreground">
+                    +150 depuis le dernier semestre
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Nombre total de professeurs</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">873</div>
+                  <p className="text-xs text-muted-foreground">
+                    +12 nouvelles recrues
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Cours actifs</CardTitle>
@@ -94,15 +97,13 @@ export default function DashboardPage() {
                 </p>
               </CardContent>
             </Card>
-            <div className="flex justify-center sm:justify-start">
-             <CurrentEventCard role="admin" />
+            <GlobalEventsCard />
+            <div className="sm:col-span-2 xl:col-span-4">
+              <AiReportCard role={role}/>
             </div>
-            <AiReportCard role={role}/>
           </div>
         
       </div>
     </div>
   );
 }
-
-

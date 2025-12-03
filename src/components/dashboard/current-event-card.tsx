@@ -38,7 +38,7 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
     return (
       <>
         <Card 
-          className="w-72 h-72 flex flex-col items-center justify-center bg-muted/80 cursor-pointer hover:scale-105 transition-transform shadow-lg"
+          className="w-full sm:w-72 h-72 flex flex-col items-center justify-center bg-muted/80 cursor-pointer hover:scale-105 transition-transform shadow-lg"
           onClick={handleCardClick}
         >
           <CardContent className="flex flex-col items-center justify-center p-4 text-center">
@@ -62,7 +62,7 @@ export default function CurrentEventCard({ role }: { role: UserRole }) {
     <>
       <Card 
         className={cn(
-          "w-72 h-72 flex flex-col justify-between p-4 text-white cursor-pointer hover:scale-105 transition-transform shadow-lg",
+          "w-full sm:w-72 h-72 flex flex-col justify-between p-4 text-white cursor-pointer hover:scale-105 transition-transform shadow-lg",
           config.color
         )}
         onClick={handleCardClick}
