@@ -228,12 +228,12 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
     avatar: studentData.avatar,
   },
   professor: {
-    name: 'Prof. Dubois',
-    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-2')?.imageUrl || '',
+    name: 'Dr. Claire Dubois',
+    avatar: 'https://i.pravatar.cc/100?img=12'
   },
   admin: {
     name: 'Samuel Morin',
-    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
+    avatar: 'https://i.pravatar.cc/100?img=68'
   },
   'academic-advisor': {
     name: 'M. Jean Moreau',
@@ -241,11 +241,11 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
   },
   secretariat: {
     name: 'Lucas Bernard',
-    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-1')?.imageUrl || '',
+    avatar: 'https://i.pravatar.cc/100?img=15'
   },
   rectorate: {
     name: 'Isabelle Moreau',
-    avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
+    avatar: 'https://i.pravatar.cc/100?img=33'
   },
   'erp-provider': {
     name: 'INNOV\'KORP',
