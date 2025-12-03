@@ -114,7 +114,6 @@ export default function RectorateActionsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="ghost" onClick={() => { setSearchTerm(''); setFilterType('all')}}>Réinitialiser</Button>
           </div>
         </CardContent>
         <div className="overflow-x-auto">
