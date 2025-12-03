@@ -71,7 +71,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '/student/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/student/profile', label: 'Profil', icon: BookUser },
     { href: '/student/payments', label: 'Paiements', icon: CreditCard },
-    { href: ' /student/tickets', label: 'Tickets', icon: Ticket },
+    { href: '/student/tickets', label: 'Tickets', icon: Ticket },
     { href: '/student/courses', label: 'Mes cours', icon: BookOpen },
     { href: '/student/timetable', label: 'Emploi du temps', icon: Calendar },
     { href: '/student/evaluations', label: 'Évaluations', icon: ClipboardList },
@@ -94,6 +94,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   ],
   professor: [
     { href: '/professor/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/professor/profile', label: 'Profil', icon: BookUser },
     { href: '/professor/payments', label: 'Paiements', icon: CreditCard },
     { href: '/professor/tickets', label: 'Tickets', icon: Ticket },
     { href: '/professor/courses', label: 'Mes cours', icon: BookOpen },
@@ -120,6 +121,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   'academic-advisor': advisorNavLinks,
   secretariat: [
     { href: '/secretariat/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/secretariat/profile', label: 'Profil', icon: BookUser },
     { href: '/secretariat/tickets', label: 'Tickets', icon: Ticket },
     { href: '/secretariat/users', label: 'Utilisateurs', icon: Users },
     { href: '/secretariat/treasury', label: 'Trésorerie', icon: Banknote },
@@ -170,6 +172,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   ],
   admin: [
     { href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/admin/profile', label: 'Profil', icon: BookUser },
     { href: '#', label: 'Gestion des utilisateurs', icon: Users },
     { href: '/admin/courses', label: 'Gestion des cours', icon: BookOpen },
     { href: '/admin/evaluations', label: 'Gestion des évaluations', icon: ClipboardCheck },
@@ -178,10 +181,14 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   ],
   rectorate: [
       { href: '/rectorate/dashboard', label: 'Rectorat', icon: LayoutDashboard },
+      { href: '/rectorate/profile', label: 'Profil', icon: BookUser },
       { href: '/academic-advisor/stats', label: 'Statistiques Globales', icon: PieChart },
       { href: '#', label: 'Administration', icon: Building },
   ],
-  'erp-provider': [],
+  'erp-provider': [
+      { href: '/erp-provider/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/erp-provider/profile', label: 'Profil', icon: BookUser },
+  ],
 };
 
 export const bottomNavLinks: { href: string; label: string; icon: LucideIcon }[] = [
@@ -247,7 +254,7 @@ export const userData: Record<UserRole, { name: string; avatar: string }> = {
     avatar: PlaceHolderImages.find(img => img.id === 'user-avatar-3')?.imageUrl || '',
   },
   'erp-provider': {
-    name: 'Fournisseur ERP',
+    name: 'INNOV\'KORP',
     avatar: '',
   },
 };

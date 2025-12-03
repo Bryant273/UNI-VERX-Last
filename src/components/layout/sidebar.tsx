@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -26,10 +25,10 @@ function isNavGroup(item: any): item is { title: string; links: any[] } {
   return item && typeof item.title === 'string' && Array.isArray(item.links);
 }
 
-function SidebarHeaderContent() {
+function SidebarHeaderContent({ role }: { role: UserRole }) {
     return (
       <div className="flex items-center justify-center pt-4">
-        <Link href="/">
+        <Link href={`/${role}/dashboard`}>
           <Logo />
         </Link>
       </div>
@@ -51,7 +50,7 @@ export default function AppSidebar() {
           </SheetHeader>
         )}
       <SidebarHeader>
-        <SidebarHeaderContent />
+        <SidebarHeaderContent role={currentRole} />
       </SidebarHeader>
       <SidebarContent className="p-2 pt-8">
         <SidebarMenu>
