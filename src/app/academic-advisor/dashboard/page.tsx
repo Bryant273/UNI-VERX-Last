@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -39,6 +38,7 @@ import {
 } from '@/lib/advisor-data';
 import Link from 'next/link';
 import GlobalEventsCard from '@/components/dashboard/global-events-card';
+import AiReportCard from '@/components/dashboard/ai-report-card';
 
 const StatCard = ({ title, value, change, icon: Icon, color }: { title: string, value: string, change: string, icon: React.ElementType, color: string }) => {
   const isPositive = change.startsWith('+');
@@ -71,7 +71,6 @@ export default function AcademicAdvisorDashboard() {
             <StatCard title="Programmes" value={`${advisorStats.programs}`} change="+3 nouveaux masters" icon={BookOpen} color="text-purple-500" />
         </div>
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
-            <GlobalEventsCard />
             <Card>
                 <CardHeader>
                     <CardTitle>Accès rapide</CardTitle>
@@ -91,6 +90,8 @@ export default function AcademicAdvisorDashboard() {
                     })}
                 </CardContent>
             </Card>
+            <AiReportCard role="academic-advisor" />
+            <GlobalEventsCard />
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { userData } from '@/lib/static-data';
 import GlobalEventsCard from '@/components/dashboard/global-events-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import SecretariatQuickActions from '@/components/dashboard/secretariat-quick-actions';
+import AiReportCard from '@/components/dashboard/ai-report-card';
 
 export default function SecretariatDashboard() {
   const user = userData.secretariat;
@@ -27,8 +28,9 @@ export default function SecretariatDashboard() {
         </Card>
       </div>
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 flex flex-col gap-6">
           <SecretariatQuickActions />
+          <AiReportCard role="admin" />
         </div>
         <div className="lg:col-span-2">
             <Card className="h-full">
