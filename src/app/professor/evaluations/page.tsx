@@ -68,7 +68,7 @@ import {
   type GroupWork,
 } from '@/lib/evaluations-data';
 import { studentData } from '@/lib/static-data';
-import { allStudents } from '@/lib/students-data';
+import { studentsData as allStudents } from '@/lib/students-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getInitials } from '@/lib/messages-data';
