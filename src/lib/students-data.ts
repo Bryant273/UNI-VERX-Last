@@ -182,7 +182,7 @@ export const studentsData: Student[] = [
              s1: [{ ue: "UE: Programmation", module: "Algorithmique avancée", grade: "10,5/20", credits: 6, validated: 6 }],
              s2: [{ ue: "UE: Technologies Avancées", module: "Intelligence artificielle", grade: "8,0/20", credits: 6, validated: 0 }]
         },
-        juryComments: "Difficultés importantes. Un suivi personnalisé est recommandé."
+        juryComments: "L'étudiant rencontre des difficultés importantes dans plusieurs modules. Un suivi personnalisé et des rattrapages sont recommandés pour la poursuite du cursus."
     }
 ];
 
