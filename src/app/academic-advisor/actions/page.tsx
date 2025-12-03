@@ -169,7 +169,7 @@ export default function AcademicAdvisorActionsPage() {
                     key={action.id}
                     className={cn(
                       action.isFirstLogin &&
-                        'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100/60 dark:hover:bg-orange-900/30',
+                        'bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-100/60 dark:hover:bg-orange-900/40',
                       'even:bg-muted/40'
                     )}
                   >
@@ -199,7 +199,7 @@ export default function AcademicAdvisorActionsPage() {
                     </TableCell>
                     <TableCell>
                         <p>{action.description}</p>
-                        {action.isFirstLogin && <p className="text-xs font-semibold text-orange-600 dark:text-orange-400">Première connexion de la journée</p>}
+                        {action.isFirstLogin && <p className="text-xs font-semibold text-orange-700 dark:text-orange-400">Première connexion de la journée</p>}
                     </TableCell>
                     <TableCell className="text-right font-mono">
                       {action.ip}
