@@ -63,8 +63,8 @@ import {
   groupWorksList,
   qcmStatusConfig,
   devoirStatusConfig,
-  type QCM,
-  type Devoir,
+  type QCMProf,
+  type DevoirProf,
   type GroupWork,
 } from '@/lib/evaluations-data';
 import { studentData } from '@/lib/static-data';
@@ -120,8 +120,8 @@ const QcmTab = () => {
                  <div className="space-y-2">
                     <Label>Paramètres de l'évaluation</Label>
                     <div className="grid grid-cols-2 gap-4">
-                        <Input type="number" placeholder="Nb. de questions par étudiant (ex: 20)" />
-                        <Input type="number" placeholder="Durée en minutes (ex: 15)" />
+                        <Input type="number" placeholder="Nb. de questions par étudiant" defaultValue="20" />
+                        <Input type="number" placeholder="Durée en minutes" defaultValue="15" />
                     </div>
                 </div>
             </div>
