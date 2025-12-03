@@ -18,6 +18,14 @@ import { getInitials } from '@/lib/messages-data';
 import type { Student } from '@/lib/students-data';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface StudentProfileModalProps {
   student: Student | null;
