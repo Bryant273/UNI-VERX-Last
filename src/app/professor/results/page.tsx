@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -80,9 +79,29 @@ const SaisieNotesTab = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Select value={gradeClass} onValueChange={setGradeClass}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent>{Object.keys(profAllStudentsData).map(c => <SelectItem key={c} value={c}>{c.replace('-',' ').toUpperCase()}</SelectItem>)}</SelectContent></Select>
-                    <Select value={gradeSubject} onValueChange={setGradeSubject}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><option value="bdd">Bases de Données</option><option value="python">Programmation Python</option><option value="algo">Algorithmique</option><option value="web">Développement Web</option><option value="projet">Projet Informatique</option></SelectContent></Select>
-                    <Select value={evaluationType} onValueChange={setEvaluationType}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><option value="examen">Examen</option><option value="td">TD noté</option><option value="tp">TP noté</option><option value="qcm_moyenne">Moyenne QCM</option></SelectContent></Select>
+                    <Select value={gradeClass} onValueChange={setGradeClass}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>{Object.keys(profAllStudentsData).map(c => <SelectItem key={c} value={c}>{c.replace('-',' ').toUpperCase()}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Select value={gradeSubject} onValueChange={setGradeSubject}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="bdd">Bases de Données</SelectItem>
+                            <SelectItem value="python">Programmation Python</SelectItem>
+                            <SelectItem value="algo">Algorithmique</SelectItem>
+                            <SelectItem value="web">Développement Web</SelectItem>
+                            <SelectItem value="projet">Projet Informatique</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={evaluationType} onValueChange={setEvaluationType}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="examen">Examen</SelectItem>
+                            <SelectItem value="td">TD noté</SelectItem>
+                            <SelectItem value="tp">TP noté</SelectItem>
+                            <SelectItem value="qcm_moyenne">Moyenne QCM</SelectItem>
+                        </SelectContent>
+                    </Select>
                     <div><Input type="text" value={`Coefficient: ${evaluationCoeff}`} readOnly className="bg-muted/50 font-medium" /></div>
                 </CardContent>
             </Card>
@@ -108,7 +127,13 @@ const SaisieNotesTab = () => {
                                 <TableRow key={student.id}>
                                     <TableCell className="font-medium">{student.name}</TableCell>
                                     <TableCell className="text-muted-foreground">{student.number}</TableCell>
-                                    <TableCell><Input type="number" min="0" max="20" step="0.5" value={grade} onChange={(e) => handleGradeChange(student.id, e.target.value)} disabled={isLocked} className={cn("w-24 text-center", grade && getGradeClass(grade))} /></TableCell>
+                                    <TableCell>
+                                        {evaluationType === 'qcm_moyenne' ? (
+                                            <Input type="number" value={grade} readOnly className={cn("w-24 text-center bg-muted/50", grade && getGradeClass(grade))} />
+                                        ) : (
+                                            <Input type="number" min="0" max="20" step="0.5" defaultValue={grade} onChange={(e) => handleGradeChange(student.id, e.target.value)} disabled={isLocked} className={cn("w-24 text-center", grade && getGradeClass(grade))} />
+                                        )}
+                                    </TableCell>
                                     <TableCell><Checkbox disabled={isLocked} /></TableCell>
                                     <TableCell><Input placeholder="Commentaire..." disabled={isLocked} /></TableCell>
                                 </TableRow>
