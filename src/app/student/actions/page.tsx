@@ -169,7 +169,7 @@ export default function StudentActionsPage() {
                     key={action.id}
                     className={cn(
                       action.isFirstLogin &&
-                        'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100/60 dark:hover:bg-blue-900/30',
+                        'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100/60 dark:hover:bg-orange-900/30',
                       'even:bg-muted/40'
                     )}
                   >
@@ -199,7 +199,7 @@ export default function StudentActionsPage() {
                     </TableCell>
                     <TableCell>
                         <p>{action.description}</p>
-                        {action.isFirstLogin && <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">Première connexion de la journée</p>}
+                        {action.isFirstLogin && <p className="text-xs font-semibold text-orange-600 dark:text-orange-400">Première connexion de la journée</p>}
                     </TableCell>
                     <TableCell className="text-right font-mono">
                       {action.ip}

@@ -81,7 +81,7 @@ const generateActionData = (): ActionLog[] => {
     'logout',
   ];
   const locations = ['Paris, FR', 'Lyon, FR', 'Marseille, FR', 'Lille, FR'];
-  let lastDate = new Date(0).toDateString(); // Initialize with a very old date
+  const firstLoginDates = new Set<string>();
 
   // Add some actions for today
   const today = new Date();
@@ -90,10 +90,10 @@ const generateActionData = (): ActionLog[] => {
     time.setHours(today.getHours() - i, today.getMinutes() - (i * 17) % 60, today.getSeconds());
     const type = actionTypes[i % actionTypes.length];
     
-    let isFirstLoginToday = false;
-    if (type === 'login' && i === 4) { // Make the last login of today the first one
-        isFirstLoginToday = true;
-        lastDate = today.toDateString();
+    let isFirstLogin = false;
+    if (type === 'login' && !firstLoginDates.has(time.toDateString())) {
+        isFirstLogin = true;
+        firstLoginDates.add(time.toDateString());
     }
 
     actions.push({
@@ -103,7 +103,7 @@ const generateActionData = (): ActionLog[] => {
       date: time,
       ip: `82.124.${100 + (i % 155)}.${50 + (i % 205)}`,
       location: locations[i % locations.length],
-      isFirstLogin: isFirstLoginToday,
+      isFirstLogin: isFirstLogin,
     });
   }
 
@@ -115,9 +115,9 @@ const generateActionData = (): ActionLog[] => {
     const type = actionTypes[i % actionTypes.length];
 
     let isFirstLogin = false;
-    if (type === 'login' && date.toDateString() !== lastDate) {
+    if (type === 'login' && !firstLoginDates.has(date.toDateString())) {
       isFirstLogin = true;
-      lastDate = date.toDateString();
+      firstLoginDates.add(date.toDateString());
     }
     
     let description = '';
@@ -141,6 +141,28 @@ const generateActionData = (): ActionLog[] => {
       isFirstLogin: isFirstLogin,
     });
   }
+
+  // Ensure there is at least one "first login" for today if not already present
+  const todayString = today.toDateString();
+  if (!firstLoginDates.has(todayString)) {
+    const firstLoginToday = actions.find(a => a.action === 'login' && a.date.toDateString() === todayString);
+    if (firstLoginToday) {
+      firstLoginToday.isFirstLogin = true;
+    } else {
+        const time = new Date();
+        time.setHours(8, 30, 0);
+        actions.push({
+            id: 'first-login-enforced',
+            action: 'login',
+            description: 'Première connexion de la journée.',
+            date: time,
+            ip: '82.124.100.50',
+            location: 'Paris, FR',
+            isFirstLogin: true
+        });
+    }
+  }
+
 
   return actions.sort((a, b) => b.date.getTime() - a.date.getTime());
 };
