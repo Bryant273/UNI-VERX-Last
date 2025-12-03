@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  Users, Search, Plus, MoreHorizontal, Edit, UserCheck, UserX, KeyRound, Archive, Trash2, ChevronLeft, ChevronRight, Clock
+  Users, Search, Plus, MoreHorizontal, Edit, UserCheck, UserX, KeyRound, Archive, Trash2, ChevronLeft, ChevronRight, Clock, Eye, History, UserCog, ShieldCheck, Undo
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,8 @@ import { getInitials } from '@/lib/messages-data';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
+import UserDetailsModal from '@/components/secretariat/user-details-modal';
+import Link from 'next/link';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -28,14 +30,16 @@ export default function UsersPage() {
     const [roleFilter, setRoleFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [action, setAction] = useState<{type: 'suspend' | 'archive' | 'delete' | null, user: UniversityUser | null}>({type: null, user: null});
+    const [action, setAction] = useState<{type: 'suspend' | 'reactivate' | 'delete' | null, user: UniversityUser | null}>({type: null, user: null});
+    const [selectedUser, setSelectedUser] = useState<UniversityUser | null>(null);
     const { toast } = useToast();
 
     const filteredUsers = useMemo(() => {
         return users.filter(user => 
             (roleFilter === 'all' || user.role === roleFilter) &&
             (statusFilter === 'all' || user.status === statusFilter) &&
-            (user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+            (user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase())) &&
+            user.status !== 'archived'
         );
     }, [users, searchTerm, roleFilter, statusFilter]);
     
@@ -46,7 +50,7 @@ export default function UsersPage() {
         return filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
     }, [filteredUsers, currentPage]);
 
-    const handleAction = (user: UniversityUser, type: 'suspend' | 'archive' | 'delete') => {
+    const handleAction = (user: UniversityUser, type: 'suspend' | 'reactivate' | 'delete') => {
         setAction({ type, user });
     };
 
@@ -59,9 +63,9 @@ export default function UsersPage() {
         if (action.type === 'suspend') {
             newStatus = 'suspended';
             toastMessage = `Le compte de ${action.user.name} a été suspendu.`;
-        } else if (action.type === 'archive') {
-            newStatus = 'archived';
-            toastMessage = `Le compte de ${action.user.name} a été archivé.`;
+        } else if (action.type === 'reactivate') {
+            newStatus = 'active';
+            toastMessage = `Le compte de ${action.user.name} a été réactivé.`;
         } else if (action.type === 'delete') {
             setUsers(prev => prev.filter(u => u.id !== action.user!.id));
             toastMessage = `Le compte de ${action.user.name} a été supprimé.`;
@@ -89,9 +93,12 @@ export default function UsersPage() {
                             <Input placeholder="Rechercher par nom ou email..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/>
                         </div>
                         <Select value={roleFilter} onValueChange={setRoleFilter}><SelectTrigger className="w-full md:w-[200px]"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">Tous les rôles</SelectItem>{Object.entries(roleConfig).map(([key, {label}]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select>
-                        <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="w-full md:w-[180px]"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem>{Object.entries(statusConfig).map(([key, {label}]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="w-full md:w-[180px]"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem>{Object.entries(statusConfig).filter(([k]) => k !== 'archived').map(([key, {label}]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select>
                     </div>
-                    <Button><Plus className="mr-2 h-4 w-4"/> Ajouter un utilisateur</Button>
+                     <div className="flex gap-2">
+                        <Button variant="outline" asChild><Link href="/secretariat/users/archived"><Archive className="mr-2 h-4 w-4"/> Archives</Link></Button>
+                        <Button><Plus className="mr-2 h-4 w-4"/> Ajouter un utilisateur</Button>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -120,11 +127,16 @@ export default function UsersPage() {
                                              <DropdownMenu>
                                                 <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" disabled={isAdmin}><MoreHorizontal/></Button></DropdownMenuTrigger>
                                                 <DropdownMenuContent>
+                                                    <DropdownMenuItem onSelect={() => setSelectedUser(user)}><Eye className="mr-2"/>Voir les détails</DropdownMenuItem>
                                                     <DropdownMenuItem><Edit className="mr-2"/>Modifier</DropdownMenuItem>
                                                     <DropdownMenuItem><KeyRound className="mr-2"/>Réinitialiser mot de passe</DropdownMenuItem>
                                                     <DropdownMenuSeparator/>
-                                                    <DropdownMenuItem onClick={() => handleAction(user, 'suspend')} className="text-orange-600 focus:text-orange-600"><Clock className="mr-2"/>Suspendre</DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleAction(user, 'archive')}><Archive className="mr-2"/>Archiver</DropdownMenuItem>
+                                                     {user.status === 'suspended' ? (
+                                                        <DropdownMenuItem onClick={() => handleAction(user, 'reactivate')} className="text-green-600 focus:text-green-600"><Undo className="mr-2"/>Réactiver</DropdownMenuItem>
+                                                    ) : (
+                                                        <DropdownMenuItem onClick={() => handleAction(user, 'suspend')} className="text-orange-600 focus:text-orange-600"><Clock className="mr-2"/>Suspendre</DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem asChild><Link href="/secretariat/users/archived"><Archive className="mr-2"/>Archiver</Link></DropdownMenuItem>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem onClick={() => handleAction(user, 'delete')} className="text-destructive focus:text-destructive"><Trash2 className="mr-2"/>Supprimer</DropdownMenuItem>
                                                 </DropdownMenuContent>
@@ -154,7 +166,7 @@ export default function UsersPage() {
                         <DialogTitle>Confirmation requise</DialogTitle>
                         <DialogDescription>
                             {action.type === 'suspend' && `Êtes-vous sûr de vouloir suspendre le compte de ${action.user?.name} ?`}
-                            {action.type === 'archive' && `Êtes-vous sûr de vouloir archiver le compte de ${action.user?.name} ?`}
+                            {action.type === 'reactivate' && `Êtes-vous sûr de vouloir réactiver le compte de ${action.user?.name} ?`}
                             {action.type === 'delete' && `Êtes-vous sûr de vouloir supprimer définitivement le compte de ${action.user?.name} ? Cette action est irréversible.`}
                         </DialogDescription>
                     </DialogHeader>
@@ -174,14 +186,19 @@ export default function UsersPage() {
                     )}
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setAction({type: null, user: null})}>Annuler</Button>
-                        <Button variant={action.type === 'delete' ? "destructive" : "default"} onClick={handleConfirmAction}>
+                        <Button 
+                            variant={action.type === 'delete' ? "destructive" : (action.type === 'reactivate' ? 'default' : 'secondary')}
+                            onClick={handleConfirmAction}
+                        >
                             {action.type === 'suspend' && 'Suspendre'}
-                            {action.type === 'archive' && 'Archiver'}
+                            {action.type === 'reactivate' && 'Réactiver'}
                             {action.type === 'delete' && 'Supprimer'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
              </Dialog>
+
+             <UserDetailsModal user={selectedUser} isOpen={!!selectedUser} onClose={() => setSelectedUser(null)} />
         </div>
     )
 }
