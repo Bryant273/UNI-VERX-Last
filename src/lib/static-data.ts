@@ -214,9 +214,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       { href: '/academic-advisor/stats', label: 'Statistiques Globales', icon: PieChart },
       { href: '#', label: 'Administration', icon: Building },
   ],
-  'erp-provider': [
-      { href: '/erp-provider/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  ],
+  'erp-provider': [],
 };
 
 export const bottomNavLinks: { href: string; label: string; icon: LucideIcon }[] = [

@@ -120,4 +120,3 @@ export const validationData = {
         details: "Certificat médical fourni pour absence justifiée. L'étudiante a manqué le cours de Bases de Données et souhaite récupérer les supports de cours."
     }
 };
-
