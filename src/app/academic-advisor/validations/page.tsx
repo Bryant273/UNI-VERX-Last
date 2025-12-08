@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useToast } from '@/hooks/use-toast';
 import { allValidations, validationData as detailedValidationData, type Validation, type ValidationType, type ValidationPriority } from '@/lib/validations-data';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
 
 const priorityConfig: Record<ValidationPriority, { text: string; color: string; }> = {
     urgent: { text: "Urgent", color: "border-red-500/80 bg-red-500/5 text-red-600 dark:text-red-400" },
