@@ -178,7 +178,7 @@ const EnrolledStudentsTab = () => {
 }
 
 
-export default function SecretariatEnrollmentsPage() {
+export default function AcademicAdvisorEnrollmentsPage() {
   return (
     <div className="space-y-6">
       <Card>
