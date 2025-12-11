@@ -1,4 +1,5 @@
 
+
 import {
   LayoutDashboard,
   BookOpen,
@@ -44,7 +45,7 @@ import {
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
 import type { DemoUser } from './messages-data';
-import { advisorNavLinks } from './advisor-data';
+
 
 export const VALID_ROLES: UserRole[] = [
   'student', 
