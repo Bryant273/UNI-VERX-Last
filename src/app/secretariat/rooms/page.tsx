@@ -95,7 +95,7 @@ const typeConfig: Record<RoomType, { label: string; icon: LucideIcon }> = {
   laboratoire: { label: 'Labo', icon: FlaskConical },
 };
 
-export default function RoomsPage() {
+export default function SecretariatRoomsPage() {
   const [rooms, setRooms] = useState(allRooms);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ building: 'all', type: 'all', status: 'all', capacity: 'all' });
@@ -143,6 +143,24 @@ export default function RoomsPage() {
         key,
         direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
+  }
+
+  const renderPagination = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+        pages.push(
+            <Button
+                key={i}
+                variant={currentPage === i ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setCurrentPage(i)}
+                className="h-8 w-8"
+            >
+                {i}
+            </Button>
+        );
+    }
+    return pages;
   }
 
   return (
@@ -196,7 +214,7 @@ export default function RoomsPage() {
                             const status = statusConfig[room.status];
                             const type = typeConfig[room.type];
                             return(
-                                <TableRow key={room.id} className="hover:bg-muted/50">
+                                <TableRow key={room.id} className="hover:bg-muted/50 even:bg-muted/40">
                                     <TableCell><div className="font-medium">{room.name}</div><div className="text-xs text-muted-foreground">Étage {room.floor}</div></TableCell>
                                     <TableCell>{room.building}</TableCell>
                                     <TableCell><div className="flex items-center gap-2"><type.icon className="h-4 w-4 text-muted-foreground"/><span>{type.label}</span></div></TableCell>
@@ -219,7 +237,7 @@ export default function RoomsPage() {
                     {totalPages > 1 && (
                         <div className="flex items-center gap-2">
                             <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
-                            <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
+                            {renderPagination()}
                             <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
                         </div>
                     )}
