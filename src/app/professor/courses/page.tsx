@@ -365,7 +365,7 @@ export default function ProfessorCoursesPage() {
 
   const studentModules = useMemo(() => {
     const modules = new Set(studentCourses.map(doc => doc.module));
-    return ['', ...Array.from(modules)];
+    return ['all', ...Array.from(modules)];
   }, [studentCourses]);
 
   const totalPages = Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE);
