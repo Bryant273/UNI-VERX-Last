@@ -1,5 +1,6 @@
+
 import type { LucideIcon } from 'lucide-react';
-import { CheckCircle, Clock, XCircle, Building, User, FileText } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, Building, User, FileText, Briefcase } from 'lucide-react';
 
 export type ContractStatus = 'active' | 'expired' | 'pending' | 'terminated';
 export type ContractorType = 'employee' | 'subcontractor' | 'consultant';
