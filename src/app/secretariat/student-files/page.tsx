@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -18,10 +19,9 @@ import StudentFileModal from '@/components/secretariat/student-file-modal';
 const ITEMS_PER_PAGE = 10;
 
 const getFolderStatus = (student: Student) => {
-    // Simple logic for demonstration
-    const hasMissingDocs = Math.random() > 0.5; // Simulate missing documents
+    // Simple deterministic logic to avoid hydration mismatch.
     if (student.id % 5 === 0) return { label: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: FileX2 };
-    if (hasMissingDocs) return { label: 'Incomplet', color: 'bg-red-100 text-red-800', icon: FileX2 };
+    if (student.id % 3 === 0) return { label: 'Incomplet', color: 'bg-red-100 text-red-800', icon: FileX2 };
     return { label: 'Complet', color: 'bg-green-100 text-green-800', icon: FileCheck2 };
 }
 
