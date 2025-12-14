@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, PanelLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 import type { UserRole, NavItem } from '@/lib/data';
 import { navLinks, bottomNavLinks } from '@/lib/static-data';
@@ -41,6 +42,26 @@ export default function AppSidebar() {
   const currentRole = (pathname.split('/')[1] || 'student') as UserRole;
   const currentNavItems = navLinks[currentRole] || [];
   const { isMobile, toggleSidebar } = useSidebar();
+  const [openItems, setOpenItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    // This effect runs only on the client after hydration
+    const storedOpenItems = localStorage.getItem('sidebarOpenItems');
+    if (storedOpenItems) {
+      setOpenItems(JSON.parse(storedOpenItems));
+    }
+  }, []);
+
+  const handleOpenChange = (isOpen: boolean, title: string) => {
+    let newOpenItems;
+    if (isOpen) {
+      newOpenItems = [...openItems, title];
+    } else {
+      newOpenItems = openItems.filter(item => item !== title);
+    }
+    setOpenItems(newOpenItems);
+    localStorage.setItem('sidebarOpenItems', JSON.stringify(newOpenItems));
+  };
 
 
   return (
@@ -62,11 +83,16 @@ export default function AppSidebar() {
           {currentNavItems.map((item, index) => {
             if (isNavGroup(item)) {
               return (
-                <Collapsible key={index} className="w-full">
+                <Collapsible 
+                  key={index} 
+                  className="w-full"
+                  open={openItems.includes(item.title)}
+                  onOpenChange={(isOpen) => handleOpenChange(isOpen, item.title)}
+                >
                   <CollapsibleTrigger className="w-full">
                     <div className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       {item.title}
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="pl-4">
