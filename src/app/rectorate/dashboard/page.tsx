@@ -45,13 +45,13 @@ export default function DashboardPage() {
         
         {/* Colonne Principale (Gauche) */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <StatsCard />
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
              <StatInfoCard title="Total Étudiants" value="12,405" subtitle="+150 depuis S1" icon={Users} />
              <StatInfoCard title="Total Professeurs" value="873" subtitle="+12 nouvelles recrues" icon={Users} />
              <StatInfoCard title="Cours Actifs" value="1,250" subtitle="Tous départements" icon={BookOpen} />
              <GlobalEventsCard />
            </div>
+           <StatsCard />
         </div>
 
         {/* Colonne Latérale (Droite) */}
