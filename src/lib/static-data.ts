@@ -1,4 +1,4 @@
-
+'use client';
 
 import {
   LayoutDashboard,
@@ -175,7 +175,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
         { href: '/secretariat/rooms', label: 'Salles', icon: DoorOpen },
         { href: '/secretariat/templates', label: 'Templates', icon: Sheet },
         { href: '/secretariat/enrollments', label: 'Inscriptions', icon: UserPlus },
-        { href: '/secretariat/courses', label: 'Cours', icon: BookOpen },
+        { href: '/secretariat/courses', label: 'Cours & Programmes', icon: BookOpen },
       ],
     },
     {
