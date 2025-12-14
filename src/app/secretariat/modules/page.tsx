@@ -271,10 +271,10 @@ export default function ModulesPage() {
       <Tabs defaultValue="modules">
         <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="modules">
-                <BookCopy className="mr-2 h-4 w-4"/> Gestion des Modules
+                <BookCopy className="mr-2 h-4 w-4"/> Modules
             </TabsTrigger>
             <TabsTrigger value="creation">
-                <FolderPlus className="mr-2 h-4 w-4"/> Outils de Création
+                <FolderPlus className="mr-2 h-4 w-4"/> UE
             </TabsTrigger>
         </TabsList>
         <TabsContent value="modules" className="mt-4">
