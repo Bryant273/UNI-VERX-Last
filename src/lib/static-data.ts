@@ -248,6 +248,14 @@ export const navLinks: Record<UserRole, NavItem[]> = {
           { href: '/rectorate/messages', label: 'Messages', icon: MessageSquare },
           { href: '/rectorate/announcements', label: 'Annonces', icon: Megaphone },
         ],
+      },
+      {
+        title: 'Rapports',
+        links: [
+          { href: '/rectorate/stats', label: 'Statistiques', icon: PieChart },
+          { href: '/rectorate/reports', label: 'Rapports', icon: FileBarChart },
+          { href: '/rectorate/exports', label: 'Exports', icon: Download },
+        ],
       }
   ],
   'erp-provider': [],
