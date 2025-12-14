@@ -24,6 +24,7 @@ import StatsCard from '@/components/dashboard/stats-card';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import QuickActionsCard from '@/components/dashboard/quick-actions-card';
+import GlobalEventsCard from '@/components/dashboard/global-events-card';
 
 const ComingSoonCard = ({ title, icon: Icon }: { title: string, icon: React.ElementType }) => (
   <Card className="lg:col-span-3">
@@ -52,11 +53,54 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <WelcomeBanner name={user.name} role={role} />
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        <ComingSoonCard title="Rectorat" icon={Building} />
-      </div>
+       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4 col-span-full">
+            <StatsCard />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Nombre total d'étudiants</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">12,405</div>
+                  <p className="text-xs text-muted-foreground">
+                    +150 depuis le dernier semestre
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Nombre total de professeurs</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">873</div>
+                  <p className="text-xs text-muted-foreground">
+                    +12 nouvelles recrues
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Cours actifs</CardTitle>
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">1,250</div>
+                <p className="text-xs text-muted-foreground">
+                  Tous départements confondus
+                </p>
+              </CardContent>
+            </Card>
+            <GlobalEventsCard />
+            <div className="sm:col-span-2 xl:col-span-4">
+              <AiReportCard role="admin"/>
+            </div>
+          </div>
     </div>
   );
 }
+
 
 
