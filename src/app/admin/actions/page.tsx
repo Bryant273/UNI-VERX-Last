@@ -35,7 +35,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  actionsData,
+  allActionsData as actionsData,
   statusConfig,
 } from '@/lib/actions-data';
 import { cn } from '@/lib/utils';
