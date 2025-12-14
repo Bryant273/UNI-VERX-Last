@@ -1,221 +1,252 @@
 
 'use client';
-
-import React, { useState, useMemo } from 'react';
-import {
-  FileText, Check, Download, Eye, X, MoreHorizontal, CheckCheck, FileUp, ListFilter, Clock
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { allStudentsData as profAllStudentsData, getGradeClass, calculateSubjectAverage, calculateGeneralAverage } from '@/lib/results-data-prof';
+import { Edit, Save, Eye, FileUp, FileDown, Lock, Unlock, TrendingUp, User, GraduationCap, X, BarChart2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { allBulletinsData, type Bulletin, type BulletinStatus } from '@/lib/bulletins-data';
 import { cn } from '@/lib/utils';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
-const ITEMS_PER_PAGE = 20;
 
-const statusConfig: Record<BulletinStatus, { label: string; color: string }> = {
-    draft: { label: 'Brouillon', color: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300' },
-    pending: { label: 'En attente', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' },
-    validated: { label: 'Validé', color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' },
-    published: { label: 'Publié', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' },
-    rejected: { label: 'Rejeté', color: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' },
-};
-
-const StatCard = ({ title, value, percentage, icon: Icon, color }: { title: string; value: number; percentage?: string; icon: React.ElementType, color: string }) => (
-    <Card className="hover-lift">
-        <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="flex items-baseline gap-2">
-                <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                {percentage && <p className="text-xs text-muted-foreground">{percentage}</p>}
-            </div>
-        </CardContent>
-    </Card>
-);
-
-export default function BulletinsPage() {
-    const [bulletins, setBulletins] = useState<Bulletin[]>(allBulletinsData);
-    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-    const [previewBulletin, setPreviewBulletin] = useState<Bulletin | null>(null);
-    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+const SaisieNotesTab = () => {
+    const [gradeClass, setGradeClass] = useState('l3-info');
+    const [gradeSubject, setGradeSubject] = useState('bdd');
+    const [evaluationType, setEvaluationType] = useState('examen');
+    const [currentStudents, setCurrentStudents] = useState(profAllStudentsData[gradeClass]);
+    const [editMode, setEditMode] = useState(false);
     const { toast } = useToast();
 
-    // Filters
-    const [classFilter, setClassFilter] = useState('all');
-    const [semesterFilter, setSemesterFilter] = useState('all');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    
-    const filteredBulletins = useMemo(() => {
-        return bulletins.filter(b => 
-            (classFilter === 'all' || b.class === classFilter) &&
-            (semesterFilter === 'all' || b.semester === semesterFilter) &&
-            (statusFilter === 'all' || b.status === statusFilter) &&
-            (b.studentName.toLowerCase().includes(searchTerm.toLowerCase()) || b.studentNumber.includes(searchTerm))
-        );
-    }, [bulletins, classFilter, semesterFilter, statusFilter, searchTerm]);
-    
-    const paginatedBulletins = useMemo(() => {
-        return filteredBulletins.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-    }, [filteredBulletins, currentPage]);
+    const evaluationCoeff = useMemo(() => {
+        const coefficients = { examen: 3, td: 1, tp: 2, qcm_moyenne: 2, devoir: 2, projet: 3, oral: 2 };
+        return coefficients[evaluationType] || 1;
+    }, [evaluationType]);
 
-    const stats = useMemo(() => {
-        const total = bulletins.length;
-        return {
-            total,
-            validated: bulletins.filter(b => b.status === 'validated').length,
-            pending: bulletins.filter(b => b.status === 'pending').length,
-            rejected: bulletins.filter(b => b.status === 'rejected').length
-        }
-    }, [bulletins]);
+    useEffect(() => {
+        setCurrentStudents(profAllStudentsData[gradeClass]);
+    }, [gradeClass]);
 
-    const handleSelect = (id: number) => {
-        const newSelection = new Set(selectedIds);
-        if (newSelection.has(id)) {
-            newSelection.delete(id);
-        } else {
-            newSelection.add(id);
-        }
-        setSelectedIds(newSelection);
-    }
-    
-    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.checked) {
-            setSelectedIds(new Set(paginatedBulletins.map(b => b.id)));
-        } else {
-            setSelectedIds(new Set());
-        }
-    }
+    const handleGradeChange = (studentId, newGrade) => {
+        setCurrentStudents(prev => prev.map(s => {
+            if (s.id === studentId) {
+                const updatedGrades = { ...s.grades };
+                if (!updatedGrades[gradeSubject]) updatedGrades[gradeSubject] = {};
+                updatedGrades[gradeSubject][evaluationType] = newGrade;
+                return { ...s, grades: updatedGrades };
+            }
+            return s;
+        }));
+    };
 
-    const handleAction = (ids: Set<number>, newStatus: BulletinStatus) => {
-        setBulletins(prev => prev.map(b => ids.has(b.id) ? { ...b, status: newStatus, lastUpdate: new Date() } : b));
-        toast({ title: 'Action effectuée', description: `${ids.size} bulletin(s) mis à jour.` });
-        setSelectedIds(new Set());
-        setIsBulkModalOpen(false);
-    }
+    const handleSaveAll = () => {
+        setCurrentStudents(prev => prev.map(s => {
+            const grade = s.grades[gradeSubject]?.[evaluationType];
+            if (grade !== null && grade !== undefined && grade !== '') {
+                if (!s.locked) s.locked = {};
+                s.locked[`${gradeSubject}_${evaluationType}`] = true;
+            }
+            return s;
+        }));
+        setEditMode(false);
+        toast({ title: "Notes sauvegardées", description: "Toutes les notes saisies ont été sauvegardées et verrouillées." });
+    };
+
+    const savedCount = useMemo(() => {
+        return currentStudents.filter(s => {
+            const grade = s.grades[gradeSubject]?.[evaluationType];
+            return grade !== null && grade !== undefined && grade !== '';
+        }).length;
+    }, [currentStudents, gradeSubject, evaluationType]);
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <StatCard title="Total Bulletins" value={stats.total} icon={FileText} color="text-blue-600" />
-                <StatCard title="Validés" value={stats.validated} percentage={`${((stats.validated / stats.total) * 100).toFixed(1)}%`} icon={CheckCheck} color="text-green-600" />
-                <StatCard title="En attente" value={stats.pending} percentage={`${((stats.pending / stats.total) * 100).toFixed(1)}%`} icon={Clock} color="text-amber-600" />
-                <StatCard title="Rejetés" value={stats.rejected} percentage={`${((stats.rejected / stats.total) * 100).toFixed(1)}%`} icon={X} color="text-red-600" />
-            </div>
-
-            {selectedIds.size > 0 && (
-                <Card className="bg-primary/10 border-primary/20 sticky top-2 z-10">
-                    <CardContent className="p-4 flex items-center justify-between">
-                         <p className="font-medium text-primary">{selectedIds.size} bulletin(s) sélectionné(s)</p>
-                         <div className="flex gap-2">
-                             <Button onClick={() => setIsBulkModalOpen(true)}>Actions en lot</Button>
-                             <Button variant="ghost" onClick={() => setSelectedIds(new Set())}>Annuler</Button>
-                         </div>
-                    </CardContent>
-                </Card>
-            )}
-
             <Card>
                 <CardHeader>
-                    <CardTitle>Filtrer les bulletins</CardTitle>
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                        <div>
+                            <CardTitle>Saisie des notes</CardTitle>
+                            <CardDescription>Saisissez et modifiez les notes de vos étudiants.</CardDescription>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            <Button variant="outline"><FileUp className="mr-2 h-4 w-4" /> Import/Export</Button>
+                            <Button onClick={handleSaveAll}><Save className="mr-2 h-4 w-4" /> Sauvegarder et Verrouiller</Button>
+                        </div>
+                    </div>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Select value={classFilter} onValueChange={setClassFilter}><SelectTrigger><SelectValue placeholder="Toutes les classes"/></SelectTrigger><SelectContent>{['all', 'l1-info', 'l2-info', 'l3-info', 'm1-info', 'm2-info'].map(c => <SelectItem key={c} value={c}>{c === 'all' ? 'Toutes les classes' : c.replace('-',' ').toUpperCase()}</SelectItem>)}</SelectContent></Select>
-                    <Select value={semesterFilter} onValueChange={setSemesterFilter}><SelectTrigger><SelectValue placeholder="Tous les semestres"/></SelectTrigger><SelectContent><SelectItem value="all">Tous</SelectItem><SelectItem value="S1">Semestre 1</SelectItem><SelectItem value="S2">Semestre 2</SelectItem></SelectContent></Select>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger><SelectValue placeholder="Tous les statuts"/></SelectTrigger><SelectContent><SelectItem value="all">Tous</SelectItem>{Object.entries(statusConfig).map(([k,v])=><SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent></Select>
-                    <Input placeholder="Rechercher étudiant..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <Select value={gradeClass} onValueChange={setGradeClass}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>{Object.keys(profAllStudentsData).map(c => <SelectItem key={c} value={c}>{c.replace('-',' ').toUpperCase()}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Select value={gradeSubject} onValueChange={setGradeSubject}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="bdd">Bases de Données</SelectItem>
+                            <SelectItem value="python">Programmation Python</SelectItem>
+                            <SelectItem value="algo">Algorithmique</SelectItem>
+                            <SelectItem value="web">Développement Web</SelectItem>
+                            <SelectItem value="projet">Projet Informatique</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={evaluationType} onValueChange={setEvaluationType}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="examen">Examen</SelectItem>
+                            <SelectItem value="td">TD noté</SelectItem>
+                            <SelectItem value="tp">TP noté</SelectItem>
+                            <SelectItem value="qcm_moyenne">Moyenne QCM</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <div><Input type="text" value={`Coefficient: ${evaluationCoeff}`} readOnly className="bg-muted/50 font-medium" /></div>
                 </CardContent>
             </Card>
-
+            
             <Card>
-                 <div className="overflow-x-auto">
+                <CardHeader>
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">Notes - {gradeClass.toUpperCase()} - {gradeSubject.toUpperCase()} - {evaluationType.replace('_', ' ').toUpperCase()}</h3>
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-muted-foreground">{savedCount} / {currentStudents.length} notes saisies</span>
+                            <Button variant="secondary" size="sm" onClick={() => setEditMode(e => !e)}>{editMode ? <Lock className="mr-2 h-4 w-4" /> : <Unlock className="mr-2 h-4 w-4" />}{editMode ? 'Quitter' : 'Modifier'}</Button>
+                        </div>
+                    </div>
+                </CardHeader>
+                <div className="overflow-x-auto">
                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead><Checkbox checked={selectedIds.size > 0 && paginatedBulletins.every(b => selectedIds.has(b.id))} onCheckedChange={(checked) => {
-                                    const newSelection = new Set(selectedIds);
-                                    paginatedBulletins.forEach(b => {
-                                        if (checked) newSelection.add(b.id);
-                                        else newSelection.delete(b.id);
-                                    });
-                                    setSelectedIds(newSelection);
-                                }} /></TableHead>
-                                <TableHead>Étudiant</TableHead>
-                                <TableHead>Classe</TableHead>
-                                <TableHead>Moyenne</TableHead>
-                                <TableHead>Statut</TableHead>
-                                <TableHead>Dernière MAJ</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
+                        <TableHeader><TableRow><TableHead>Étudiant</TableHead><TableHead>N° Étudiant</TableHead><TableHead>Note (/20)</TableHead><TableHead>Absence</TableHead><TableHead>Commentaire</TableHead></TableRow></TableHeader>
                         <TableBody>
-                            {paginatedBulletins.map(b => {
-                                const status = statusConfig[b.status];
+                            {currentStudents.map(student => {
+                                const isLocked = student.locked?.[`${gradeSubject}_${evaluationType}`] && !editMode;
+                                const grade = student.grades[gradeSubject]?.[evaluationType] ?? '';
                                 return (
-                                    <TableRow key={b.id} className={selectedIds.has(b.id) ? 'bg-primary/5' : ''}>
-                                        <TableCell><Checkbox checked={selectedIds.has(b.id)} onCheckedChange={() => handleSelect(b.id)}/></TableCell>
-                                        <TableCell>{b.studentName}<br/><span className="text-xs text-muted-foreground">{b.studentNumber}</span></TableCell>
-                                        <TableCell>{b.className} - {b.semester}</TableCell>
-                                        <TableCell className="font-bold">{b.average.toFixed(2)}</TableCell>
-                                        <TableCell><Badge variant="outline" className={cn("border-0", status.color)}>{status.label}</Badge></TableCell>
-                                        <TableCell>{b.lastUpdate.toLocaleDateString('fr-FR')}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => setPreviewBulletin(b)}><Eye /></Button>
-                                            <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
-                                        </TableCell>
-                                    </TableRow>
+                                <TableRow key={student.id}>
+                                    <TableCell className="font-medium">{student.name}</TableCell>
+                                    <TableCell className="text-muted-foreground">{student.number}</TableCell>
+                                    <TableCell>
+                                        {evaluationType === 'qcm_moyenne' ? (
+                                            <Input type="number" value={grade} readOnly className={cn("w-24 text-center bg-muted/50", grade && getGradeClass(grade))} />
+                                        ) : (
+                                            <Input type="number" min="0" max="20" step="0.5" defaultValue={grade} onChange={(e) => handleGradeChange(student.id, e.target.value)} disabled={isLocked} className={cn("w-24 text-center", grade && getGradeClass(grade))} />
+                                        )}
+                                    </TableCell>
+                                    <TableCell><Checkbox disabled={isLocked} /></TableCell>
+                                    <TableCell><Input placeholder="Commentaire..." disabled={isLocked} /></TableCell>
+                                </TableRow>
                                 )
                             })}
                         </TableBody>
                     </Table>
-                 </div>
-                 <CardFooter className="p-4 flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">Affichage de {paginatedBulletins.length} sur {filteredBulletins.length} bulletins</p>
-                    {/* Pagination here */}
-                 </CardFooter>
+                </div>
             </Card>
+        </div>
+    );
+};
 
-            <Dialog open={!!previewBulletin} onOpenChange={() => setPreviewBulletin(null)}>
-                <DialogContent className="max-w-4xl">
-                     <DialogHeader>
-                        <DialogTitle>Aperçu du bulletin - {previewBulletin?.studentName}</DialogTitle>
-                        <DialogDescription>L3 Informatique • Semestre 2 • 2024-2025</DialogDescription>
-                    </DialogHeader>
-                    {/* Content will be similar to student's view */}
-                    <p className="py-10 text-center">Le contenu détaillé du bulletin sera affiché ici.</p>
-                    <DialogFooter>
-                         <Button variant="ghost" onClick={() => setPreviewBulletin(null)}>Fermer</Button>
-                        <Button onClick={() => handleAction(new Set([previewBulletin!.id]), 'validated')}>Valider</Button>
-                        <Button onClick={() => handleAction(new Set([previewBulletin!.id]), 'published')}>Publier</Button>
-                        <Button variant="secondary"><Download className="mr-2"/>PDF</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <Dialog open={isBulkModalOpen} onOpenChange={setIsBulkModalOpen}>
-                <DialogContent>
-                     <DialogHeader>
-                        <DialogTitle>Actions en lot</DialogTitle>
-                        <DialogDescription>{selectedIds.size} bulletin(s) sélectionné(s).</DialogDescription>
-                    </DialogHeader>
-                    <div className="grid grid-cols-2 gap-4 py-4">
-                        <Button variant="outline" onClick={() => handleAction(selectedIds, 'validated')}><CheckCheck className="mr-2" />Valider la sélection</Button>
-                        <Button variant="outline" onClick={() => handleAction(selectedIds, 'published')}><FileUp className="mr-2" />Publier la sélection</Button>
-                        <Button variant="outline" onClick={() => handleAction(selectedIds, 'rejected')} className="text-destructive hover:text-destructive"><X className="mr-2" />Rejeter la sélection</Button>
-                        <Button variant="outline"><Download className="mr-2"/>Exporter en PDF</Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+const ResultatsTab = () => {
+    const [students, setStudents] = useState(profAllStudentsData['l3-info']);
+    const [selectedClass, setSelectedClass] = useState('l3-info');
+    const [selectedSubject, setSelectedSubject] = useState('all');
+
+    const stats = useMemo(() => {
+        const studentsWithAverages = students.map(s => ({
+            ...s,
+            average: selectedSubject === 'all' 
+                ? calculateGeneralAverage(s.grades) 
+                : calculateSubjectAverage(s.grades, selectedSubject)
+        })).filter(s => s.average !== null);
+        
+        if (studentsWithAverages.length === 0) return { avg: 'N/A', min: 'N/A', max: 'N/A' };
+
+        const avg = (studentsWithAverages.reduce((acc, s) => acc + s.average, 0) / studentsWithAverages.length).toFixed(2);
+        const min = Math.min(...studentsWithAverages.map(s => s.average)).toFixed(2);
+        const max = Math.max(...studentsWithAverages.map(s => s.average)).toFixed(2);
+        return { avg, min, max };
+    }, [students, selectedSubject]);
+
+    const rankedStudents = useMemo(() => {
+        return students.map(s => ({
+            ...s,
+            average: selectedSubject === 'all' 
+                ? calculateGeneralAverage(s.grades) 
+                : calculateSubjectAverage(s.grades, selectedSubject)
+        })).sort((a,b) => (b.average ?? 0) - (a.average ?? 0));
+    }, [students, selectedSubject]);
+
+    return (
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card><CardHeader><CardTitle className="text-sm font-medium">Étudiants</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{students.length}</p></CardContent></Card>
+                <Card><CardHeader><CardTitle className="text-sm font-medium">Moyenne Classe</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{stats.avg}</p></CardContent></Card>
+                <Card><CardHeader><CardTitle className="text-sm font-medium">Note Minimale</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-red-600">{stats.min}</p></CardContent></Card>
+                <Card><CardHeader><CardTitle className="text-sm font-medium">Note Maximale</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{stats.max}</p></CardContent></Card>
+            </div>
+            <Card>
+                 <CardHeader>
+                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <CardTitle>Classement des étudiants</CardTitle>
+                            <CardDescription>Consultez les moyennes et le classement de vos étudiants.</CardDescription>
+                        </div>
+                        <div className="flex gap-3">
+                            <Select value={selectedClass} onValueChange={(v) => { setSelectedClass(v); setStudents(profAllStudentsData[v]); }}>
+                                <SelectTrigger className="w-[180px]"><SelectValue/></SelectTrigger>
+                                <SelectContent>{Object.keys(profAllStudentsData).map(c => <SelectItem key={c} value={c}>{c.replace('-',' ').toUpperCase()}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                                <SelectTrigger className="w-[180px]"><SelectValue/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Toutes les matières</SelectItem>
+                                    <SelectItem value="bdd">Bases de Données</SelectItem>
+                                    <SelectItem value="python">Python</SelectItem>
+                                    <SelectItem value="algo">Algorithmique</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                     </div>
+                 </CardHeader>
+                 <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Rang</TableHead><TableHead>Étudiant</TableHead><TableHead>Moyenne</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                            {rankedStudents.map((student, index) => (
+                                <TableRow key={student.id}>
+                                    <TableCell className="font-bold w-16 text-center">{index + 1}</TableCell>
+                                    <TableCell className="font-medium">{student.name}</TableCell>
+                                    <TableCell className={cn("font-bold", student.average !== null ? getGradeClass(student.average) : '')}>{student.average?.toFixed(2) ?? 'N/A'}</TableCell>
+                                    <TableCell><Button variant="ghost" size="icon"><Eye className="h-4 w-4"/></Button></TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                 </div>
+            </Card>
+        </div>
+    )
+}
+
+export default function AcademicAdvisorResultsPage() {
+    return (
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Notes & Résultats</CardTitle>
+                    <CardDescription>Saisissez les notes, consultez les résultats des étudiants et gérez les bulletins.</CardDescription>
+                </CardHeader>
+            </Card>
+            <Tabs defaultValue="saisie">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="saisie"><Edit className="mr-2" /> Saisie des notes</TabsTrigger>
+                    <TabsTrigger value="resultats"><BarChart2 className="mr-2" /> Résultats & Classement</TabsTrigger>
+                </TabsList>
+                <TabsContent value="saisie" className="mt-4"><SaisieNotesTab /></TabsContent>
+                <TabsContent value="resultats" className="mt-4"><ResultatsTab /></TabsContent>
+            </Tabs>
         </div>
     )
 }
