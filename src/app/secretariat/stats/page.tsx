@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useTransition } from 'react';
@@ -41,7 +42,7 @@ import {
   Line,
   Legend,
   PieChart as RechartsPieChart,
-  Pie,
+  Pie as RechartsPie,
   Cell,
 } from 'recharts';
 import { getStatsDataForYear } from '@/lib/stats-data';
