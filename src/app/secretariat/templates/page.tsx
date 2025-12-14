@@ -122,6 +122,9 @@ export default function TemplatesPage() {
                   </TableCell>
                   <TableCell>{template.lastModified || 'N/A'}</TableCell>
                   <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => handleOpenModal(template)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
                     <Button variant="outline" size="sm" onClick={() => handleOpenModal(template)}>
                       <Palette className="mr-2 h-4 w-4" />
                       {template.isCustomized ? 'Modifier' : 'Personnaliser'}
@@ -199,4 +202,3 @@ export default function TemplatesPage() {
     </div>
   );
 }
-
