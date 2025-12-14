@@ -19,6 +19,7 @@ export interface Student {
     ranking: number;
     totalStudents: number;
     passStatus: "Admis" | "Ajournement";
+    folderStatus: "complet" | "incomplet" | "en attente";
     academicResults: {
         s1: Array<{ ue: string; module: string; grade: string; credits: number; validated: number }>;
         s2: Array<{ ue: string; module: string; grade: string; credits: number; validated: number }>;
@@ -47,6 +48,7 @@ export const studentsData: Student[] = [
         ranking: 1,
         totalStudents: 67,
         passStatus: "Admis",
+        folderStatus: "complet",
         academicResults: {
             s1: [
                 { ue: "UE: Programmation", module: "Algorithmique avancée", grade: "18,5/20", credits: 6, validated: 6 },
@@ -88,6 +90,7 @@ export const studentsData: Student[] = [
         ranking: 3,
         totalStudents: 54,
         passStatus: "Admis",
+        folderStatus: "incomplet",
         academicResults: {
             s1: [
                 { ue: "UE: Programmation", module: "Algorithmique avancée", grade: "17,0/20", credits: 6, validated: 6 },
@@ -120,6 +123,7 @@ export const studentsData: Student[] = [
         ranking: 12,
         totalStudents: 72,
         passStatus: "Admis",
+        folderStatus: "complet",
          academicResults: {
             s1: [
                 { ue: "UE: Programmation", module: "Programmation", grade: "15,0/20", credits: 4, validated: 4 },
@@ -152,6 +156,7 @@ export const studentsData: Student[] = [
         ranking: 2,
         totalStudents: 67,
         passStatus: "Admis",
+        folderStatus: "en attente",
         academicResults: {
              s1: [{ ue: "UE: Programmation", module: "Algorithmique avancée", grade: "18,0/20", credits: 6, validated: 6 }],
              s2: [{ ue: "UE: Développement Avancé", module: "Développement web", grade: "19,0/20", credits: 4, validated: 4 }]
@@ -178,6 +183,7 @@ export const studentsData: Student[] = [
         ranking: 45,
         totalStudents: 58,
         passStatus: "Ajournement",
+        folderStatus: "incomplet",
         academicResults: {
              s1: [{ ue: "UE: Programmation", module: "Algorithmique avancée", grade: "10,5/20", credits: 6, validated: 6 }],
              s2: [{ ue: "UE: Technologies Avancées", module: "Intelligence artificielle", grade: "8,0/20", credits: 6, validated: 0 }]
@@ -203,6 +209,11 @@ for (let i = 6; i <= 185; i++) {
     if (average >= 16) status = 'excellent';
     else if (average >= 13) status = 'good';
     else if (average < 10 || attendance < 80) status = 'difficulty';
+    
+    let folderStatus: Student['folderStatus'] = 'complet';
+    if (i % 3 === 0) folderStatus = 'incomplet';
+    if (i % 7 === 0) folderStatus = 'en attente';
+
 
     const classOptions = ['l1-info', 'l2-info', 'l3-info', 'm1-info', 'm2-info'];
     const randomClass = classOptions[i % classOptions.length];
@@ -227,6 +238,7 @@ for (let i = 6; i <= 185; i++) {
         ranking: 2 + (i % 80),
         totalStudents: 82,
         passStatus: average >= 10 ? 'Admis' : 'Ajournement',
+        folderStatus: folderStatus,
         academicResults: {s1:[], s2:[]},
         juryComments: 'Résultats en ligne avec la moyenne de la promotion.'
     });
