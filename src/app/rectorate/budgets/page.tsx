@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -23,6 +24,7 @@ import { budgetData, type BudgetItem } from '@/lib/budgets-data';
 import { allIncomes } from '@/lib/treasury-data';
 import { allExpenses } from '@/lib/treasury-data';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 const StatCard = ({ title, value, change, icon: Icon, color }: { title: string, value: string, change: string, icon: React.ElementType, color: string }) => (
     <Card>
