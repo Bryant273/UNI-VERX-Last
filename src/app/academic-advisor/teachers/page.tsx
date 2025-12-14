@@ -14,6 +14,7 @@ import {
   MessageSquare,
   FileText,
   User as UserIcon,
+  Pointer
 } from 'lucide-react';
 import {
   Card,
@@ -57,17 +58,21 @@ const ITEMS_PER_PAGE = 15;
 
 export default function AcademicAdvisorTeachersPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [specialtyFilter, setSpecialtyFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [specialtyFilter, setSpecialtyFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTeachers, setSelectedTeachers] = useState<number[]>([]);
 
+  const isFiltered = searchTerm || specialtyFilter || statusFilter;
+
   const filteredAndSortedTeachers = useMemo(() => {
+    if (!isFiltered) return [];
+
     let filtered = teachersData.filter(
       (teacher) =>
-        (specialtyFilter === 'all' || teacher.specialty === specialtyFilter) &&
-        (statusFilter === 'all' || teacher.status === statusFilter) &&
+        (!specialtyFilter || teacher.specialty === specialtyFilter) &&
+        (!statusFilter || teacher.status === statusFilter) &&
         (teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           teacher.email.toLowerCase().includes(searchTerm.toLowerCase()))
     );
@@ -82,7 +87,7 @@ export default function AcademicAdvisorTeachersPage() {
     });
 
     return filtered;
-  }, [searchTerm, specialtyFilter, statusFilter, sortBy]);
+  }, [searchTerm, specialtyFilter, statusFilter, sortBy, isFiltered]);
 
   const totalPages = Math.ceil(filteredAndSortedTeachers.length / ITEMS_PER_PAGE);
   const paginatedTeachers = filteredAndSortedTeachers.slice(
@@ -110,12 +115,13 @@ export default function AcademicAdvisorTeachersPage() {
   };
   
   const stats = useMemo(() => {
-    const total = filteredAndSortedTeachers.length;
-    const active = filteredAndSortedTeachers.filter(t => t.status === 'active').length;
-    const avgEvaluation = (filteredAndSortedTeachers.reduce((acc, t) => acc + t.evaluation, 0) / total).toFixed(2);
-    const totalPublications = filteredAndSortedTeachers.reduce((acc, t) => acc + t.publications, 0);
+    const dataToUse = isFiltered ? filteredAndSortedTeachers : teachersData;
+    const total = dataToUse.length;
+    const active = dataToUse.filter(t => t.status === 'active').length;
+    const avgEvaluation = (dataToUse.reduce((acc, t) => acc + t.evaluation, 0) / total).toFixed(2);
+    const totalPublications = dataToUse.reduce((acc, t) => acc + t.publications, 0);
     return { total, active, avgEvaluation, totalPublications };
-  }, [filteredAndSortedTeachers]);
+  }, [filteredAndSortedTeachers, isFiltered]);
 
   return (
     <div className="space-y-6">
@@ -142,54 +148,62 @@ export default function AcademicAdvisorTeachersPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                 <Input placeholder="Rechercher par nom ou email..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/>
               </div>
-              <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}><SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Spécialité" /></SelectTrigger><SelectContent><SelectItem value="all">Toutes les spécialités</SelectItem><SelectItem value="computer-science">Informatique</SelectItem><SelectItem value="mathematics">Mathématiques</SelectItem><SelectItem value="physics">Physique</SelectItem><SelectItem value="statistics">Statistiques</SelectItem></SelectContent></Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Statut"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem><SelectItem value="active">Actif</SelectItem><SelectItem value="sabbatical">En congé</SelectItem><SelectItem value="temporary">Temporaire</SelectItem></SelectContent></Select>
+              <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}><SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Spécialité" /></SelectTrigger><SelectContent><SelectItem value="">Toutes les spécialités</SelectItem><SelectItem value="computer-science">Informatique</SelectItem><SelectItem value="mathematics">Mathématiques</SelectItem><SelectItem value="physics">Physique</SelectItem><SelectItem value="statistics">Statistiques</SelectItem></SelectContent></Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Statut"/></SelectTrigger><SelectContent><SelectItem value="">Tous les statuts</SelectItem><SelectItem value="active">Actif</SelectItem><SelectItem value="sabbatical">En congé</SelectItem><SelectItem value="temporary">Temporaire</SelectItem></SelectContent></Select>
               <Select value={sortBy} onValueChange={setSortBy}><SelectTrigger className="w-full md:w-[180px]"><div className="flex items-center gap-2"><ChevronsUpDown className="h-4 w-4"/><span>Trier par</span></div></SelectTrigger><SelectContent><SelectItem value="name">Nom</SelectItem><SelectItem value="evaluation">Évaluation</SelectItem><SelectItem value="courses">Nb. cours</SelectItem><SelectItem value="specialty">Spécialité</SelectItem></SelectContent></Select>
           </div>
         </CardHeader>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead padding="checkbox"><Checkbox checked={selectedTeachers.length > 0 && selectedTeachers.length === paginatedTeachers.length} onCheckedChange={handleSelectAll} /></TableHead>
-                <TableHead>Enseignant</TableHead><TableHead>Spécialité</TableHead><TableHead>Cours</TableHead><TableHead>Publications</TableHead><TableHead>Évaluation</TableHead><TableHead>Statut</TableHead><TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedTeachers.map(teacher => {
-                const isSelected = selectedTeachers.includes(teacher.id);
-                const statusConfig = getStatusConfig(teacher.status);
-                return (
-                    <TableRow key={teacher.id} data-state={isSelected ? 'selected' : undefined}>
-                        <TableCell padding="checkbox"><Checkbox checked={isSelected} onCheckedChange={() => handleSelectTeacher(teacher.id)}/></TableCell>
-                        <TableCell>
-                            <div className="flex items-center gap-3">
-                                <Avatar><AvatarImage src={`https://i.pravatar.cc/100?img=${teacher.avatar}`} /><AvatarFallback>{getInitials(teacher.name)}</AvatarFallback></Avatar>
-                                <div><p className="font-medium">{teacher.name}</p><p className="text-xs text-muted-foreground">{teacher.email}</p></div>
-                            </div>
-                        </TableCell>
-                        <TableCell>{getSpecialtyConfig(teacher.specialty)}</TableCell>
-                        <TableCell>{teacher.courses}</TableCell>
-                        <TableCell>{teacher.publications}</TableCell>
-                        <TableCell><p className="font-semibold">{teacher.evaluation}/5</p></TableCell>
-                        <TableCell><Badge variant="outline" className={cn("border-0", statusConfig.color)}>{statusConfig.label}</Badge></TableCell>
-                        <TableCell className="text-right">
-                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><ChevronDown/></Button></DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem><UserIcon className="mr-2"/>Voir le profil</DropdownMenuItem>
-                                <DropdownMenuItem><BookOpen className="mr-2"/>Voir les cours</DropdownMenuItem>
-                                <DropdownMenuItem><FileText className="mr-2"/>Consulter le dossier</DropdownMenuItem>
-                                <DropdownMenuItem><MessageSquare className="mr-2"/>Envoyer un message</DropdownMenuItem>
-                            </DropdownMenuContent>
-                           </DropdownMenu>
-                        </TableCell>
-                    </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </div>
+        {isFiltered ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead padding="checkbox"><Checkbox checked={selectedTeachers.length > 0 && selectedTeachers.length === paginatedTeachers.length} onCheckedChange={handleSelectAll} /></TableHead>
+                    <TableHead>Enseignant</TableHead><TableHead>Spécialité</TableHead><TableHead>Cours</TableHead><TableHead>Publications</TableHead><TableHead>Évaluation</TableHead><TableHead>Statut</TableHead><TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedTeachers.map(teacher => {
+                    const isSelected = selectedTeachers.includes(teacher.id);
+                    const statusConfig = getStatusConfig(teacher.status);
+                    return (
+                        <TableRow key={teacher.id} data-state={isSelected ? 'selected' : undefined}>
+                            <TableCell padding="checkbox"><Checkbox checked={isSelected} onCheckedChange={() => handleSelectTeacher(teacher.id)}/></TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-3">
+                                    <Avatar><AvatarImage src={`https://i.pravatar.cc/100?img=${teacher.avatar}`} /><AvatarFallback>{getInitials(teacher.name)}</AvatarFallback></Avatar>
+                                    <div><p className="font-medium">{teacher.name}</p><p className="text-xs text-muted-foreground">{teacher.email}</p></div>
+                                </div>
+                            </TableCell>
+                            <TableCell>{getSpecialtyConfig(teacher.specialty)}</TableCell>
+                            <TableCell>{teacher.courses}</TableCell>
+                            <TableCell>{teacher.publications}</TableCell>
+                            <TableCell><p className="font-semibold">{teacher.evaluation}/5</p></TableCell>
+                            <TableCell><Badge variant="outline" className={cn("border-0", statusConfig.color)}>{statusConfig.label}</Badge></TableCell>
+                            <TableCell className="text-right">
+                               <DropdownMenu>
+                                <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><ChevronDown/></Button></DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem><UserIcon className="mr-2"/>Voir le profil</DropdownMenuItem>
+                                    <DropdownMenuItem><BookOpen className="mr-2"/>Voir les cours</DropdownMenuItem>
+                                    <DropdownMenuItem><FileText className="mr-2"/>Consulter le dossier</DropdownMenuItem>
+                                    <DropdownMenuItem><MessageSquare className="mr-2"/>Envoyer un message</DropdownMenuItem>
+                                </DropdownMenuContent>
+                               </DropdownMenu>
+                            </TableCell>
+                        </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+        ) : (
+             <CardContent className="flex flex-col items-center justify-center p-12 text-center bg-muted/50 border-2 border-dashed m-6">
+                <Pointer className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold">Consulter les dossiers enseignants</h3>
+                <p className="text-muted-foreground mt-2">Veuillez utiliser la barre de recherche ou les filtres pour afficher la liste des enseignants.</p>
+            </CardContent>
+        )}
         <CardFooter className="flex items-center justify-between p-4">
             <p className="text-sm text-muted-foreground">
                 Affichage de {paginatedTeachers.length} sur {filteredAndSortedTeachers.length} enseignants

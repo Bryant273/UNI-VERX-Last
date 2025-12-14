@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -32,6 +31,7 @@ import {
   Globe,
   BookOpen,
   LayoutGrid,
+  Pointer
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -106,22 +106,25 @@ const coursesWithStatus = courseDocuments.map((doc, index) => ({
 
 const CoursesTab = () => {
     const [courses, setCourses] = useState(coursesWithStatus);
-    const [levelFilter, setLevelFilter] = useState('all');
-    const [classFilter, setClassFilter] = useState('all');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [teacherFilter, setTeacherFilter] = useState('all');
+    const [levelFilter, setLevelFilter] = useState('');
+    const [classFilter, setClassFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [teacherFilter, setTeacherFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const { onOpen } = useCourseModal();
     const [actionState, setActionState] = useState<{type: 'delete' | 'validate' | 'reject' | null, course: any}>({type: null, course: null});
 
+    const isFiltered = levelFilter || classFilter || statusFilter || teacherFilter;
+
     const filteredCourses = useMemo(() => {
+        if (!isFiltered) return [];
         return courses.filter(c => 
-            (levelFilter === 'all' || c.level === levelFilter) &&
-            (classFilter === 'all' || c.class === classFilter) &&
-            (statusFilter === 'all' || c.status === statusFilter) &&
-            (teacherFilter === 'all' || c.uploader === teacherFilter)
+            (!levelFilter || c.level === levelFilter) &&
+            (!classFilter || c.class === classFilter) &&
+            (!statusFilter || c.status === statusFilter) &&
+            (!teacherFilter || c.uploader === teacherFilter)
         );
-    }, [courses, levelFilter, classFilter, statusFilter, teacherFilter]);
+    }, [courses, levelFilter, classFilter, statusFilter, teacherFilter, isFiltered]);
 
     const paginatedCourses = useMemo(() => {
         return filteredCourses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -129,7 +132,7 @@ const CoursesTab = () => {
 
     const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
 
-    const uniqueTeachers = useMemo(() => ['all', ...Array.from(new Set(courses.map(c => c.uploader)))], [courses]);
+    const uniqueTeachers = useMemo(() => ['', ...Array.from(new Set(courses.map(c => c.uploader)))], [courses]);
 
     const handleAction = (course: any, type: 'delete' | 'validate' | 'reject') => {
         setActionState({ type, course });
@@ -156,69 +159,77 @@ const CoursesTab = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                        <Select value={teacherFilter} onValueChange={setTeacherFilter}><SelectTrigger><SelectValue placeholder="Tous les enseignants"/></SelectTrigger><SelectContent>{uniqueTeachers.map(t => <SelectItem key={t} value={t}>{t === 'all' ? 'Tous les enseignants' : t}</SelectItem>)}</SelectContent></Select>
-                        <Select value={levelFilter} onValueChange={setLevelFilter}><SelectTrigger><SelectValue placeholder="Tous les niveaux"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les niveaux</SelectItem><SelectItem value="L1">Licence 1</SelectItem><SelectItem value="L2">Licence 2</SelectItem><SelectItem value="L3">Licence 3</SelectItem><SelectItem value="M1">Master 1</SelectItem><SelectItem value="M2">Master 2</SelectItem></SelectContent></Select>
-                        <Select value={classFilter} onValueChange={setClassFilter}><SelectTrigger><SelectValue placeholder="Toutes les filières"/></SelectTrigger><SelectContent><SelectItem value="all">Toutes les filières</SelectItem><SelectItem value="INFO">Informatique</SelectItem><SelectItem value="MATH">Mathématiques</SelectItem><SelectItem value="PHYS">Physique</SelectItem><SelectItem value="ELEC">Électronique</SelectItem></SelectContent></Select>
-                        <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger><SelectValue placeholder="Tous les statuts"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem>{Object.entries(statusConfig).map(([key, {text}]) => <SelectItem key={key} value={key}>{text}</SelectItem>)}</SelectContent></Select>
+                        <Select value={teacherFilter} onValueChange={setTeacherFilter}><SelectTrigger><SelectValue placeholder="Tous les enseignants"/></SelectTrigger><SelectContent>{uniqueTeachers.map(t => <SelectItem key={t} value={t}>{t === '' ? 'Tous les enseignants' : t}</SelectItem>)}</SelectContent></Select>
+                        <Select value={levelFilter} onValueChange={setLevelFilter}><SelectTrigger><SelectValue placeholder="Tous les niveaux"/></SelectTrigger><SelectContent><SelectItem value="">Tous les niveaux</SelectItem><SelectItem value="L1">Licence 1</SelectItem><SelectItem value="L2">Licence 2</SelectItem><SelectItem value="L3">Licence 3</SelectItem><SelectItem value="M1">Master 1</SelectItem><SelectItem value="M2">Master 2</SelectItem></SelectContent></Select>
+                        <Select value={classFilter} onValueChange={setClassFilter}><SelectTrigger><SelectValue placeholder="Toutes les filières"/></SelectTrigger><SelectContent><SelectItem value="">Toutes les filières</SelectItem><SelectItem value="INFO">Informatique</SelectItem><SelectItem value="MATH">Mathématiques</SelectItem><SelectItem value="PHYS">Physique</SelectItem><SelectItem value="ELEC">Électronique</SelectItem></SelectContent></Select>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger><SelectValue placeholder="Tous les statuts"/></SelectTrigger><SelectContent><SelectItem value="">Tous les statuts</SelectItem>{Object.entries(statusConfig).map(([key, {text}]) => <SelectItem key={key} value={key}>{text}</SelectItem>)}</SelectContent></Select>
                     </div>
                 </CardContent>
             </Card>
 
-            <Card>
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Publication</TableHead>
-                                <TableHead>Enseignant</TableHead>
-                                <TableHead>Niveau/Filière</TableHead>
-                                <TableHead>Module</TableHead>
-                                <TableHead>Document</TableHead>
-                                <TableHead>Statut</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {paginatedCourses.map((course) => {
-                                const status = statusConfig[course.status];
-                                return (
-                                    <TableRow key={course.id} className="even:bg-muted/40">
-                                        <TableCell className="text-sm text-muted-foreground">{course.date}</TableCell>
-                                        <TableCell className="font-medium">{course.uploader}</TableCell>
-                                        <TableCell>{course.level} {course.class}</TableCell>
-                                        <TableCell>{course.module}</TableCell>
-                                        <TableCell><div className="flex items-center gap-2"><FileTypeIcon type={course.type} /> <span>{course.documentName}</span></div></TableCell>
-                                        <TableCell><Badge variant="outline" className={cn("border-0", status.color)}><status.icon className="mr-1.5 h-3.5 w-3.5" />{status.text}</Badge></TableCell>
-                                        <TableCell className="text-right">
-                                            <TooltipProvider>
-                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Eye/></Button></TooltipTrigger><TooltipContent><p>Voir</p></TooltipContent></Tooltip>
-                                                {course.status === 'pending' && (
-                                                    <>
-                                                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'validate')}><Check/></Button></TooltipTrigger><TooltipContent><p>Valider</p></TooltipContent></Tooltip>
-                                                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'reject')} className="text-destructive hover:text-destructive"><XCircle/></Button></TooltipTrigger><TooltipContent><p>Rejeter</p></TooltipContent></Tooltip>
-                                                    </>
-                                                )}
-                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => onOpen(course)}><Edit/></Button></TooltipTrigger><TooltipContent><p>Modifier</p></TooltipContent></Tooltip>
-                                                <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'delete')} className="text-destructive hover:text-destructive"><Trash2/></Button></TooltipTrigger><TooltipContent><p>Supprimer</p></TooltipContent></Tooltip>
-                                            </TooltipProvider>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            })}
-                        </TableBody>
-                    </Table>
-                </div>
-                <CardFooter className="p-4 flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">Affichage de {paginatedCourses.length} sur {filteredCourses.length} cours</p>
-                    {totalPages > 1 && (
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
-                            <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
-                            <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
-                        </div>
-                    )}
-                </CardFooter>
-            </Card>
+            {isFiltered ? (
+                <Card>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Publication</TableHead>
+                                    <TableHead>Enseignant</TableHead>
+                                    <TableHead>Niveau/Filière</TableHead>
+                                    <TableHead>Module</TableHead>
+                                    <TableHead>Document</TableHead>
+                                    <TableHead>Statut</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {paginatedCourses.map((course) => {
+                                    const status = statusConfig[course.status];
+                                    return (
+                                        <TableRow key={course.id} className="even:bg-muted/40">
+                                            <TableCell className="text-sm text-muted-foreground">{course.date}</TableCell>
+                                            <TableCell className="font-medium">{course.uploader}</TableCell>
+                                            <TableCell>{course.level} {course.class}</TableCell>
+                                            <TableCell>{course.module}</TableCell>
+                                            <TableCell><div className="flex items-center gap-2"><FileTypeIcon type={course.type} /> <span>{course.documentName}</span></div></TableCell>
+                                            <TableCell><Badge variant="outline" className={cn("border-0", status.color)}><status.icon className="mr-1.5 h-3.5 w-3.5" />{status.text}</Badge></TableCell>
+                                            <TableCell className="text-right">
+                                                <TooltipProvider>
+                                                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon"><Eye/></Button></TooltipTrigger><TooltipContent><p>Voir</p></TooltipContent></Tooltip>
+                                                    {course.status === 'pending' && (
+                                                        <>
+                                                        <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'validate')}><Check/></Button></TooltipTrigger><TooltipContent><p>Valider</p></TooltipContent></Tooltip>
+                                                        <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'reject')} className="text-destructive hover:text-destructive"><XCircle/></Button></TooltipTrigger><TooltipContent><p>Rejeter</p></TooltipContent></Tooltip>
+                                                        </>
+                                                    )}
+                                                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => onOpen(course)}><Edit/></Button></TooltipTrigger><TooltipContent><p>Modifier</p></TooltipContent></Tooltip>
+                                                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleAction(course, 'delete')} className="text-destructive hover:text-destructive"><Trash2/></Button></TooltipTrigger><TooltipContent><p>Supprimer</p></TooltipContent></Tooltip>
+                                                </TooltipProvider>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
+                            </TableBody>
+                        </Table>
+                    </div>
+                    <CardFooter className="p-4 flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">Affichage de {paginatedCourses.length} sur {filteredCourses.length} cours</p>
+                        {totalPages > 1 && (
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
+                                <span className="text-sm font-medium">Page {currentPage} sur {totalPages}</span>
+                                <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
+                            </div>
+                        )}
+                    </CardFooter>
+                </Card>
+            ) : (
+                <Card className="flex flex-col items-center justify-center p-12 text-center bg-muted/50 border-2 border-dashed">
+                    <Pointer className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-semibold">Consulter les cours</h3>
+                    <p className="text-muted-foreground mt-2">Veuillez sélectionner au moins un filtre pour afficher la liste des documents de cours.</p>
+                </Card>
+            )}
             
             <Dialog open={!!actionState.type} onOpenChange={() => setActionState({type: null, course: null})}>
                 <DialogContent className="sm:max-w-md">
@@ -248,11 +259,15 @@ const CoursesTab = () => {
 }
 
 const ProgrammesTab = () => {
-    const [semesterFilter, setSemesterFilter] = useState('annual');
-    const [classFilter, setClassFilter] = useState('info-l3');
+    const [semesterFilter, setSemesterFilter] = useState('');
+    const [classFilter, setClassFilter] = useState('');
     const [isAddModuleModalOpen, setIsAddModuleModalOpen] = useState(false);
 
+    const isFiltered = semesterFilter && classFilter;
+
     const programData = useMemo(() => {
+        if (!isFiltered) return {};
+
         let courses = [];
         if (semesterFilter === 's1' || semesterFilter === 'annual') {
             courses.push(...semesterResults.s1.courses);
@@ -268,7 +283,7 @@ const ProgrammesTab = () => {
             acc[course.ue].push(course);
             return acc;
         }, {} as Record<string, typeof semesterResults.s1.courses>);
-    }, [semesterFilter, classFilter]);
+    }, [semesterFilter, classFilter, isFiltered]);
     
     const handleAddModule = (e: React.FormEvent) => {
         e.preventDefault();
@@ -287,14 +302,14 @@ const ProgrammesTab = () => {
                         </div>
                          <div className="flex flex-wrap items-center gap-3">
                             <Select value={classFilter} onValueChange={setClassFilter}>
-                                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
+                                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="Sélectionnez une filière" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="info-l3">Info L3</SelectItem>
                                     <SelectItem value="math-l2">Math L2</SelectItem>
                                 </SelectContent>
                              </Select>
                              <Select value={semesterFilter} onValueChange={setSemesterFilter}>
-                                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
+                                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="Sélectionnez un semestre" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="annual">Annuel</SelectItem>
                                     <SelectItem value="s1">Semestre 1</SelectItem>
@@ -312,54 +327,63 @@ const ProgrammesTab = () => {
                 </CardFooter>
             </Card>
 
-            <Accordion type="multiple" defaultValue={Object.keys(programData)} className="w-full space-y-4">
-                {Object.entries(programData).map(([ue, courses]) => (
-                    <AccordionItem key={ue} value={ue} className="border-0">
-                        <Card>
-                            <AccordionTrigger className="p-6 hover:no-underline">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-3 bg-primary/10 rounded-lg text-primary"><BookOpen /></div>
-                                    <div>
-                                        <h3 className="text-base font-semibold text-left">{ue}</h3>
-                                        <p className="text-sm text-muted-foreground text-left">{courses.length} modules</p>
+            {isFiltered ? (
+                <Accordion type="multiple" defaultValue={Object.keys(programData)} className="w-full space-y-4">
+                    {Object.entries(programData).map(([ue, courses]) => (
+                        <AccordionItem key={ue} value={ue} className="border-0">
+                            <Card>
+                                <AccordionTrigger className="p-6 hover:no-underline">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-3 bg-primary/10 rounded-lg text-primary"><BookOpen /></div>
+                                        <div>
+                                            <h3 className="text-base font-semibold text-left">{ue}</h3>
+                                            <p className="text-sm text-muted-foreground text-left">{courses.length} modules</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-0">
-                                <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Module</TableHead>
-                                                <TableHead>Crédits</TableHead>
-                                                <TableHead>Syllabus</TableHead>
-                                                <TableHead className="text-right">Actions</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {courses.map(course => (
-                                                <TableRow key={course.id}>
-                                                    <TableCell className="font-medium">{course.module}</TableCell>
-                                                    <TableCell>{course.creditsToValidate}</TableCell>
-                                                    <TableCell>
-                                                        <Button variant="link" className="p-0 h-auto">
-                                                            Voir le syllabus
-                                                        </Button>
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8"><Edit/></Button>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2/></Button>
-                                                    </TableCell>
+                                </AccordionTrigger>
+                                <AccordionContent className="p-0">
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Module</TableHead>
+                                                    <TableHead>Crédits</TableHead>
+                                                    <TableHead>Syllabus</TableHead>
+                                                    <TableHead className="text-right">Actions</TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </AccordionContent>
-                        </Card>
-                    </AccordionItem>
-                ))}
-            </Accordion>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {courses.map(course => (
+                                                    <TableRow key={course.id}>
+                                                        <TableCell className="font-medium">{course.module}</TableCell>
+                                                        <TableCell>{course.creditsToValidate}</TableCell>
+                                                        <TableCell>
+                                                            <Button variant="link" className="p-0 h-auto">
+                                                                Voir le syllabus
+                                                            </Button>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8"><Edit/></Button>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2/></Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </AccordionContent>
+                            </Card>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            ) : (
+                <Card className="flex flex-col items-center justify-center p-12 text-center bg-muted/50 border-2 border-dashed">
+                    <Pointer className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-semibold">Consulter les programmes</h3>
+                    <p className="text-muted-foreground mt-2">Veuillez sélectionner une filière et un semestre pour afficher la maquette du programme.</p>
+                </Card>
+            )}
+
              <Dialog open={isAddModuleModalOpen} onOpenChange={setIsAddModuleModalOpen}>
                 <DialogContent>
                     <DialogHeader>

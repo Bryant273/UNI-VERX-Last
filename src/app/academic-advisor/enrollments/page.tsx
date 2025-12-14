@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -17,7 +18,8 @@ import {
   Edit,
   Trash2,
   Undo,
-  Printer
+  Printer,
+  Pointer
 } from 'lucide-react';
 import {
   Card,
@@ -124,6 +126,22 @@ const NewInscriptionsTab = () => {
 }
 
 const EnrolledStudentsTab = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [levelFilter, setLevelFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const isFiltered = searchTerm || levelFilter || statusFilter;
+
+    const filteredStudents = useMemo(() => {
+        if (!isFiltered) return [];
+        return enrolledStudentsData.filter(student =>
+            (student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             student.studentNumber.includes(searchTerm)) &&
+            (!levelFilter || student.currentLevel === levelFilter) &&
+            (!statusFilter || student.canProgress === (statusFilter === 'canProgress'))
+        );
+    }, [searchTerm, levelFilter, statusFilter, isFiltered]);
+
     return (
         <div className="space-y-6">
              <Card>
@@ -135,43 +153,57 @@ const EnrolledStudentsTab = () => {
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                            <Input placeholder="Rechercher par nom, matricule..." className="pl-10" />
+                            <Input placeholder="Rechercher par nom, matricule..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                         </div>
-                        <Select><SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="Niveau"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les niveaux</SelectItem></SelectContent></Select>
-                        <Select><SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="Statut"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem></SelectContent></Select>
+                        <Select value={levelFilter} onValueChange={setLevelFilter}>
+                            <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="Niveau"/></SelectTrigger>
+                            <SelectContent><SelectItem value="">Tous les niveaux</SelectItem><SelectItem value="L1">L1</SelectItem><SelectItem value="L2">L2</SelectItem><SelectItem value="L3">L3</SelectItem><SelectItem value="M1">M1</SelectItem><SelectItem value="M2">M2</SelectItem></SelectContent>
+                        </Select>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="Statut"/></SelectTrigger>
+                            <SelectContent><SelectItem value="">Tous les statuts</SelectItem><SelectItem value="canProgress">Peut progresser</SelectItem><SelectItem value="cannotProgress">Redoublement</SelectItem></SelectContent>
+                        </Select>
                     </div>
                 </CardContent>
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Étudiant</TableHead>
-                            <TableHead>Formation</TableHead>
-                            <TableHead>Moyenne</TableHead>
-                            <TableHead>Statut</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {enrolledStudentsData.map(student => (
-                            <TableRow key={student.id}>
-                                <TableCell>
-                                    <div className="font-medium">{student.firstName} {student.lastName}</div>
-                                    <div className="text-xs text-muted-foreground">{student.studentNumber}</div>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="font-medium">{student.currentLevel}</div>
-                                    <div className="text-xs text-muted-foreground">{student.currentProgram}</div>
-                                </TableCell>
-                                <TableCell className="font-semibold">{student.gpa}/20</TableCell>
-                                <TableCell><Badge variant="outline" className={getStatusColor(student.canProgress)}>{getStatusLabel(student.canProgress)}</Badge></TableCell>
-                                <TableCell className="text-right">
-                                    <Button variant="ghost" size="icon"><Eye className="h-4 w-4"/></Button>
-                                    <Button variant="ghost" size="icon"><Undo className="h-4 w-4"/></Button>
-                                </TableCell>
+                {isFiltered ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Étudiant</TableHead>
+                                <TableHead>Formation</TableHead>
+                                <TableHead>Moyenne</TableHead>
+                                <TableHead>Statut</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                 </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredStudents.map(student => (
+                                <TableRow key={student.id}>
+                                    <TableCell>
+                                        <div className="font-medium">{student.firstName} {student.lastName}</div>
+                                        <div className="text-xs text-muted-foreground">{student.studentNumber}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="font-medium">{student.currentLevel}</div>
+                                        <div className="text-xs text-muted-foreground">{student.currentProgram}</div>
+                                    </TableCell>
+                                    <TableCell className="font-semibold">{student.gpa}/20</TableCell>
+                                    <TableCell><Badge variant="outline" className={getStatusColor(student.canProgress)}>{getStatusLabel(student.canProgress)}</Badge></TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon"><Eye className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon"><Undo className="h-4 w-4"/></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <CardContent className="flex flex-col items-center justify-center p-12 text-center bg-muted/50 border-2 border-dashed m-6">
+                        <Pointer className="h-12 w-12 text-muted-foreground mb-4" />
+                        <h3 className="text-xl font-semibold">Consulter les étudiants inscrits</h3>
+                        <p className="text-muted-foreground mt-2">Veuillez utiliser la barre de recherche ou les filtres pour afficher la liste.</p>
+                    </CardContent>
+                )}
              </Card>
         </div>
     )

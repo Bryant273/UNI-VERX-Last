@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
@@ -26,6 +25,7 @@ import {
   Trash2,
   Edit,
   Info,
+  Pointer
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -315,9 +315,9 @@ export default function ProfessorCoursesPage() {
   const role = 'professor';
 
   const [courses, setCourses] = useState<CourseDocument[]>(courseDocuments);
-  const [levelFilter, setLevelFilter] = useState('L3');
-  const [classFilter, setClassFilter] = useState('INFO');
-  const [moduleFilter, setModuleFilter] = useState('all');
+  const [levelFilter, setLevelFilter] = useState('');
+  const [classFilter, setClassFilter] = useState('');
+  const [moduleFilter, setModuleFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewModalDoc, setViewModalDoc] = useState<CourseDocument | null>(null);
   const [deleteModalDoc, setDeleteModalDoc] = useState<CourseDocument | null>(null);
@@ -344,24 +344,28 @@ export default function ProfessorCoursesPage() {
       .filter((doc) => doc.class === studentMajor);
   }, [courses]);
 
+  const isFiltered = levelFilter || classFilter;
+
   const filteredDocuments = useMemo(() => {
+    if (!isFiltered) return [];
+
     let documents = role === 'student' ? studentCourses : courses;
     
     if (role === 'student') {
-        if (moduleFilter !== 'all') {
+        if (moduleFilter) {
             documents = documents.filter((doc) => doc.module === moduleFilter);
         }
     } else {
         documents = documents
-            .filter((doc) => levelFilter === 'all' || doc.level === levelFilter)
-            .filter((doc) => classFilter === 'all' || doc.class === classFilter);
+            .filter((doc) => !levelFilter || doc.level === levelFilter)
+            .filter((doc) => !classFilter || doc.class === classFilter);
     }
     return documents;
-  }, [courses, studentCourses, levelFilter, classFilter, moduleFilter, role]);
+  }, [courses, studentCourses, levelFilter, classFilter, moduleFilter, role, isFiltered]);
 
   const studentModules = useMemo(() => {
     const modules = new Set(studentCourses.map(doc => doc.module));
-    return ['all', ...Array.from(modules)];
+    return ['', ...Array.from(modules)];
   }, [studentCourses]);
 
   const totalPages = Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE);
@@ -421,7 +425,7 @@ export default function ProfessorCoursesPage() {
                     <SelectContent>
                       {studentModules.map(mod => (
                         <SelectItem key={mod} value={mod}>
-                          {mod === 'all' ? 'Tous les modules' : mod}
+                          {mod === '' ? 'Tous les modules' : mod}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -433,10 +437,10 @@ export default function ProfessorCoursesPage() {
                   <label htmlFor="selectLevel" className="text-sm font-medium">Niveau</label>
                   <Select value={levelFilter} onValueChange={setLevelFilter}>
                     <SelectTrigger id="selectLevel" className="w-full sm:w-[180px] mt-1">
-                      <SelectValue placeholder="Tous les niveaux" />
+                      <SelectValue placeholder="Sélectionnez un niveau" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tous les niveaux</SelectItem>
+                      <SelectItem value="">Tous les niveaux</SelectItem>
                       <SelectItem value="L1">Licence 1</SelectItem>
                       <SelectItem value="L2">Licence 2</SelectItem>
                       <SelectItem value="L3">Licence 3</SelectItem>
@@ -449,10 +453,10 @@ export default function ProfessorCoursesPage() {
                   <label htmlFor="selectClass" className="text-sm font-medium">Filière</label>
                   <Select value={classFilter} onValueChange={setClassFilter}>
                     <SelectTrigger id="selectClass" className="w-full sm:w-[180px] mt-1">
-                      <SelectValue placeholder="Toutes les filières" />
+                      <SelectValue placeholder="Sélectionnez une filière" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Toutes les filières</SelectItem>
+                      <SelectItem value="">Toutes les filières</SelectItem>
                       <SelectItem value="INFO">Informatique</SelectItem>
                       <SelectItem value="MATH">Mathématiques</SelectItem>
                       <SelectItem value="PHYS">Physique</SelectItem>
@@ -468,101 +472,111 @@ export default function ProfessorCoursesPage() {
                 </Button>
             )}
           </div>
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center">
-              <Info className="text-blue-600 dark:text-blue-400 mr-2 h-5 w-5" />
-              <span className="text-sm text-blue-800 dark:text-blue-300">
-                <span className="font-medium">{filteredDocuments.length} documents</span> correspondent à votre sélection.
-              </span>
+          {isFiltered && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center">
+                <Info className="text-blue-600 dark:text-blue-400 mr-2 h-5 w-5" />
+                <span className="text-sm text-blue-800 dark:text-blue-300">
+                    <span className="font-medium">{filteredDocuments.length} documents</span> correspondent à votre sélection.
+                </span>
+                </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
-      <Card>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-16">#</TableHead>
-                <TableHead>Date de mise en ligne</TableHead>
-                <TableHead>Nom du module</TableHead>
-                <TableHead>Document</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedDocuments.map((doc, index) => (
-                <TableRow key={doc.id} className="even:bg-muted/40">
-                  <TableCell className="font-medium text-muted-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
-                  <TableCell className="text-muted-foreground">{doc.date}</TableCell>
-                  <TableCell className="font-medium">{doc.module}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                       <FileTypeIcon type={doc.type} />
-                       <span>{doc.documentName}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                     <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" onClick={() => setViewModalDoc(doc)}><Eye className="h-4 w-4" /></Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Voir</p></TooltipContent>
-                        </Tooltip>
-                        {role !== 'student' && (
-                            <>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" onClick={() => onOpen(doc)}><Edit className="h-4 w-4" /></Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Modifier</p></TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteModalDoc(doc)}><Trash2 className="h-4 w-4" /></Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Supprimer</p></TooltipContent>
-                                </Tooltip>
-                            </>
-                        )}
-                     </TooltipProvider>
-                  </TableCell>
+      {isFiltered ? (
+        <Card>
+            <div className="overflow-x-auto">
+            <Table>
+                <TableHeader>
+                <TableRow>
+                    <TableHead className="w-16">#</TableHead>
+                    <TableHead>Date de mise en ligne</TableHead>
+                    <TableHead>Nom du module</TableHead>
+                    <TableHead>Document</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <CardFooter className="flex items-center justify-between p-4">
-           <p className="text-sm text-muted-foreground">
-             Affichage de {paginatedDocuments.length} sur {filteredDocuments.length} documents
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="h-8 w-8"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            {[...Array(totalPages)].map((_, i) => (
-                <Button key={i} variant={currentPage === i + 1 ? 'default' : 'outline'} size="icon" onClick={() => setCurrentPage(i+1)} className="h-8 w-8">{i + 1}</Button>
-            ))}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="h-8 w-8"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                {paginatedDocuments.map((doc, index) => (
+                    <TableRow key={doc.id} className="even:bg-muted/40">
+                    <TableCell className="font-medium text-muted-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
+                    <TableCell className="text-muted-foreground">{doc.date}</TableCell>
+                    <TableCell className="font-medium">{doc.module}</TableCell>
+                    <TableCell>
+                        <div className="flex items-center gap-2">
+                           <FileTypeIcon type={doc.type} />
+                           <span>{doc.documentName}</span>
+                        </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                         <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" onClick={() => setViewModalDoc(doc)}><Eye className="h-4 w-4" /></Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>Voir</p></TooltipContent>
+                            </Tooltip>
+                            {role !== 'student' && (
+                                <>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={() => onOpen(doc)}><Edit className="h-4 w-4" /></Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Modifier</p></TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteModalDoc(doc)}><Trash2 className="h-4 w-4" /></Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Supprimer</p></TooltipContent>
+                                    </Tooltip>
+                                </>
+                            )}
+                         </TooltipProvider>
+                    </TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+            </div>
+            <CardFooter className="flex items-center justify-between p-4">
+               <p className="text-sm text-muted-foreground">
+                 Affichage de {paginatedDocuments.length} sur {filteredDocuments.length} documents
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="h-8 w-8"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                {[...Array(totalPages)].map((_, i) => (
+                    <Button key={i} variant={currentPage === i + 1 ? 'default' : 'outline'} size="icon" onClick={() => setCurrentPage(i+1)} className="h-8 w-8">{i + 1}</Button>
+                ))}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="h-8 w-8"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardFooter>
+        </Card>
+      ) : (
+        <Card className="flex flex-col items-center justify-center p-12 text-center bg-muted/50 border-2 border-dashed">
+            <Pointer className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold">Gérez vos documents de cours</h3>
+            <p className="text-muted-foreground mt-2">Veuillez sélectionner un niveau et/ou une filière pour afficher les documents.</p>
+        </Card>
+      )}
       
       {viewModalDoc && (
         <Dialog open={!!viewModalDoc} onOpenChange={() => setViewModalDoc(null)}>
@@ -706,10 +720,3 @@ export default function ProfessorCoursesPage() {
     </div>
   );
 }
-
-
-
-    
-
-    
-
