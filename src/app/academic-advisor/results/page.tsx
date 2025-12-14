@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
 import {
-  FileText, Check, Download, Eye, X, MoreHorizontal, CheckCheck, FileUp, ListFilter
+  FileText, Check, Download, Eye, X, MoreHorizontal, CheckCheck, FileUp, ListFilter, Clock
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,4 +219,3 @@ export default function BulletinsPage() {
         </div>
     )
 }
-
