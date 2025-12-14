@@ -132,7 +132,7 @@ const CoursesTab = () => {
 
     const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
 
-    const uniqueTeachers = useMemo(() => ['', ...Array.from(new Set(courses.map(c => c.uploader)))], [courses]);
+    const uniqueTeachers = useMemo(() => Array.from(new Set(courses.map(c => c.uploader))), [courses]);
 
     const handleAction = (course: any, type: 'delete' | 'validate' | 'reject') => {
         setActionState({ type, course });
@@ -159,7 +159,7 @@ const CoursesTab = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                        <Select value={teacherFilter} onValueChange={setTeacherFilter}><SelectTrigger><SelectValue placeholder="Tous les enseignants"/></SelectTrigger><SelectContent>{uniqueTeachers.map(t => <SelectItem key={t} value={t}>{t === '' ? 'Tous les enseignants' : t}</SelectItem>)}</SelectContent></Select>
+                        <Select value={teacherFilter} onValueChange={setTeacherFilter}><SelectTrigger><SelectValue placeholder="Tous les enseignants"/></SelectTrigger><SelectContent><SelectItem value="">Tous les enseignants</SelectItem>{uniqueTeachers.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
                         <Select value={levelFilter} onValueChange={setLevelFilter}><SelectTrigger><SelectValue placeholder="Tous les niveaux"/></SelectTrigger><SelectContent><SelectItem value="">Tous les niveaux</SelectItem><SelectItem value="L1">Licence 1</SelectItem><SelectItem value="L2">Licence 2</SelectItem><SelectItem value="L3">Licence 3</SelectItem><SelectItem value="M1">Master 1</SelectItem><SelectItem value="M2">Master 2</SelectItem></SelectContent></Select>
                         <Select value={classFilter} onValueChange={setClassFilter}><SelectTrigger><SelectValue placeholder="Toutes les filières"/></SelectTrigger><SelectContent><SelectItem value="">Toutes les filières</SelectItem><SelectItem value="INFO">Informatique</SelectItem><SelectItem value="MATH">Mathématiques</SelectItem><SelectItem value="PHYS">Physique</SelectItem><SelectItem value="ELEC">Électronique</SelectItem></SelectContent></Select>
                         <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger><SelectValue placeholder="Tous les statuts"/></SelectTrigger><SelectContent><SelectItem value="">Tous les statuts</SelectItem>{Object.entries(statusConfig).map(([key, {text}]) => <SelectItem key={key} value={key}>{text}</SelectItem>)}</SelectContent></Select>
