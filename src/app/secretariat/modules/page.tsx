@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState } from 'react';
 import {
@@ -6,7 +7,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  ChevronDown,
   BookOpen,
 } from 'lucide-react';
 import {
@@ -33,6 +33,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Module {
   id: string;
@@ -70,151 +71,12 @@ const initialUes: UE[] = [
   },
 ];
 
-export default function ModulesPage() {
-  const [ues, setUes] = useState<UE[]>(initialUes);
-  const [newUeName, setNewUeName] = useState('');
-  const [newUeCode, setNewUeCode] = useState('');
-  const { toast } = useToast();
-
-  const handleCreateUe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newUeName || !newUeCode) {
-      toast({ title: 'Erreur', description: 'Veuillez remplir tous les champs pour créer une UE.', variant: 'destructive'});
-      return;
-    }
-    const newUe: UE = {
-      id: `ue-${Date.now()}`,
-      name: newUeName,
-      code: newUeCode,
-      modules: [],
-    };
-    setUes([...ues, newUe]);
-    setNewUeName('');
-    setNewUeCode('');
-    toast({ title: 'Succès', description: `L'UE "${newUeName}" a été créée.` });
-  };
-  
-  const handleDeleteUe = (ueId: string) => {
-    setUes(ues.filter(ue => ue.id !== ueId));
-    toast({ title: 'Succès', description: 'UE supprimée.', variant: 'destructive' });
-  }
-
-  const handleCreateModule = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const ueId = formData.get('ue') as string;
-    const moduleName = formData.get('moduleName') as string;
-
-    if (!ueId || !moduleName) {
-        toast({ title: 'Erreur', description: 'Veuillez sélectionner une UE et nommer le module.', variant: 'destructive'});
-        return;
-    }
-    
-    const newModule: Module = {
-        id: `mod-${Date.now()}`,
-        name: moduleName,
-        code: formData.get('moduleCode') as string,
-        credits: Number(formData.get('credits')),
-        teacher: formData.get('teacher') as string,
-    }
-
-    setUes(ues.map(ue => ue.id === ueId ? { ...ue, modules: [...ue.modules, newModule] } : ue));
-    toast({ title: 'Succès', description: `Module "${newModule.name}" ajouté.` });
-    e.currentTarget.reset();
-  }
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestion des Modules et UE</CardTitle>
-          <CardDescription>
-            Organisez l'offre de formation en créant des Unités d'Enseignement (UE) et en y assignant des modules.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Section de gauche : Gestion des UE et création de modules */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FolderPlus />
-                Unités d'Enseignement (UE)
-              </CardTitle>
-              <CardDescription>Créez et gérez les grands blocs de votre programme.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCreateUe} className="flex gap-2 mb-4">
-                <Input value={newUeName} onChange={(e) => setNewUeName(e.target.value)} placeholder="Nom de l'UE (ex: Fondamentaux)" />
-                <Input value={newUeCode} onChange={(e) => setNewUeCode(e.target.value)} placeholder="Code (ex: UEF1)" className="w-28" />
-                <Button type="submit" size="icon"><Plus /></Button>
-              </form>
-              <div className="space-y-2">
-                {ues.map(ue => (
-                    <div key={ue.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                        <div>
-                            <p className="font-semibold">{ue.name}</p>
-                            <p className="text-xs text-muted-foreground">{ue.code} - {ue.modules.length} modules</p>
-                        </div>
-                        <div>
-                            <Button variant="ghost" size="icon" className="h-8 w-8"><Edit/></Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteUe(ue.id)}><Trash2/></Button>
-                        </div>
-                    </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus />
-                Nouveau Module
-              </CardTitle>
-               <CardDescription>Créez un module et assignez-le à une UE.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleCreateModule} className="space-y-4">
-                    <div className="space-y-1">
-                        <Label htmlFor="ue">Assigner à l'UE</Label>
-                         <Select name="ue" required>
-                            <SelectTrigger id="ue"><SelectValue placeholder="Sélectionnez une UE..."/></SelectTrigger>
-                            <SelectContent>{ues.map(ue => <SelectItem key={ue.id} value={ue.id}>{ue.name}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-1">
-                        <Label htmlFor="moduleName">Nom du module</Label>
-                        <Input id="moduleName" name="moduleName" placeholder="Ex: Algorithmique Avancée" required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                         <div className="space-y-1">
-                            <Label htmlFor="moduleCode">Code</Label>
-                            <Input id="moduleCode" name="moduleCode" placeholder="ALG201"/>
-                        </div>
-                         <div className="space-y-1">
-                            <Label htmlFor="credits">Crédits</Label>
-                            <Input id="credits" name="credits" type="number" placeholder="5"/>
-                        </div>
-                    </div>
-                    <div className="space-y-1">
-                        <Label htmlFor="teacher">Enseignant</Label>
-                        <Input id="teacher" name="teacher" placeholder="Ex: Prof. Durand"/>
-                    </div>
-                    <Button type="submit" className="w-full">Créer le module</Button>
-                </form>
-            </CardContent>
-          </Card>
-
-        </div>
-
-        {/* Section de droite : Visualisation des modules par UE */}
-        <div className="lg:col-span-2">
-          <Card>
+const ModulesView = ({ ues }: { ues: UE[] }) => {
+    return (
+        <Card>
             <CardHeader>
               <CardTitle>Liste des Modules par UE</CardTitle>
+              <CardDescription>Visualisez la structure actuelle des unités d'enseignement et des modules qui les composent.</CardDescription>
             </CardHeader>
             <CardContent>
                 {ues.length > 0 ? (
@@ -262,8 +124,166 @@ export default function ModulesPage() {
                 )}
             </CardContent>
           </Card>
+    );
+}
+
+const CreationTools = ({ ues, setUes }: { ues: UE[], setUes: React.Dispatch<React.SetStateAction<UE[]>> }) => {
+    const [newUeName, setNewUeName] = useState('');
+    const [newUeCode, setNewUeCode] = useState('');
+    const { toast } = useToast();
+
+    const handleCreateUe = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newUeName || !newUeCode) {
+        toast({ title: 'Erreur', description: 'Veuillez remplir tous les champs pour créer une UE.', variant: 'destructive'});
+        return;
+        }
+        const newUe: UE = {
+        id: `ue-${Date.now()}`,
+        name: newUeName,
+        code: newUeCode,
+        modules: [],
+        };
+        setUes([...ues, newUe]);
+        setNewUeName('');
+        setNewUeCode('');
+        toast({ title: 'Succès', description: `L'UE "${newUeName}" a été créée.` });
+    };
+    
+    const handleDeleteUe = (ueId: string) => {
+        setUes(ues.filter(ue => ue.id !== ueId));
+        toast({ title: 'Succès', description: 'UE supprimée.', variant: 'destructive' });
+    }
+
+    const handleCreateModule = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const ueId = formData.get('ue') as string;
+        const moduleName = formData.get('moduleName') as string;
+
+        if (!ueId || !moduleName) {
+            toast({ title: 'Erreur', description: 'Veuillez sélectionner une UE et nommer le module.', variant: 'destructive'});
+            return;
+        }
+        
+        const newModule: Module = {
+            id: `mod-${Date.now()}`,
+            name: moduleName,
+            code: formData.get('moduleCode') as string,
+            credits: Number(formData.get('credits')),
+            teacher: formData.get('teacher') as string,
+        }
+
+        setUes(ues.map(ue => ue.id === ueId ? { ...ue, modules: [...ue.modules, newModule] } : ue));
+        toast({ title: 'Succès', description: `Module "${newModule.name}" ajouté.` });
+        e.currentTarget.reset();
+    }
+    
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+           <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FolderPlus />
+                Gérer les Unités d'Enseignement
+              </CardTitle>
+              <CardDescription>Créez et supprimez les blocs de votre programme.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleCreateUe} className="flex gap-2 mb-4">
+                <Input value={newUeName} onChange={(e) => setNewUeName(e.target.value)} placeholder="Nom de l'UE" required/>
+                <Input value={newUeCode} onChange={(e) => setNewUeCode(e.target.value)} placeholder="Code" className="w-28" required/>
+                <Button type="submit" size="icon"><Plus /></Button>
+              </form>
+              <div className="space-y-2">
+                {ues.map(ue => (
+                    <div key={ue.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                        <div>
+                            <p className="font-semibold">{ue.name}</p>
+                            <p className="text-xs text-muted-foreground">{ue.code} - {ue.modules.length} modules</p>
+                        </div>
+                        <div>
+                            <Button variant="ghost" size="icon" className="h-8 w-8"><Edit/></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteUe(ue.id)}><Trash2/></Button>
+                        </div>
+                    </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+           <Card>
+             <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus />
+                Créer un Nouveau Module
+              </CardTitle>
+               <CardDescription>Créez un module et assignez-le à une UE existante.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleCreateModule} className="space-y-4">
+                    <div className="space-y-1">
+                        <Label htmlFor="ue">Assigner à l'UE</Label>
+                         <Select name="ue" required>
+                            <SelectTrigger id="ue"><SelectValue placeholder="Sélectionnez une UE..."/></SelectTrigger>
+                            <SelectContent>{ues.map(ue => <SelectItem key={ue.id} value={ue.id}>{ue.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor="moduleName">Nom du module</Label>
+                        <Input id="moduleName" name="moduleName" placeholder="Ex: Algorithmique Avancée" required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                         <div className="space-y-1">
+                            <Label htmlFor="moduleCode">Code</Label>
+                            <Input id="moduleCode" name="moduleCode" placeholder="ALG201"/>
+                        </div>
+                         <div className="space-y-1">
+                            <Label htmlFor="credits">Crédits</Label>
+                            <Input id="credits" name="credits" type="number" placeholder="5"/>
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor="teacher">Enseignant</Label>
+                        <Input id="teacher" name="teacher" placeholder="Ex: Prof. Durand"/>
+                    </div>
+                    <Button type="submit" className="w-full">Créer le module</Button>
+                </form>
+            </CardContent>
+          </Card>
         </div>
-      </div>
+    );
+}
+
+export default function ModulesPage() {
+  const [ues, setUes] = useState<UE[]>(initialUes);
+  
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Gestion des Modules et UE</CardTitle>
+          <CardDescription>
+            Organisez l'offre de formation en créant des Unités d'Enseignement (UE) et en y assignant des modules.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+      
+      <Tabs defaultValue="modules">
+        <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="modules">
+                <BookCopy className="mr-2 h-4 w-4"/> Gestion des Modules
+            </TabsTrigger>
+            <TabsTrigger value="creation">
+                <FolderPlus className="mr-2 h-4 w-4"/> Outils de Création
+            </TabsTrigger>
+        </TabsList>
+        <TabsContent value="modules" className="mt-4">
+            <ModulesView ues={ues} />
+        </TabsContent>
+        <TabsContent value="creation" className="mt-4">
+            <CreationTools ues={ues} setUes={setUes} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
