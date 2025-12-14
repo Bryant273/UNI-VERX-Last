@@ -72,7 +72,7 @@ const AnnouncementsPage = () => {
                 ...announcementData,
                 status: 'draft',
                 date: null,
-                author: 'Secrétariat' // Should be dynamic
+                author: 'M. Jean Moreau' // Should be dynamic
             };
             setAnnouncements(prev => [newAnn, ...prev]);
             toast({ title: 'Brouillon enregistré', description: 'Votre annonce a été sauvegardée.' });
