@@ -18,6 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import { BarChart3, Plus, Download, TrendingUp, TrendingDown, Goal, Edit, Trash2 } from 'lucide-react';
@@ -127,7 +128,7 @@ export default function BudgetsPage() {
                                 <TableRow key={item.id}><TableCell className="font-medium">{item.categoryLabel}</TableCell><TableCell className="text-right font-mono">{item.amount.toLocaleString('fr-FR')} FCFA</TableCell></TableRow>
                             ))}
                         </TableBody>
-                        <CardFooter className="font-bold"><TableCell>Total Revenus Prévus</TableCell><TableCell className="text-right font-mono">{totalBudgetedIncome.toLocaleString('fr-FR')} FCFA</TableCell></CardFooter>
+                        <TableFooter className="font-bold"><TableRow><TableCell>Total Revenus Prévus</TableCell><TableCell className="text-right font-mono">{totalBudgetedIncome.toLocaleString('fr-FR')} FCFA</TableCell></TableRow></TableFooter>
                     </Table>
                 </CardContent>
             </Card>
@@ -140,7 +141,7 @@ export default function BudgetsPage() {
                                 <TableRow key={item.id}><TableCell className="font-medium">{item.categoryLabel}</TableCell><TableCell className="text-right font-mono">{item.amount.toLocaleString('fr-FR')} FCFA</TableCell></TableRow>
                             ))}
                         </TableBody>
-                        <CardFooter className="font-bold"><TableCell>Total Dépenses Prévues</TableCell><TableCell className="text-right font-mono">{totalBudgetedExpense.toLocaleString('fr-FR')} FCFA</TableCell></CardFooter>
+                        <TableFooter className="font-bold"><TableRow><TableCell>Total Dépenses Prévues</TableCell><TableCell className="text-right font-mono">{totalBudgetedExpense.toLocaleString('fr-FR')} FCFA</TableCell></TableRow></TableFooter>
                     </Table>
                 </CardContent>
             </Card>
@@ -165,10 +166,12 @@ export default function BudgetsPage() {
                         <TableRow key={`comp-${item.id}`}><TableCell className="font-medium">{item.categoryLabel}</TableCell><TableCell><Badge variant="outline" className={isIncome ? 'text-green-600 border-green-200' : 'text-red-600 border-red-200'}>{item.type === 'income' ? 'Revenu' : 'Dépense'}</Badge></TableCell><TableCell className="text-right font-mono">{item.amount.toLocaleString('fr-FR')} FCFA</TableCell><TableCell className="text-right font-mono">{actualAmount.toLocaleString('fr-FR')} FCFA</TableCell><TableCell className={cn("text-right font-mono font-semibold", isGood && 'text-green-600', isBad && 'text-red-600')}>{difference.toLocaleString('fr-FR')} FCFA</TableCell></TableRow>
                         )
                     })}
-                     <TableRow className="bg-muted/50 font-bold border-t-2"><TableCell colSpan={2}>TOTAL REVENUS</TableCell><TableCell className="text-right font-mono">{totalBudgetedIncome.toLocaleString('fr-FR')} FCFA</TableCell><TableCell className="text-right font-mono">{totalActualIncome.toLocaleString('fr-FR')} FCFA</TableCell><TableCell className={cn("text-right font-mono", (totalActualIncome - totalBudgetedIncome) >= 0 ? 'text-green-600' : 'text-red-600')}>{(totalActualIncome - totalBudgetedIncome).toLocaleString('fr-FR')} FCFA</TableCell></TableRow>
+                </TableBody>
+                <TableFooter>
+                     <TableRow className="bg-muted/50 font-bold"><TableCell colSpan={2}>TOTAL REVENUS</TableCell><TableCell className="text-right font-mono">{totalBudgetedIncome.toLocaleString('fr-FR')} FCFA</TableCell><TableCell className="text-right font-mono">{totalActualIncome.toLocaleString('fr-FR')} FCFA</TableCell><TableCell className={cn("text-right font-mono", (totalActualIncome - totalBudgetedIncome) >= 0 ? 'text-green-600' : 'text-red-600')}>{(totalActualIncome - totalBudgetedIncome).toLocaleString('fr-FR')} FCFA</TableCell></TableRow>
                     <TableRow className="bg-muted/50 font-bold"><TableCell colSpan={2}>TOTAL DÉPENSES</TableCell><TableCell className="text-right font-mono">{totalBudgetedExpense.toLocaleString('fr-FR')} FCFA</TableCell><TableCell className="text-right font-mono">{totalActualExpense.toLocaleString('fr-FR')} FCFA</TableCell><TableCell className={cn("text-right font-mono", (totalActualExpense - totalBudgetedExpense) <= 0 ? 'text-green-600' : 'text-red-600')}>{(totalActualExpense - totalBudgetedExpense).toLocaleString('fr-FR')} FCFA</TableCell></TableRow>
                     <TableRow className="border-t-2 border-primary"><TableCell colSpan={2} className="font-extrabold text-lg">SOLDE</TableCell><TableCell className="text-right font-mono font-extrabold text-lg">{(totalBudgetedIncome - totalBudgetedExpense).toLocaleString('fr-FR')} FCFA</TableCell><TableCell className="text-right font-mono font-extrabold text-lg">{(totalActualIncome - totalActualExpense).toLocaleString('fr-FR')} FCFA</TableCell><TableCell className="text-right font-mono font-extrabold text-lg">{((totalActualIncome - totalActualExpense) - (totalBudgetedIncome - totalBudgetedExpense)).toLocaleString('fr-FR')} FCFA</TableCell></TableRow>
-                </TableBody>
+                </TableFooter>
             </Table>
         </CardContent>
       </Card>
@@ -204,4 +207,3 @@ export default function BudgetsPage() {
     </div>
   );
 }
-
