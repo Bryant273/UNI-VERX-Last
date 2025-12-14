@@ -18,14 +18,19 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { GenerateStudentReportOutput } from '@/blue-ai/flows/generate-student-report';
 import type { GenerateProfessorReportOutput } from '@/blue-ai/flows/generate-professor-report';
+import type { GenerateStatsReportOutput } from '@/blue-ai/flows/generate-stats-report';
 import Logo from '@/components/logo';
 import AiReportPDF from './ai-report-pdf';
+
+type ReportType = GenerateStudentReportOutput | GenerateProfessorReportOutput | GenerateStatsReportOutput;
 
 interface AiReportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  report: GenerateStudentReportOutput | GenerateProfessorReportOutput;
+  report: ReportType;
   role: 'student' | 'professor' | 'admin';
+  chartsData?: any;
+  year?: string;
 }
 
 const ReportSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -92,8 +97,19 @@ const ProfessorReportContent: React.FC<{ report: GenerateProfessorReportOutput }
   )
 };
 
+const StatsReportContent: React.FC<{ report: GenerateStatsReportOutput }> = ({ report }) => {
+    return (
+        <div className="space-y-6">
+            <ReportSection title="Résumé des Indicateurs Clés">{report.kpiSummary}</ReportSection>
+            <ReportSection title="Analyse de la Performance Étudiante">{report.performanceComment}</ReportSection>
+            <ReportSection title="Analyse des Inscriptions">{report.enrollmentComment}</ReportSection>
+            <ReportSection title="Analyse Démographique">{report.demographicsComment}</ReportSection>
+            <ReportSection title="Conclusion & Recommandations">{report.globalConclusion}</ReportSection>
+        </div>
+    )
+}
 
-export default function AiReportModal({ isOpen, onClose, report, role }: AiReportModalProps) {
+export default function AiReportModal({ isOpen, onClose, report, role, chartsData, year }: AiReportModalProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -113,21 +129,31 @@ export default function AiReportModal({ isOpen, onClose, report, role }: AiRepor
         format: [canvas.width, canvas.height],
       });
       
-      const reportName = 'studentName' in report ? report.studentName : report.professorName;
+      let reportName = 'Rapport_Stats';
+      if ('studentName' in report) {
+          reportName = `Rapport_BlueAI_${report.studentName.replace(' ', '_')}_${report.semester}.pdf`;
+      } else if ('professorName' in report) {
+          reportName = `Rapport_BlueAI_${report.professorName.replace(' ', '_')}_${report.semester}.pdf`;
+      } else if (year) {
+          reportName = `Rapport_Stats_BlueAI_${year}.pdf`;
+      }
+      
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`Rapport_BlueAI_${reportName.replace(' ', '_')}_${report.semester}.pdf`);
+      pdf.save(reportName);
     }
 
     setIsDownloading(false);
   };
   
   const isStudentReport = (report: any): report is GenerateStudentReportOutput => role === 'student' && 'studentName' in report;
+  const isProfessorReport = (report: any): report is GenerateProfessorReportOutput => role === 'professor' && 'professorName' in report;
+  const isStatsReport = (report: any): report is GenerateStatsReportOutput => role === 'admin' && 'kpiSummary' in report;
 
   return (
     <>
       {/* Hidden container for PDF generation */}
       <div id="pdf-container" style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-        <AiReportPDF report={report} role={role} />
+        <AiReportPDF report={report} role={role} chartsData={chartsData} year={year} />
       </div>
 
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -146,12 +172,16 @@ export default function AiReportModal({ isOpen, onClose, report, role }: AiRepor
                     <div><span className='font-semibold text-foreground'>Classe :</span> {report.studentClass}</div>
                     <div><span className='font-semibold text-foreground'>Semestre :</span> {report.semester}</div>
                   </div>
-                ) : (
+                ) : isProfessorReport(report) ? (
                    <div className='space-y-1 text-xs'>
                     <div><span className='font-semibold text-foreground'>Professeur :</span> {report.professorName}</div>
                     <div><span className='font-semibold text-foreground'>Département :</span> {report.department}</div>
                     <div><span className='font-semibold text-foreground'>Semestre :</span> {report.semester}</div>
                   </div>
+                ) : (
+                    <div className='space-y-1 text-xs'>
+                        <p>Analyse des données pour l'année académique {year}</p>
+                    </div>
                 )}
               </DialogDescription>
             </div>
@@ -159,9 +189,10 @@ export default function AiReportModal({ isOpen, onClose, report, role }: AiRepor
           </DialogHeader>
           <Separator />
           <div className="max-h-[60vh] overflow-y-auto p-1 pr-4">
-              {isStudentReport(report) 
-                ? <StudentReportContent report={report} /> 
-                : <ProfessorReportContent report={report as GenerateProfessorReportOutput} />
+              {isStudentReport(report) ? <StudentReportContent report={report} /> 
+               : isProfessorReport(report) ? <ProfessorReportContent report={report as GenerateProfessorReportOutput} />
+               : isStatsReport(report) ? <StatsReportContent report={report} />
+               : null
               }
           </div>
           <Separator />

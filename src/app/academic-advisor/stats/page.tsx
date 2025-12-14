@@ -61,7 +61,7 @@ const StatCard = ({ title, value, subtitle, icon: Icon, color }: any) => (
   </Card>
 );
 
-export default function SecretariatStatsPage() {
+export default function AcademicAdvisorStatsPage() {
   const [year, setYear] = useState('2024-2025');
   const [semester, setSemester] = useState('all');
   const [isPending, startTransition] = useTransition();

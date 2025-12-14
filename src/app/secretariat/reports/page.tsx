@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -112,8 +111,8 @@ export default function ReportsPage() {
                 <CardHeader>
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                         <div>
-                            <CardTitle className="text-2xl">Rapports</CardTitle>
-                            <CardDescription>Générez et consultez les rapports administratifs et pédagogiques.</CardDescription>
+                            <CardTitle className="text-2xl">Rapports Système</CardTitle>
+                            <CardDescription>Générez et consultez les rapports globaux de l'université.</CardDescription>
                         </div>
                          <div className="flex flex-wrap gap-3">
                              <Select defaultValue="month">
