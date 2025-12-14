@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Edit, Save, Hourglass } from 'lucide-react';
 import { initialTimeSlots, initialDays, initialBreaks, type TimeSlot, type DaySetting, type BreakSetting } from '@/lib/hours-data';
+import Timetable from '@/components/shared/timetable';
+import { startOfWeek } from 'date-fns';
 
 const SlotModal = ({
   slot,
@@ -29,7 +31,7 @@ const SlotModal = ({
   const [name, setName] = useState(type === 'break' ? (slot as BreakSetting)?.name || '' : '');
 
   const handleSave = () => {
-    const commonData = { id: slot?.id, start, end };
+    const commonData = { id: slot?.id || Date.now(), start, end };
     if (type === 'break') {
       onSave({ ...commonData, name });
     } else {
@@ -89,7 +91,7 @@ export default function HoursPage() {
   };
 
   const handleSaveSlots = (slotData: TimeSlot) => {
-    if (slotData.id) {
+    if (editingSlot) {
         setTimeSlots(timeSlots.map(s => s.id === slotData.id ? slotData : s));
     } else {
         setTimeSlots([...timeSlots, { ...slotData, id: Date.now() }]);
@@ -101,7 +103,7 @@ export default function HoursPage() {
   };
   
   const handleSaveBreaks = (breakData: BreakSetting) => {
-    if (breakData.id) {
+    if (editingBreak) {
         setBreaks(breaks.map(b => b.id === breakData.id ? breakData : b));
     } else {
         setBreaks([...breaks, { ...breakData, id: Date.now() }]);
@@ -127,7 +129,7 @@ export default function HoursPage() {
             <div>
               <CardTitle className="flex items-center gap-2"><Hourglass /> Définition des Heures</CardTitle>
               <CardDescription>
-                Configurez la structure des emplois du temps de l'université.
+                Configurez la structure des emplois du temps de l'université. Les changements sont visibles en temps réel ci-dessous.
               </CardDescription>
             </div>
              <Button onClick={handleSaveAll}><Save className="mr-2 h-4 w-4"/> Enregistrer la configuration</Button>
@@ -203,6 +205,22 @@ export default function HoursPage() {
             </Card>
         </div>
       </div>
+      
+       <Card>
+        <CardHeader>
+            <CardTitle>Aperçu de la structure</CardTitle>
+            <CardDescription>Voici à quoi ressemblera l'emploi du temps avec la configuration actuelle.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Timetable 
+                weekStart={startOfWeek(new Date(), { weekStartsOn: 1 })}
+                days={days}
+                timeSlots={timeSlots}
+                breaks={breaks}
+                events={[]}
+            />
+        </CardContent>
+      </Card>
       
       {isSlotModalOpen && <SlotModal isOpen={isSlotModalOpen} onClose={() => setIsSlotModalOpen(false)} slot={editingSlot} onSave={handleSaveSlots} type="slot" />}
       {isBreakModalOpen && <SlotModal isOpen={isBreakModalOpen} onClose={() => setIsBreakModalOpen(false)} slot={editingBreak} onSave={handleSaveBreaks} type="break" />}

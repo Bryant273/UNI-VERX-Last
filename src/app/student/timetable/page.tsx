@@ -16,40 +16,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import type { TimetableEvent, UserRole, TimetableEventType } from '@/lib/data';
 import { allEvents, studentData } from '@/lib/static-data';
-import { cn } from '@/lib/utils';
 import EventDetailsModal from '@/components/dashboard/event-details-modal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { format, startOfWeek, endOfWeek, addDays, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import Timetable from '@/components/shared/timetable';
+import { initialDays, initialTimeSlots, initialBreaks } from '@/lib/hours-data';
 
-
-const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-const TIME_SLOTS = [
-  '08:30 - 10:00',
-  '10:30 - 12:00',
-  '13:30 - 15:00',
-  '15:30 - 17:00',
-];
-
-const eventTypeColors: Record<TimetableEventType, { border: string; bg: string; text: string }> = {
-  cours: { border: 'border-blue-500', bg: 'bg-blue-500/10', text: 'text-blue-700 dark:text-blue-300' },
-  td: { border: 'border-orange-500', bg: 'bg-orange-500/10', text: 'text-orange-700 dark:text-orange-300' },
-  tp: { border: 'border-green-500', bg: 'bg-green-500/10', text: 'text-green-700 dark:text-green-300' },
-  examen: { border: 'border-red-500', bg: 'bg-red-500/10', text: 'text-red-700 dark:text-red-300' },
-  devoir: { border: 'border-yellow-500', bg: 'bg-yellow-500/10', text: 'text-yellow-700 dark:text-yellow-300' },
-  activité: { border: 'border-purple-500', bg: 'bg-purple-500/10', text: 'text-purple-700 dark:text-purple-300' },
-};
-
-
-const getEventForSlot = (
-  events: (TimetableEvent & { day: string })[],
-  day: string,
-  time: string
-) => {
-  return events.find(event => event.day === day && event.time === time);
-};
 
 export default function TimetablePage() {
   const role: UserRole = 'student';
@@ -79,7 +54,7 @@ export default function TimetablePage() {
 
   const weekString = `Semaine du ${format(weekStart, 'dd MMMM yyyy', { locale: fr })} au ${format(weekEnd, 'dd MMMM yyyy', { locale: fr })}`;
 
-  const handleEventClick = (event: TimetableEvent | undefined) => {
+  const handleEventClick = (day: string, time: string, event?: TimetableEvent) => {
     if (!event) return;
     setSelectedEvent(event);
     setIsModalOpen(true);
@@ -107,63 +82,12 @@ export default function TimetablePage() {
       const headerX = doc.internal.pageSize.width - 14;
       doc.text(`Classe: ${studentData.class}`, headerX, 20, { align: 'right' });
 
-
-      const head = [['Horaire', ...DAYS_OF_WEEK.map((day, index) => `${day.toUpperCase()}\n${format(addDays(weekStart, index), 'dd/MM')}`)]];
-      const body: any[] = [];
-
-      TIME_SLOTS.forEach((time, index) => {
-        const row: string[] = [time];
-        DAYS_OF_WEEK.forEach(day => {
-          const event = getEventForSlot(userEvents, day, time);
-          if (event && event.type) {
-            row.push(`${event.course}\n(${event.type.toUpperCase()})\n${event.instructor || ''}\n${event.location}`);
-          } else {
-            row.push('');
-          }
-        });
-        body.push(row);
-
-        if (index === 0) {
-            body.push([{ content: 'RÉCRÉATION', colSpan: 7, styles: { halign: 'center', fillColor: [30, 58, 138], textColor: [255, 255, 255] } }]);
-        }
-        if (index === 1) {
-            body.push([{ content: 'PAUSE', colSpan: 7, styles: { halign: 'center', fillColor: [51, 65, 85], textColor: [255, 255, 255] } }]);
-        }
-        if (index === 2) {
-             body.push([{ content: 'RÉCRÉATION', colSpan: 7, styles: { halign: 'center', fillColor: [30, 58, 138], textColor: [255, 255, 255] } }]);
-        }
-      });
-
-
       // @ts-ignore
       doc.autoTable({
+        html: '#timetable-table-for-pdf',
         startY: 35,
-        head: head,
-        body: body,
         theme: 'grid',
-        headStyles: { fillColor: [22, 163, 74], valign: 'middle' },
-        styles: {
-          cellPadding: 3,
-          valign: 'middle',
-          minCellHeight: 15,
-        },
-        didParseCell: function (data: any) {
-          if (data.section === 'body' && !data.cell.raw.colSpan) { // Check it's not a recreation/pause row
-             const event = getEventForSlot(userEvents, DAYS_OF_WEEK[data.column.index - 1], body.find(r => r[0] === data.cell.raw[0])?.[0]);
-             if (event && event.type) {
-                const colorMap = {
-                    cours: [240, 248, 255],
-                    td: [255, 247, 237],
-                    tp: [240, 253, 244],
-                    examen: [254, 242, 242],
-                    activité: [250, 245, 255],
-                    devoir: [255, 251, 235],
-                };
-                // @ts-ignore
-                data.cell.styles.fillColor = colorMap[event.type];
-             }
-          }
-        }
+        headStyles: { fillColor: [22, 163, 74] }
       });
       
       doc.save('emploi-du-temps.pdf');
@@ -199,103 +123,15 @@ export default function TimetablePage() {
           </div>
         </CardContent>
       </Card>
-
-      <div className="overflow-x-auto rounded-lg border bg-card text-card-foreground shadow-sm">
-        <table id="timetableContent" className="w-full min-w-[80rem] border-collapse">
-          <thead>
-            <tr className="bg-muted/50">
-              <th className="p-2 border font-semibold text-sm w-36">JOURS</th>
-              {DAYS_OF_WEEK.map((day, index) => (
-                <th key={day} className="p-2 border font-semibold text-sm">
-                  {day.toUpperCase()}
-                  <span className="block font-normal text-xs text-muted-foreground">
-                    {format(addDays(weekStart, index), 'dd/MM')}
-                  </span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {TIME_SLOTS.map((time, timeIndex) => (
-              <React.Fragment key={time}>
-                <tr className='h-28'>
-                  <td className="p-2 border font-medium text-sm text-center bg-muted/30 w-36">
-                    {time}
-                  </td>
-                  {DAYS_OF_WEEK.map((day) => {
-                    const event = getEventForSlot(userEvents, day, time);
-                    const colorConfig = event ? eventTypeColors[event.type] : null;
-                    return (
-                      <td
-                        key={`${day}-${time}`}
-                        className={cn(
-                          'p-0 border align-top transition-colors',
-                           event ? 'cursor-pointer' : 'bg-muted/10'
-                        )}
-                        onClick={() => handleEventClick(event)}
-                      >
-                        {event && colorConfig ? (
-                          <div className={cn(
-                            "h-full w-full p-2.5 border-l-4 flex flex-col transition-colors", 
-                            colorConfig.border, 
-                            colorConfig.bg,
-                            'hover:bg-opacity-20',
-                            `hover:${colorConfig.bg.replace('/10', '/20')}`
-                            )}>
-                            <p className={cn("font-bold text-sm", colorConfig.text)}>
-                              {event.course}
-                            </p>
-                            <p className="text-xs font-semibold text-muted-foreground mt-0.5">{event.type.toUpperCase()}</p>
-                            <div className="flex-grow" />
-                            <p className="text-xs text-muted-foreground mt-2">
-                              {event.instructor}
-                            </p>
-                            <p className="text-xs italic text-muted-foreground/80 mt-1">
-                              {event.location}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="hover:bg-muted/30 h-full w-full">&nbsp;</div>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-                {timeIndex === 0 && (
-                  <tr>
-                    <td
-                      colSpan={DAYS_OF_WEEK.length + 1}
-                      className="p-1 text-center text-xs font-medium bg-blue-900 text-white border"
-                    >
-                      RÉCRÉATION
-                    </td>
-                  </tr>
-                )}
-                 {timeIndex === 1 && (
-                  <tr>
-                    <td
-                      colSpan={DAYS_OF_WEEK.length + 1}
-                      className="p-1.5 text-center text-sm font-bold bg-muted/80 border"
-                    >
-                      PAUSE
-                    </td>
-                  </tr>
-                )}
-                 {timeIndex === 2 && (
-                  <tr>
-                    <td
-                      colSpan={DAYS_OF_WEEK.length + 1}
-                       className="p-1 text-center text-xs font-medium bg-blue-900 text-white border"
-                    >
-                      RÉCRÉATION
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        
+      <Timetable
+        weekStart={weekStart}
+        days={initialDays}
+        timeSlots={initialTimeSlots}
+        breaks={initialBreaks}
+        events={userEvents}
+        onCellClick={handleEventClick}
+       />
 
       {selectedEvent && (
         <EventDetailsModal
@@ -321,5 +157,3 @@ export default function TimetablePage() {
     </div>
   );
 }
-
-
