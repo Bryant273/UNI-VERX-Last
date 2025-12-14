@@ -48,7 +48,7 @@ import { userData } from '@/lib/static-data';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
-const currentUser = userData.secretariat;
+const currentUser = userData['academic-advisor'];
 
 const ConversationList = ({
   conversations,
@@ -258,7 +258,7 @@ const NewMessageModal = ({ onSelectUser }: { onSelectUser: (user: DemoUser) => v
     )
 }
 
-export default function SecretariatMessagingPage() {
+export default function AcademicAdvisorMessagingPage() {
   const [conversations, setConversations] = useState(initialConversationsData);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
