@@ -43,21 +43,21 @@ export default function DashboardPage() {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Colonne Principale (Gauche et Centre) */}
+        {/* Colonne Principale (Gauche) */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <StatsCard />
-          <AiReportCard role="admin"/>
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+             <StatInfoCard title="Total Étudiants" value="12,405" subtitle="+150 depuis S1" icon={Users} />
+             <StatInfoCard title="Total Professeurs" value="873" subtitle="+12 nouvelles recrues" icon={Users} />
+             <StatInfoCard title="Cours Actifs" value="1,250" subtitle="Tous départements" icon={BookOpen} />
+             <GlobalEventsCard />
+           </div>
         </div>
 
         {/* Colonne Latérale (Droite) */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
-                <StatInfoCard title="Total Étudiants" value="12,405" subtitle="+150 depuis S1" icon={Users} />
-                <StatInfoCard title="Total Professeurs" value="873" subtitle="+12 nouvelles recrues" icon={Users} />
-                <StatInfoCard title="Cours Actifs" value="1,250" subtitle="Tous départements" icon={BookOpen} />
-                <GlobalEventsCard />
-            </div>
             <RectorateQuickActions />
+            <AiReportCard role="admin"/>
         </div>
       </div>
     </div>
