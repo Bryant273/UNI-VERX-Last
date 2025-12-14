@@ -1,3 +1,4 @@
+
 'use client';
 import {
   LogIn,
@@ -9,6 +10,8 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
+import type { UserRole } from './data';
+import { userData } from './static-data';
 
 export type ActionType =
   | 'login'
@@ -21,6 +24,11 @@ export type ActionType =
 
 export interface ActionLog {
   id: string;
+  user: {
+    name: string;
+    role: UserRole;
+    avatar: string;
+  }
   action: ActionType;
   description: string;
   date: Date;
@@ -81,48 +89,23 @@ const generateActionData = (): ActionLog[] => {
     'logout',
   ];
   const locations = ['Paris, FR', 'Lyon, FR', 'Marseille, FR', 'Lille, FR'];
+  const userRoles = Object.keys(userData) as UserRole[];
   const firstLoginDates = new Set<string>();
-
   const baseDate = new Date();
-  baseDate.setHours(17, 25, 38, 0); // Set a fixed time for deterministic generation
 
-  // Add some actions for today
-  for (let i = 0; i < 5; i++) {
-    const time = new Date(baseDate);
-    time.setHours(baseDate.getHours() - i);
-    time.setMinutes(baseDate.getMinutes() - (i * 17));
-    time.setSeconds(baseDate.getSeconds() - (i*5));
-    
-    const type = actionTypes[i % actionTypes.length];
-    
-    let isFirstLogin = false;
-    if (type === 'login' && !firstLoginDates.has(time.toDateString())) {
-        isFirstLogin = true;
-        firstLoginDates.add(time.toDateString());
-    }
-
-    actions.push({
-      id: `action-today-${i}`,
-      action: type,
-      description: `Description de l'action d'aujourd'hui #${i+1}`,
-      date: time,
-      ip: `82.124.${100 + (i % 155)}.${50 + (i % 205)}`,
-      location: locations[i % locations.length],
-      isFirstLogin: isFirstLogin,
-    });
-  }
-
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 150; i++) {
     const date = new Date(baseDate);
-    date.setDate(baseDate.getDate() - Math.floor(i / 5) - 1);
-    date.setHours(20 - (i % 12), 59 - (i * 3) % 60, 0, 0);
+    date.setDate(baseDate.getDate() - Math.floor(i / 10));
+    date.setHours(20 - (i % 12), 59 - (i * 3) % 60, (59 - i) % 60);
 
     const type = actionTypes[i % actionTypes.length];
+    const userRole = userRoles[i % userRoles.length];
+    const user = userData[userRole];
 
     let isFirstLogin = false;
-    if (type === 'login' && !firstLoginDates.has(date.toDateString())) {
+    if (type === 'login' && !firstLoginDates.has(`${user.name}-${date.toDateString()}`)) {
       isFirstLogin = true;
-      firstLoginDates.add(date.toDateString());
+      firstLoginDates.add(`${user.name}-${date.toDateString()}`);
     }
     
     let description = '';
@@ -130,14 +113,15 @@ const generateActionData = (): ActionLog[] => {
         case 'login': description = "Connexion réussie au compte."; break;
         case 'logout': description = "Déconnexion manuelle du compte."; break;
         case 'profile_update': description = "Informations du profil modifiées."; break;
-        case 'file_upload': description = "Téléversement du fichier 'CV_Sarah_Dupont.pdf'."; break;
-        case 'file_download': description = "Téléchargement du fichier 'Certificat_Scolarite.pdf'."; break;
+        case 'file_upload': description = "Téléversement du fichier 'CV_2025.pdf'."; break;
+        case 'file_download': description = "Téléchargement du fichier 'Releve_Notes.pdf'."; break;
         case 'password_change': description = "Le mot de passe a été modifié avec succès."; break;
         case 'settings_update': description = "Les préférences de notifications ont été mises à jour."; break;
     }
 
     actions.push({
-      id: `action-past-${i + 1}`,
+      id: `action-log-${i + 1}`,
+      user: { name: user.name, role: userRole, avatar: user.avatar },
       action: type,
       description,
       date: date,
@@ -147,28 +131,7 @@ const generateActionData = (): ActionLog[] => {
     });
   }
 
-  // Ensure there is at least one "first login" for today if not already present
-  const todayString = baseDate.toDateString();
-  if (!firstLoginDates.has(todayString)) {
-    const firstLoginToday = actions.find(a => a.action === 'login' && a.date.toDateString() === todayString);
-    if (firstLoginToday) {
-      firstLoginToday.isFirstLogin = true;
-    } else {
-        const time = new Date(baseDate);
-        time.setHours(8, 30, 0);
-        actions.push({
-            id: 'first-login-enforced',
-            action: 'login',
-            description: 'Première connexion de la journée.',
-            date: time,
-            ip: '82.124.100.50',
-            location: 'Paris, FR',
-            isFirstLogin: true
-        });
-    }
-  }
-
   return actions.sort((a, b) => b.date.getTime() - a.date.getTime());
 };
 
-export const actionsData: ActionLog[] = generateActionData();
+export const allActionsData: ActionLog[] = generateActionData();

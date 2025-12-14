@@ -31,19 +31,35 @@ export const usersData: UniversityUser[] = [
 ];
 
 // Add more users for pagination
+const firstNames = ["Léa", "Manon", "Chloé", "Louis", "Gabriel", "Jules", "Hugo", "Alice", "Rose", "Louise", "Adam", "Arthur", "Raphaël"];
+const lastNames = ["Garcia", "Rodriguez", "Gomez", "Fernandez", "Lopez", "Martinez", "Sanchez", "Perez", "Gonzalez", "Martin", "Bernard", "Dubois"];
+
 for (let i = 9; i <= 35; i++) {
+    const firstName = firstNames[i % firstNames.length];
+    const lastName = lastNames[i % lastNames.length];
+    const name = `${firstName} ${lastName}`;
+    
+    // Deterministic generation based on ID 'i' to avoid hydration errors
+    const average = parseFloat((8 + (i * 13) % 12 + ((i * 7) % 100) / 100).toFixed(2));
+    const attendance = 70 + (i * 17) % 31;
+    
+    let status: UserStatus = 'active';
+    if (i % 5 === 0) status = 'suspended';
+    if (i % 10 === 0) status = 'archived';
+
     const roles: UniversityUser['role'][] = ['student', 'professor', 'student'];
-    const statuses: UserStatus[] = ['active', 'active', 'suspended', 'active'];
+    const randomClass = roles[i % roles.length];
+
     usersData.push({
         id: i,
-        name: `Utilisateur ${i}`,
+        name: name,
         avatar: `https://i.pravatar.cc/100?img=${30+i}`,
-        email: `user.${i}@uni-verx.edu`,
+        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@uni-verx.edu`,
         phone: `06${String(Math.floor(Math.random()*100000000)).padStart(8,'0')}`,
         address: `${i} rue de l'Exemple, 75000 Paris`,
-        role: roles[i % roles.length],
-        status: statuses[i % statuses.length],
-        lastLogin: `Il y a ${i % 7} jours`,
+        role: randomClass,
+        status: status,
+        lastLogin: `Il y a ${1 + (i % 5)} jours`,
         creationDate: `01/09/202${i%5}`,
         activity: [{date: `2025-05-${28 - (i%7)}`, action: 'Connexion'}]
     });
