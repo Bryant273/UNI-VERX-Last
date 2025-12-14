@@ -40,6 +40,8 @@ import {
   Columns,
   Sheet,
   CheckCheck,
+  Pencil,
+  BarChart3
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
@@ -211,9 +213,42 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '#', label: 'Sécurité', icon: Shield },
   ],
   rectorate: [
-      { href: '/rectorate/dashboard', label: 'Rectorat', icon: LayoutDashboard },
-      { href: '/academic-advisor/stats', label: 'Statistiques Globales', icon: PieChart },
-      { href: '#', label: 'Administration', icon: Building },
+      { href: '/rectorate/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+      { href: '/rectorate/journal', label: 'Journal', icon: History },
+      { href: '/rectorate/signature', label: 'Signature', icon: Pencil },
+      { href: '/rectorate/alerts', label: 'Alertes', icon: AlertTriangle },
+      {
+        title: 'Académique',
+        links: [
+          { href: '/rectorate/departments', label: 'Départements', icon: Building },
+          { href: '/rectorate/modules', label: 'Modules', icon: BookCopy },
+          { href: '/rectorate/maquettes', label: 'Maquettes', icon: Columns },
+          { href: '/rectorate/hours', label: 'Heures', icon: Hourglass },
+          { href: '/rectorate/results', label: 'Bulletins & Résultats', icon: GraduationCap },
+        ],
+      },
+      {
+        title: 'Administratif',
+        links: [
+          { href: '/rectorate/student-files', label: 'Dossiers étudiants', icon: Users },
+          { href: '/rectorate/teacher-files', label: 'Dossiers professeurs', icon: BookUser },
+          { href: '/rectorate/contracts', label: 'Contrats', icon: FileText },
+        ],
+      },
+      {
+        title: 'Finance',
+        links: [
+          { href: '/rectorate/budgets', label: 'Budgétisation', icon: BarChart3 },
+          { href: '/rectorate/treasury', label: 'Trésorerie', icon: Banknote },
+        ],
+      },
+      {
+        title: 'Communication',
+        links: [
+          { href: '/rectorate/messages', label: 'Messages', icon: MessageSquare },
+          { href: '/rectorate/announcements', label: 'Annonces', icon: Megaphone },
+        ],
+      }
   ],
   'erp-provider': [],
 };
