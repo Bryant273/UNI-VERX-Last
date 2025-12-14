@@ -138,7 +138,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     {
       title: 'Communication',
       links: [
-        { href: '/academic-advisor/messaging', label: 'Messages', icon: MessageSquare },
+        { href: '/academic-advisor/messages', label: 'Messages', icon: MessageSquare },
         { href: '/academic-advisor/announcements', label: 'Annonces', icon: Megaphone },
       ],
     },
@@ -161,6 +161,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     {
       title: 'Académique',
       links: [
+        { href: '/secretariat/departments', label: 'Départements', icon: Building },
         { href: '/secretariat/modules', label: 'Modules', icon: BookCopy },
         { href: '/secretariat/hours', label: 'Heures', icon: Hourglass },
         { href: '/secretariat/planning', label: 'Planning', icon: CalendarDays },
@@ -188,7 +189,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     {
       title: 'Communication',
       links: [
-        { href: '/secretariat/messaging', label: 'Messages', icon: MessageSquare },
+        { href: '/secretariat/messages', label: 'Messages', icon: MessageSquare },
         { href: '/secretariat/announcements', label: 'Annonces', icon: Megaphone },
       ],
     },
