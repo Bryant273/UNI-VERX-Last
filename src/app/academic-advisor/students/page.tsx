@@ -95,7 +95,7 @@ export default function AcademicAdvisorStudentsPage() {
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<Student | null>(null);
 
-  const isFiltered = searchTerm || classFilter || statusFilter;
+  const isFiltered = searchTerm || classFilter;
 
   const filteredAndSortedStudents = useMemo(() => {
     if (!isFiltered) return [];
@@ -183,8 +183,8 @@ export default function AcademicAdvisorStudentsPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                 <Input placeholder="Rechercher par nom ou email..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/>
               </div>
-              <Select value={classFilter} onValueChange={setClassFilter}><SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Toutes les classes"/></SelectTrigger><SelectContent><SelectItem value="">Toutes les classes</SelectItem><SelectItem value="l1-info">L1 Info</SelectItem><SelectItem value="l2-info">L2 Info</SelectItem><SelectItem value="l3-info">L3 Info</SelectItem><SelectItem value="m1-info">M1 Info</SelectItem><SelectItem value="m2-info">M2 Info</SelectItem></SelectContent></Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Tous les statuts"/></SelectTrigger><SelectContent><SelectItem value="">Tous les statuts</SelectItem>{Object.entries(statusConfig).map(([key, {label}]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select>
+              <Select value={classFilter} onValueChange={v => setClassFilter(v === 'all' ? '' : v)}><SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Toutes les classes"/></SelectTrigger><SelectContent><SelectItem value="all">Toutes les classes</SelectItem><SelectItem value="l1-info">L1 Info</SelectItem><SelectItem value="l2-info">L2 Info</SelectItem><SelectItem value="l3-info">L3 Info</SelectItem><SelectItem value="m1-info">M1 Info</SelectItem><SelectItem value="m2-info">M2 Info</SelectItem></SelectContent></Select>
+              <Select value={statusFilter} onValueChange={v => setStatusFilter(v === 'all' ? '' : v)}><SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Tous les statuts"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem>{Object.entries(statusConfig).map(([key, {label}]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select>
               <Select value={sortBy} onValueChange={setSortBy}><SelectTrigger className="w-full md:w-[180px]"><div className="flex items-center gap-2"><ChevronsUpDown className="h-4 w-4"/><span>Trier par</span></div></SelectTrigger><SelectContent><SelectItem value="name">Nom</SelectItem><SelectItem value="grade">Moyenne</SelectItem><SelectItem value="attendance">Présence</SelectItem><SelectItem value="class">Classe</SelectItem></SelectContent></Select>
           </div>
         </CardHeader>
