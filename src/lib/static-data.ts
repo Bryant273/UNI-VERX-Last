@@ -1,4 +1,3 @@
-
 import {
   LayoutDashboard,
   BookOpen,
@@ -41,31 +40,30 @@ import {
   Sheet,
   CheckCheck,
   Pencil,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
 import type { DemoUser } from './messages-data';
 
-
 export const VALID_ROLES: UserRole[] = [
-  'student', 
-  'professor', 
-  'academic-advisor', 
-  'secretariat', 
+  'student',
+  'professor',
+  'academic-advisor',
+  'secretariat',
   'rectorate',
   'admin',
-  'erp-provider'
+  'erp-provider',
 ];
 
 export const userRolesForLogin: { value: UserRole; label: string }[] = [
-    { value: 'student', label: 'Étudiant' },
-    { value: 'professor', label: 'Professeur' },
-    { value: 'academic-advisor', label: 'Responsable Pédagogique' },
-    { value: 'secretariat', label: 'Secrétariat' },
-    { value: 'rectorate', label: 'Rectorat' },
-    { value: 'admin', label: 'Admin-Université' },
-    { value: 'erp-provider', label: 'Fournisseur ERP' },
+  { value: 'student', label: 'Étudiant' },
+  { value: 'professor', label: 'Professeur' },
+  { value: 'academic-advisor', label: 'Responsable Pédagogique' },
+  { value: 'secretariat', label: 'Secrétariat' },
+  { value: 'rectorate', label: 'Rectorat' },
+  { value: 'admin', label: 'Admin-Université' },
+  { value: 'erp-provider', label: 'Fournisseur ERP' },
 ];
 
 export const navLinks: Record<UserRole, NavItem[]> = {
@@ -124,7 +122,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
     { href: '/academic-advisor/students', label: 'Étudiants', icon: Users },
     { href: '/academic-advisor/teachers', label: 'Enseignants', icon: UserCheck },
     { href: '/academic-advisor/courses', label: 'Cours & Programmes', icon: BookOpen },
-    { href: '/academic-advisor/planning', label: 'Planning Global', icon: Calendar },
+    { href: '/academic-advisor/planning', label: 'Emploi du temps', icon: Calendar },
     {
       title: 'Gestion',
       links: [
@@ -165,7 +163,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
         { href: '/secretariat/departments', label: 'Départements', icon: Building },
         { href: '/secretariat/modules', label: 'Modules', icon: BookCopy },
         { href: '/secretariat/hours', label: 'Heures', icon: Hourglass },
-        { href: '/secretariat/planning', label: 'Planning', icon: CalendarDays },
+        { href: '/secretariat/planning', label: 'Planning Annuel', icon: CalendarDays },
       ],
     },
     {
@@ -205,12 +203,64 @@ export const navLinks: Record<UserRole, NavItem[]> = {
   ],
   admin: [
     { href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/admin/users', label: 'Utilisateurs', icon: Users },
     { href: '/admin/tickets', label: 'Tickets', icon: Ticket },
-    { href: '#', label: 'Gestion des utilisateurs', icon: Users },
-    { href: '/admin/courses', label: 'Gestion des cours', icon: BookOpen },
-    { href: '/admin/evaluations', label: 'Gestion des évaluations', icon: ClipboardCheck },
-    { href: '#', label: 'Statistiques', icon: PieChart },
-    { href: '#', label: 'Sécurité', icon: Shield },
+    { href: '/admin/journal', label: 'Journal', icon: History },
+    { href: '/admin/signature', label: 'Signature', icon: Pencil },
+    { href: '/admin/results', label: 'Bulletins & Résultats', icon: GraduationCap },
+    { href: '/admin/timetable', label: 'Emploi du temps', icon: Calendar },
+    {
+      title: 'Finance',
+      links: [
+        { href: '/admin/budgets', label: 'Budgétisation', icon: BarChart3 },
+        { href: '/admin/scholarships', label: 'Scolarité', icon: CreditCard },
+        { href: '/admin/treasury', label: 'Trésorerie', icon: Banknote },
+      ],
+    },
+    {
+      title: 'Gestion',
+      links: [
+        { href: '/admin/alerts', label: 'Alertes', icon: AlertTriangle },
+        { href: '/admin/validations', label: 'Validations', icon: CheckCheck },
+        { href: '/admin/rooms', label: 'Salles', icon: DoorOpen },
+        { href: '/admin/templates', label: 'Templates', icon: Sheet },
+        { href: '/admin/enrollments', label: 'Inscriptions', icon: UserPlus },
+        { href: '/admin/courses', label: 'Cours', icon: BookOpen },
+      ],
+    },
+    {
+      title: 'Académique',
+      links: [
+        { href: '/admin/departments', label: 'Départements', icon: Building },
+        { href: '/admin/modules', label: 'Modules', icon: BookCopy },
+        { href: '/admin/maquettes', label: 'Maquettes', icon: Columns },
+        { href: '/admin/hours', label: 'Heures', icon: Hourglass },
+        { href: '/admin/planning', label: 'Planning Annuel', icon: CalendarDays },
+      ],
+    },
+    {
+      title: 'Administratif',
+      links: [
+        { href: '/admin/student-files', label: 'Dossiers Etudiants', icon: Users },
+        { href: '/admin/teacher-files', label: 'Dossiers Professeurs', icon: BookUser },
+        { href: '/admin/contracts', label: 'Contrats', icon: FileText },
+      ],
+    },
+    {
+      title: 'Communication',
+      links: [
+        { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
+        { href: '/admin/announcements', label: 'Annonces', icon: Megaphone },
+      ],
+    },
+    {
+      title: 'Rapports',
+      links: [
+        { href: '/admin/stats', label: 'Statistiques', icon: PieChart },
+        { href: '/admin/reports', label: 'Rapports', icon: FileBarChart },
+        { href: '/admin/exports', label: 'Exports', icon: Download },
+      ],
+    },
   ],
   rectorate: [
       { href: '/rectorate/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
