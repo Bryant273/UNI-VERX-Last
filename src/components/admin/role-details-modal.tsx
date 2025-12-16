@@ -12,6 +12,7 @@ import { getInitials } from '@/lib/messages-data';
 import { roleConfig, usersData, type UniversityUser } from '@/lib/users-data';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
+import { Trash2 } from 'lucide-react';
 
 interface RoleDetailsModalProps {
   role: any | null;
