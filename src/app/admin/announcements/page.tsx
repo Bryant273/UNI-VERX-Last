@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useMemo } from 'react';
 import { Megaphone, Plus, Send, Edit, Trash2, Eye, Search, Filter } from 'lucide-react';
@@ -29,6 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 import { announcementsData, channelsConfig, audiencesConfig, type Announcement } from '@/lib/announcements-data';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { userData } from '@/lib/static-data';
 
 const AnnouncementsPage = () => {
     const [announcements, setAnnouncements] = useState<Announcement[]>(announcementsData);
@@ -71,7 +73,7 @@ const AnnouncementsPage = () => {
                 ...announcementData,
                 status: 'draft',
                 date: null,
-                author: 'Rectorat' // Should be dynamic
+                author: userData.admin.name,
             };
             setAnnouncements(prev => [newAnn, ...prev]);
             toast({ title: 'Brouillon enregistré', description: 'Votre annonce a été sauvegardée.' });
