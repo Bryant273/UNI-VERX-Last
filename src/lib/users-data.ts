@@ -1,4 +1,3 @@
-
 'use client';
 import type { LucideIcon } from 'lucide-react';
 import { UserCheck, UserX, Clock, Archive } from 'lucide-react';
@@ -30,7 +29,6 @@ export const usersData: UniversityUser[] = [
     { id: 8, name: 'Prof. Martin', avatar: 'https://i.pravatar.cc/100?img=60', email: 'prof.martin@uni-verx.edu', phone: '0612345685', address: '45 Rue des Écoles, 75005 Paris', role: 'professor', status: 'archived', lastLogin: 'Il y a 6 mois', creationDate: '01/09/2010', activity: [{date: '2024-11-28', action: 'Déconnexion'}] },
 ];
 
-// Add more users for pagination
 const firstNames = ["Léa", "Manon", "Chloé", "Louis", "Gabriel", "Jules", "Hugo", "Alice", "Rose", "Louise", "Adam", "Arthur", "Raphaël"];
 const lastNames = ["Garcia", "Rodriguez", "Gomez", "Fernandez", "Lopez", "Martinez", "Sanchez", "Perez", "Gonzalez", "Martin", "Bernard", "Dubois"];
 
@@ -39,7 +37,6 @@ for (let i = 9; i <= 35; i++) {
     const lastName = lastNames[i % lastNames.length];
     const name = `${firstName} ${lastName}`;
     
-    // Deterministic generation based on ID 'i' to avoid hydration errors
     const average = parseFloat((8 + (i * 13) % 12 + ((i * 7) % 100) / 100).toFixed(2));
     const attendance = 70 + (i * 17) % 31;
     
@@ -65,15 +62,42 @@ for (let i = 9; i <= 35; i++) {
     });
 }
 
-
-export const roleConfig: Record<UniversityUser['role'], { label: string; }> = {
-    student: { label: 'Étudiant' },
-    professor: { label: 'Professeur' },
-    'academic-advisor': { label: 'Resp. Pédagogique' },
-    secretariat: { label: 'Secrétariat' },
-    rectorate: { label: 'Rectorat' },
-    admin: { label: 'Admin Université' },
-    'erp-provider': { label: 'Fournisseur ERP' },
+export const roleConfig: Record<UniversityUser['role'], { label: string; description: string; permissions: string[] }> = {
+    student: { 
+        label: 'Étudiant', 
+        description: 'Accès aux cours, notes, emploi du temps et services étudiants.',
+        permissions: ['read:own_courses', 'read:own_grades', 'submit:assignments']
+    },
+    professor: { 
+        label: 'Professeur', 
+        description: 'Gestion des cours, saisie des notes, communication avec les étudiants.',
+        permissions: ['manage:courses', 'manage:grades', 'read:student_profiles']
+    },
+    'academic-advisor': { 
+        label: 'Resp. Pédagogique', 
+        description: 'Supervision des programmes, suivi des étudiants et validation des maquettes.',
+        permissions: ['validate:programs', 'read:all_student_data', 'manage:teachers']
+    },
+    secretariat: { 
+        label: 'Secrétariat', 
+        description: 'Gestion administrative des dossiers, inscriptions et documents officiels.',
+        permissions: ['manage:student_files', 'manage:enrollments', 'generate:documents']
+    },
+    rectorate: { 
+        label: 'Rectorat', 
+        description: 'Pilotage stratégique, supervision globale, gestion budgétaire.',
+        permissions: ['read:all_data', 'manage:budgets', 'manage:departments']
+    },
+    admin: { 
+        label: 'Admin Université', 
+        description: 'Contrôle total sur la plateforme, gestion des utilisateurs et permissions.',
+        permissions: ['manage:all']
+    },
+    'erp-provider': { 
+        label: 'Fournisseur ERP', 
+        description: 'Maintenance technique, supervision du système et intégrations.',
+        permissions: ['system:maintenance', 'system:monitoring']
+    },
 };
 
 export const statusConfig: Record<UserStatus, { label: string; icon: LucideIcon; color: string; }> = {
