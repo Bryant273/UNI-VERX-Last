@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   BookOpen,
@@ -67,6 +68,7 @@ import {
   Globe,
   SlidersHorizontal,
   Bell,
+  FileCheck2,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
