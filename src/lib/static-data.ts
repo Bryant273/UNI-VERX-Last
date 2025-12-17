@@ -41,6 +41,32 @@ import {
   CheckCheck,
   Pencil,
   BarChart3,
+  Server,
+  University,
+  Award,
+  Repeat,
+  Library,
+  GitBranch,
+  GitPullRequest,
+  KeyRound,
+  UserCog,
+  MessageSquareHeart,
+  Inbox,
+  Wrench,
+  CalendarClock,
+  ArrowUpToLine,
+  Database,
+  Receipt,
+  GanttChart,
+  ShieldAlert,
+  DatabaseBackup,
+  BadgeCheck,
+  Activity,
+  TrafficCone,
+  Palette,
+  Globe,
+  SlidersHorizontal,
+  Bell,
 } from 'lucide-react';
 import { PlaceHolderImages } from './placeholder-images';
 import type { UserRole, NavItem, TimetableEvent } from './data';
@@ -242,7 +268,7 @@ export const navLinks: Record<UserRole, NavItem[]> = {
       title: 'Administratif',
       links: [
         { href: '/admin/student-files', label: 'Dossiers Etudiants', icon: Users },
-        { href: '/admin/teacher-files', label: 'Dossiers Professeurs', icon: BookUser },
+        { href: '/admin/teacher-files', label: 'Dossiers professeurs', icon: BookUser },
         { href: '/admin/contracts', label: 'Contrats', icon: FileText },
       ],
     },
@@ -308,7 +334,96 @@ export const navLinks: Record<UserRole, NavItem[]> = {
         ],
       }
   ],
-  'erp-provider': [],
+  'erp-provider': [
+    { href: '/erp-provider/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { href: '/erp-provider/tickets', label: 'Tickets', icon: Ticket },
+    { href: '/erp-provider/server-status', label: 'État des serveurs', icon: Server },
+    { href: '/erp-provider/universities', label: 'Universités', icon: University },
+    { href: '/erp-provider/licenses', label: 'Licences', icon: Award },
+    { href: '/erp-provider/subscriptions', label: 'Abonnements', icon: Repeat },
+    {
+      title: 'Services',
+      links: [
+        { href: '/erp-provider/services/catalog', label: 'Catalogue', icon: BookCopy },
+        { href: '/erp-provider/services/modules', label: 'Modules par client', icon: Library },
+        { href: '/erp-provider/services/versions', label: 'Versions', icon: GitBranch },
+        { href: '/erp-provider/services/new-versions', label: 'Nouvelles versions', icon: GitPullRequest },
+      ],
+    },
+    {
+      title: 'Clients',
+      links: [
+        { href: '/erp-provider/clients/admins', label: 'Admin universités', icon: Shield },
+        { href: '/erp-provider/clients/journal', label: 'Journal', icon: History },
+        { href: '/erp-provider/clients/password-reset', label: 'Mots de passe', icon: KeyRound },
+        { href: '/erp-provider/clients/permissions', label: 'Permissions', icon: UserCog },
+      ],
+    },
+    {
+      title: 'Support',
+      links: [
+        { href: '/erp-provider/support/feedback', label: 'Retours clients', icon: MessageSquareHeart },
+        { href: '/erp-provider/support/requests', label: 'Requêtes', icon: Inbox },
+        { href: '/erp-provider/support/history', label: 'Historique interventions', icon: Wrench },
+        { href: '/erp-provider/support/maintenance', label: 'Planification maintenance', icon: CalendarClock },
+        { href: '/erp-provider/support/updates', label: 'Mises à jour', icon: ArrowUpToLine },
+        { href: '/erp-provider/support/data', label: 'Données clients', icon: Database },
+      ],
+    },
+    {
+      title: 'Finance',
+      links: [
+        { href: '/erp-provider/finance/budget', label: 'Budgétisation', icon: BarChart3 },
+        { href: '/erp-provider/finance/billing', label: 'Facturation', icon: Receipt },
+        { href: '/erp-provider/finance/treasury', label: 'Trésorerie', icon: Banknote },
+      ],
+    },
+    {
+      title: 'Templates',
+      links: [
+        { href: '/erp-provider/templates/grades', label: 'Bulletins', icon: GraduationCap },
+        { href: '/erp-provider/templates/certificates', label: 'Certificats', icon: FileCheck2 },
+        { href: '/erp-provider/templates/contracts', label: 'Contrats', icon: FileText },
+        { href: '/erp-provider/templates/maquettes', label: 'Maquettes', icon: Columns },
+        { href: '/erp-provider/templates/reports', label: 'Rapports', icon: FileBarChart },
+      ],
+    },
+    {
+      title: 'Sécurité',
+      links: [
+        { href: '/erp-provider/security/audit', label: 'Audit', icon: GanttChart },
+        { href: '/erp-provider/security/alerts', label: 'Alertes sécurité', icon: ShieldAlert },
+        { href: '/erp-provider/security/backups', label: 'Sauvegardes', icon: DatabaseBackup },
+        { href: '/erp-provider/security/compliance', label: 'Conformités', icon: BadgeCheck },
+      ],
+    },
+    {
+      title: 'Statistiques',
+      links: [
+        { href: '/erp-provider/stats/load', label: 'Charge système', icon: PieChart },
+        { href: '/erp-provider/stats/usage', label: 'Utilisation modules', icon: Activity },
+        { href: '/erp-provider/stats/reports', label: 'Rapports', icon: FileBarChart },
+        { href: '/erp-provider/stats/failures', label: 'Suivi des pannes', icon: TrafficCone },
+      ],
+    },
+    {
+      title: 'Personnalisation',
+      links: [
+        { href: '/erp-provider/custom/branding', label: 'Logos et thèmes', icon: Palette },
+        { href: '/erp-provider/custom/domain', label: 'Domaine personnalisé', icon: Globe },
+        { href: '/erp-provider/custom/ui', label: 'Préférences UI client', icon: SlidersHorizontal },
+      ],
+    },
+    {
+      title: 'Communication',
+      links: [
+        { href: '/erp-provider/communication/messages', label: 'Messages', icon: MessageSquare },
+        { href: '/erp-provider/communication/announcements', label: 'Annonces', icon: Megaphone },
+        { href: '/erp-provider/communication/notifications', label: 'Notifications système', icon: Bell },
+        { href: '/erp-provider/communication/history', label: 'Historique', icon: History },
+      ],
+    },
+  ],
 };
 
 export const bottomNavLinks: { href: string; label: string; icon: LucideIcon }[] = [
