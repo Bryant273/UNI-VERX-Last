@@ -55,33 +55,299 @@ UNI-VERX est construit sur un socle technologique moderne, performant et évolut
 
 ## Structure du Projet
 
-Le projet est organisé pour une séparation claire des préoccupations :
+Voici l'arbre complet de l'application, détaillant chaque dossier et fichier pour une compréhension parfaite de l'architecture.
 
 ```
 /
-├── src/
-│   ├── app/
-│   │   ├── (auth)/         # Pages d'authentification (si nécessaire)
-│   │   ├── [role]/         # Pages spécifiques pour chaque rôle (student, professor, admin...)
-│   │   ├── layout.tsx      # Layout principal de l'application
-│   │   └── page.tsx        # Page d'accueil (landing page)
-│   ├── components/
-│   │   ├── dashboard/      # Composants spécifiques aux tableaux de bord
-│   │   ├── landing/        # Composants pour la page d'accueil
-│   │   ├── layout/         # Composants de structure (Header, Sidebar)
-│   │   └── ui/             # Composants d'interface ShadCN (Button, Card, etc.)
-│   ├── lib/
-│   │   ├── data.ts         # Types et interfaces principaux
-│   │   └── static-data.ts  # Données statiques de démonstration
-│   ├── hooks/
-│   │   └── use-login-modal.ts # Gestion de l'état de la modale de connexion
-│   ├── blue-ai/
-│   │   ├── flows/          # Logique des agents IA (Genkit Flows)
-│   │   └── genkit.ts       # Configuration de Genkit
-│   └── server/
-│       └── actions.ts      # Server Actions pour les appels au backend
-├── public/                 # Fichiers statiques (images, etc.)
-└── tailwind.config.ts      # Configuration de Tailwind CSS
+├── .env
+├── README.md
+├── apphosting.yaml
+├── components.json
+├── next.config.ts
+├── package.json
+├── tailwind.config.ts
+├── tsconfig.json
+├── docs/
+│   └── backend.json
+├── public/
+│   └── icon.svg
+└── src/
+    ├── app/
+    │   ├── academic-advisor/
+    │   │   ├── actions/page.tsx
+    │   │   ├── alerts/page.tsx
+    │   │   ├── announcements/page.tsx
+    │   │   ├── courses/page.tsx
+    │   │   ├── dashboard/page.tsx
+    │   │   ├── enrollments/page.tsx
+    │   │   ├── exports/page.tsx
+    │   │   ├── layout.tsx
+    │   │   ├── messaging/page.tsx
+    │   │   ├── planning/page.tsx
+    │   │   ├── profile/page.tsx
+    │   │   ├── reports/page.tsx
+    │   │   ├── results/page.tsx
+    │   │   ├── rooms/page.tsx
+    │   │   ├── scholarships/page.tsx
+    │   │   ├── settings/page.tsx
+    │   │   ├── stats/page.tsx
+    │   │   ├── students/page.tsx
+    │   │   ├── teachers/page.tsx
+    │   │   ├── tickets/page.tsx
+    │   │   └── validations/page.tsx
+    │   ├── admin/
+    │   │   ├── actions/page.tsx
+    │   │   ├── alerts/page.tsx
+    │   │   ├── announcements/page.tsx
+    │   │   ├── budgets/page.tsx
+    │   │   ├── contracts/page.tsx
+    │   │   ├── courses/page.tsx
+    │   │   ├── dashboard/page.tsx
+    │   │   ├── departments/page.tsx
+    │   │   ├── documents/page.tsx
+    │   │   ├── enrollments/page.tsx
+    │   │   ├── exports/page.tsx
+    │   │   ├── hours/page.tsx
+    │   │   ├── journal/page.tsx
+    │   │   ├── layout.tsx
+    │   │   ├── maquettes/page.tsx
+    │   │   ├── messages/page.tsx
+    │   │   ├── modules/page.tsx
+    │   │   ├── page.tsx
+    │   │   ├── planning/page.tsx
+    │   │   ├── profile/page.tsx
+    │   │   ├── reports/page.tsx
+    │   │   ├── results/page.tsx
+    │   │   ├── rooms/page.tsx
+    │   │   ├── scholarships/page.tsx
+    │   │   ├── settings/page.tsx
+    │   │   ├── signature/page.tsx
+    │   │   ├── stats/page.tsx
+    │   │   ├── student-files/page.tsx
+    │   │   ├── teacher-files/page.tsx
+    │   │   ├── templates/page.tsx
+    │   │   ├── tickets/page.tsx
+    │   │   ├── timetable/page.tsx
+    │   │   ├── treasury/page.tsx
+    │   │   ├── users/
+    │   │   │   ├── archived/page.tsx
+    │   │   │   └── page.tsx
+    │   │   └── validations/page.tsx
+    │   ├── erp-provider/
+    │   │   ├── actions/page.tsx
+    │   │   ├── dashboard/page.tsx
+    │   │   ├── layout.tsx
+    │   │   ├── profile/page.tsx
+    │   │   └── settings/page.tsx
+    │   ├── professor/
+    │   │   ├── actions/page.tsx
+    │   │   ├── courses/page.tsx
+    │   │   ├── dashboard/page.tsx
+    │   │   ├── documents/page.tsx
+    │   │   ├── evaluations/page.tsx
+    │   │   ├── layout.tsx
+    │   │   ├── messages/page.tsx
+    │   │   ├── page.tsx
+    │   │   ├── payments/page.tsx
+    │   │   ├── presence/page.tsx
+    │   │   ├── profile/page.tsx
+    │   │   ├── reports/page.tsx
+    │   │   ├── resources/page.tsx
+    │   │   ├── results/page.tsx
+    │   │   ├── settings/page.tsx
+    │   │   ├── students/page.tsx
+    │   │   └── tickets/page.tsx
+    │   ├── rectorate/
+    │   │   ├── actions/page.tsx
+    │   │   ├── alerts/page.tsx
+    │   │   ├── announcements/page.tsx
+    │   │   ├── budgets/page.tsx
+    │   │   ├── contracts/page.tsx
+    │   │   ├── dashboard/page.tsx
+    │   │   ├── departments/page.tsx
+    │   │   ├── documents/page.tsx
+    │   │   ├── exports/page.tsx
+    │   │   ├── hours/page.tsx
+    │   │   ├── journal/page.tsx
+    │   │   ├── layout.tsx
+    │   │   ├── maquettes/page.tsx
+    │   │   ├── messages/page.tsx
+    │   │   ├── modules/page.tsx
+    │   │   ├── page.tsx
+    │   │   ├── profile/page.tsx
+    │   │   ├── reports/page.tsx
+    │   │   ├── results/page.tsx
+    │   │   ├── settings/page.tsx
+    │   │   ├── signature/page.tsx
+    │   │   ├── stats/page.tsx
+    │   │   ├── student-files/page.tsx
+    │   │   ├── teacher-files/page.tsx
+    │   │   └── treasury/page.tsx
+    │   ├── secretariat/
+    │   │   ├── actions/page.tsx
+    │   │   ├── alerts/page.tsx
+    │   │   ├── announcements/page.tsx
+    │   │   ├── contracts/page.tsx
+    │   │   ├── courses/page.tsx
+    │   │   ├── dashboard/page.tsx
+    │   │   ├── departments/page.tsx
+    │   │   ├── enrollments/page.tsx
+    │   │   ├── exports/page.tsx
+    │   │   ├── hours/page.tsx
+    │   │   ├── journal/page.tsx
+    │   │   ├── layout.tsx
+    │   │   ├── messaging/page.tsx
+    │   │   ├── modules/page.tsx
+    │   │   ├── planning/page.tsx
+    │   │   ├── profile/page.tsx
+    │   │   ├── reports/page.tsx
+    │   │   ├── results/page.tsx
+    │   │   ├── rooms/page.tsx
+    │   │   ├── scholarships/page.tsx
+    │   │   ├── settings/page.tsx
+    │   │   ├── stats/page.tsx
+    │   │   ├── student-files/page.tsx
+    │   │   ├── teacher-files/page.tsx
+    │   │   ├── templates/page.tsx
+    │   │   ├── tickets/page.tsx
+    │   │   ├── treasury/page.tsx
+    │   │   ├── users/
+    │   │   │   ├── archived/page.tsx
+    │   │   │   └── page.tsx
+    │   │   └── validations/page.tsx
+    │   ├── student/
+    │   │   ├── actions/page.tsx
+    │   │   ├── courses/page.tsx
+    │   │   ├── dashboard/page.tsx
+    │   │   ├── documents/page.tsx
+    │   │   ├── enterprise/page.tsx
+    │   │   ├── evaluations/page.tsx
+    │   │   ├── group-work/page.tsx
+    │   │   ├── jobs/page.tsx
+    │   │   ├── layout.tsx
+    │   │   ├── messages/page.tsx
+    │   │   ├── messaging/page.tsx
+    │   │   ├── payments/page.tsx
+    │   │   ├── profile/page.tsx
+    │   │   ├── results/
+    │   │   │   ├── layout.tsx
+    │   │   │   └── page.tsx
+    │   │   ├── settings/page.tsx
+    │   │   ├── tickets/page.tsx
+    │   │   └── timetable/page.tsx
+    │   ├── globals.css
+    │   ├── layout.tsx
+    │   └── page.tsx
+    ├── blue-ai/
+    │   ├── dev.ts
+    │   ├── genkit.ts
+    │   └── flows/
+    │       ├── generate-professor-report.ts
+    │       ├── generate-stats-report.ts
+    │       ├── generate-student-report.ts
+    │       ├── summarize-course-materials.ts
+    │       └── summarize-document-uploads.ts
+    ├── components/
+    │   ├── admin/
+    │   │   └── role-details-modal.tsx
+    │   ├── dashboard/
+    │   │   ├── ai-report-card.tsx
+    │   │   ├── ai-report-modal.tsx
+    │   │   ├── ai-report-pdf.tsx
+    │   │   ├── average-card.tsx
+    │   │   ├── courses-card.tsx
+    │   │   ├── current-event-card.tsx
+    │   │   ├── date-time.tsx
+    │   │   ├── event-details-modal.tsx
+    │   │   ├── global-events-card.tsx
+    │   │   ├── messaging-card.tsx
+    │   │   ├── quick-actions-card.tsx
+    │   │   ├── rectorate-quick-actions.tsx
+    │   │   ├── secretariat-quick-actions.tsx
+    │   │   └── stats-card.tsx
+    │   ├── landing/
+    │   │   ├── contact.tsx
+    │   │   ├── features.tsx
+    │   │   ├── footer.tsx
+    │   │   ├── header.tsx
+    │   │   ├── hero.tsx
+    │   │   ├── login-modal.tsx
+    │   │   ├── pricing.tsx
+    │   │   └── testimonials.tsx
+    │   ├── layout/
+    │   │   ├── header.tsx
+    │   │   └── sidebar.tsx
+    │   ├── secretariat/
+    │   │   ├── student-file-modal.tsx
+    │   │   ├── teacher-file-modal.tsx
+    │   │   └── user-details-modal.tsx
+    │   ├── settings/
+    │   │   ├── SettingsCard.tsx
+    │   │   ├── account-settings.tsx
+    │   │   ├── appearance-settings.tsx
+    │   │   ├── integrations-settings.tsx
+    │   │   ├── notifications-settings.tsx
+    │   │   ├── privacy-settings.tsx
+    │   │   └── profile-settings.tsx
+    │   ├── shared/
+    │   │   └── timetable.tsx
+    │   ├── students/
+    │   │   └── student-profile-modal.tsx
+    │   ├── logo.tsx
+    │   ├── modal-provider.tsx
+    │   └── theme-provider.tsx
+    ├── hooks/
+    │   ├── use-course-modal.ts
+    │   ├── use-login-modal.ts
+    │   ├── use-mobile.tsx
+    │   └── use-toast.ts
+    ├── lib/
+    │   ├── actions-data.ts
+    │   ├── advisor-data.ts
+    │   ├── alerts-data.ts
+    │   ├── announcements-data.ts
+    │   ├── applications-data.ts
+    │   ├── budgets-data.ts
+    │   ├── bulletins-data.ts
+    │   ├── contracts-data.ts
+    │   ├── course-data.ts
+    │   ├── data.ts
+    │   ├── departments-data.ts
+    │   ├── documents-data.ts
+    │   ├── enrollments-data.ts
+    │   ├── enterprise-data.ts
+    │   ├── evaluations-data.ts
+    │   ├── exports-data.ts
+    │   ├── group-work-data.ts
+    │   ├── hours-data.ts
+    │   ├── jobs-data.ts
+    │   ├── messages-data.ts
+    │   ├── payments-data.ts
+    │   ├── placeholder-images.json
+    │   ├── placeholder-images.ts
+    │   ├── planning-data.ts
+    │   ├── presence-data.ts
+    │   ├── profile-data.ts
+    │   ├── reports-data.ts
+    │   ├── resources-data.ts
+    │   ├── results-data-prof.ts
+    │   ├── results-data.ts
+    │   ├── rooms-data.ts
+    │   ├── scholarships-data.ts
+    │   ├── static-data.ts
+    │   ├── stats-data.ts
+    │   ├── student-payment-data.ts
+    │   ├── students-data.ts
+    │   ├── supabaseClient.ts
+    │   ├── teachers-data.ts
+    │   ├── templates-data.ts
+    │   ├── tickets-data.ts
+    │   ├── treasury-data.ts
+    │   ├── users-data.ts
+    │   ├── utils.ts
+    │   └── validations-data.ts
+    └── server/
+        └── actions.ts
 ```
 
 ---
