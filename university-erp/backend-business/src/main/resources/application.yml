@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: backend-business
+  datasource:
+    url: jdbc:postgresql://localhost:5432/univerx
+    username: univerx
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
