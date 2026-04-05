@@ -1,0 +1,35 @@
+
+spring:
+  application:
+    name: backend-business
+  datasource:
+    url: jdbc:postgresql://localhost:5432/univerx
+    username: univerx
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+resilience4j:
+  ratelimiter:
+    instances:
+      default:
+        limitForPeriod: 10000
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+  circuitbreaker:
+    instances:
+      default:
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        minimumNumberOfCalls: 20
+
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 1000
+      min-spare: 200

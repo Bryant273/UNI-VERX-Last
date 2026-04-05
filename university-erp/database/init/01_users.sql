@@ -1,0 +1,12 @@
+-- Core Identity & Access
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL, -- ADMIN, RECTORATE, SECRETARIAT, ACADEMIC_ADVISOR, PROFESSOR, STUDENT, ERP_PROVIDER
+    full_name VARCHAR(200),
+    email VARCHAR(255) UNIQUE,
+    status VARCHAR(50) DEFAULT 'Active', -- Active, Inactive, Suspended
+    last_login TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
